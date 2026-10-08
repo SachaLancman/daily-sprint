@@ -33,7 +33,7 @@ function nextQuestion() {
   let q;
   do { q = set[r(0, set.length - 1)](); } while (q[0] === s.text);
   s.text = q[0]; s.answer = q[1]; s.input = ''; s.locked = false;
-  $('board').className = 'board';
+  $('mathBoard').className = 'board';
   $('q').textContent = s.text; $('a').textContent = '';
   mathHud();
 }
@@ -45,15 +45,15 @@ function settle(correct) {
   if (correct) {
     s.correct++; s.streak++; s.row++;
     s.score += 10 * s.level;
-    floatText($('board'), '+' + 10 * s.level);
-    if (s.row >= 3 && s.level < MAX_LEVEL) { s.level++; s.row = 0; beep(990, 0.18); floatText($('board'), 'Level up!', 'lvl'); } else beep(660, 0.08);
+    floatText($('mathBoard'), '+' + 10 * s.level);
+    if (s.row >= 3 && s.level < MAX_LEVEL) { s.level++; s.row = 0; beep(990, 0.18); floatText($('mathBoard'), 'Level up!', 'lvl'); } else beep(660, 0.08);
     s.top = Math.max(s.top, s.level);
-    $('board').className = 'board ok';
+    $('mathBoard').className = 'board ok';
   } else {
     s.streak = 0; s.row = 0;
     if (s.level > 1) s.level--;
     $('a').textContent = s.answer;
-    $('board').className = 'board no';
+    $('mathBoard').className = 'board no';
     beep(180, 0.25);
   }
   mathHud();

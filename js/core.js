@@ -168,7 +168,7 @@ let screen = 'home', run = 0, inSession = false, current = null;
 const NAV_SCREENS = ['home', 'library', 'board'];
 function show(id) {
   screen = id;
-  ['home', 'library', 'count', 'end', 'board', 'profile', 'calendar'].concat(GAMES.map(g => g.id)).forEach(x => { $(x).hidden = x !== id; });
+  ['home', 'library', 'countdown', 'end', 'board', 'profile', 'calendar'].concat(GAMES.map(g => g.id)).forEach(x => { $(x).hidden = x !== id; });
   const nav = NAV_SCREENS.includes(id);
   $('nav').hidden = !nav;
   document.body.classList.toggle('has-nav', nav);
@@ -226,14 +226,14 @@ function renderHome() {
 async function launch(id) {
   const my = ++run;
   current = GAMES.find(g => g.id === id);
-  $('count').className = 'screen full g-' + id;
+  $('countdown').className = 'screen full g-' + id;
   $('end').className = 'screen full g-' + id;
   $('countName').textContent = current.name;
   $('countHint').textContent = current.hint;
   $('countArt').innerHTML = current.art;
   document.querySelectorAll('.bar').forEach(b => b.classList.remove('low'));
   document.querySelectorAll('.hud-time').forEach(t => t.classList.remove('low'));
-  show('count');
+  show('countdown');
   for (let n = 3; n >= 1; n--) {
     const el = $('countNum');
     el.textContent = n; el.classList.remove('count'); void el.offsetWidth; el.classList.add('count');
@@ -307,6 +307,8 @@ function timer(bar, time, left) {
 // A game file calls registerGame({ id, name, skill, hint, art, colors: [light, dark], html, start, key }).
 // `html` is the game screen's content; it gets its own <section>, header and color class automatically.
 function registerGame(g) {
+  // A game's id becomes its screen's HTML id, so it must not clash with any other element (e.g. "countdown", "board").
+  if (document.getElementById(g.id)) throw new Error('registerGame: id "' + g.id + '" is already used on the page');
   GAMES.push(g);
   if (!(g.id in store.skill)) store.skill[g.id] = 1;
   if (!(g.id in store.hist)) store.hist[g.id] = [];
