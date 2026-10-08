@@ -181,6 +181,42 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .word-btn s{opacity:.7;margin-right:6px}
 #fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:20}
 
+/* Leaderboard and profile */
+.top-actions{display:flex;align-items:center;gap:8px}
+.icon-btn{flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);display:grid;place-items:center;cursor:pointer}
+.icon-btn svg{width:22px;height:22px}
+.topbar{display:flex;align-items:center;gap:12px}
+.topbar h1{flex:1;font-size:28px}
+.tabs{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:2px 16px 6px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;border:0;border-radius:999px;padding:9px 15px;background:var(--surface);color:var(--ink);font:700 14px var(--display);cursor:pointer;box-shadow:0 3px 0 var(--line)}
+.tab.t-all{--grad:var(--hero)}
+.tab[aria-selected="true"]{background:var(--grad);color:#fff;box-shadow:none}
+.select,.input{width:100%;font:500 16px var(--display);color:var(--ink);background-color:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.select{appearance:none;-webkit-appearance:none;padding-right:40px;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238A87A8' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center;background-size:18px}
+.input:focus,.select:focus{outline:3px solid var(--accent);outline-offset:1px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field > span{font:500 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.note{background:color-mix(in srgb, var(--accent) 22%, var(--surface));color:var(--ink);border-radius:16px;padding:12px 14px;font-size:14px}
+.rows{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.lb-row{display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:18px;padding:12px 14px;box-shadow:var(--shadow)}
+.lb-row.you{box-shadow:0 0 0 2px var(--accent),var(--shadow)}
+.rank{flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font:800 15px var(--display);background:var(--bg);color:var(--muted)}
+.rank.r1{background:#FFC83D;color:#17153A} .rank.r2{background:#CFD4E6;color:#17153A} .rank.r3{background:#EDA77F;color:#17153A}
+.flag{flex:none;font-size:24px;line-height:1}
+.cc{flex:none;font:500 11px var(--mono);background:var(--bg);color:var(--muted);border-radius:6px;padding:4px 6px}
+.who{flex:1;min-width:0;display:flex;flex-direction:column}
+.who b{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who small{color:var(--muted);font-size:13px}
+.pts{font:800 20px var(--display);font-variant-numeric:tabular-nums}
+.empty{text-align:center;padding:32px 12px;color:var(--muted);background:var(--surface);border-radius:20px}
+.err{color:var(--bad);font-size:14px}
+.split{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.link.danger{color:var(--bad);opacity:1}
+a.link{color:var(--muted)}
+
 @media (hover:hover){
   .btn:hover,.card:hover{filter:brightness(1.06)}
   .pad button:hover,.opt:hover,.tile:hover,.word-btn:hover{filter:brightness(.97)}
@@ -222,7 +258,10 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
   <section class="screen" id="home">
     <div class="home-top">
       <div><p class="hello" id="hello">Hello</p><h1>Daily Sprint</h1></div>
-      <div class="pill" id="streakPill"><span id="flameSlot"></span><span><span id="streakNum">0</span> <small>days</small></span></div>
+      <div class="top-actions">
+        <button class="icon-btn" id="boardBtn" aria-label="Leaderboard"></button>
+        <div class="pill" id="streakPill"><span id="flameSlot"></span><span><span id="streakNum">0</span> <small>days</small></span></div>
+      </div>
     </div>
     <div class="hero">
       <div>
@@ -311,7 +350,36 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
         <button class="btn white" id="nextBtn">Back to home</button>
         <button class="btn glass" id="againBtn">Play again</button>
         <button class="link" id="homeBtn" hidden>Back to home</button>
+        <button class="link" id="endBoard">See leaderboard</button>
       </div>
+    </div>
+  </section>
+
+  <section class="screen" id="board" hidden>
+    <div class="topbar">
+      <button class="icon-btn" id="boardBack" aria-label="Back"></button>
+      <h1>Leaderboard</h1>
+      <button class="toggle" id="meBtn" aria-label="Edit your profile"></button>
+    </div>
+    <div class="tabs" id="boardTabs" role="tablist" aria-label="Category"></div>
+    <select class="select" id="countryFilter" aria-label="Filter by country"></select>
+    <div class="note" id="boardNote" hidden></div>
+    <ol class="rows" id="boardRows" aria-live="polite"></ol>
+  </section>
+
+  <section class="screen" id="profile" hidden>
+    <div class="topbar">
+      <button class="icon-btn" id="profileBack" aria-label="Back"></button>
+      <h1>Your profile</h1>
+    </div>
+    <p>Your nickname and country appear on the leaderboard. Nothing else about you is shared.</p>
+    <label class="field"><span>Nickname</span><input class="input" id="nameInput" maxlength="20" autocomplete="nickname" placeholder="e.g. QuickFox"></label>
+    <label class="field"><span>Country</span><select class="select" id="countryInput"></select></label>
+    <p class="err" id="profileErr" hidden></p>
+    <button class="btn" id="profileSave">Save</button>
+    <div class="split">
+      <a class="link" href="privacy.html">Privacy policy</a>
+      <button class="link danger" id="deleteData" hidden>Delete my leaderboard data</button>
     </div>
   </section>
 </main>
@@ -329,6 +397,8 @@ const ICON = {
   heart: '<svg viewBox="0 0 24 24"><path d="M12 20.5s-8-4.9-8-11A4.5 4.5 0 0 1 12 6.6 4.5 4.5 0 0 1 20 9.5c0 6.1-8 11-8 11z"/></svg>',
   star: '<svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z"/></svg>',
   soundOn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>',
+  trophy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7M10 17h4"/></svg>',
+  back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
   soundOff: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg>'
 };
 /* Big illustrations (120x120) for the game cards and countdown. White shapes; currentColor is the game's dark color. */
@@ -363,6 +433,10 @@ try {
 } catch (e) {}
 store.skill = Object.assign({ math: 1, memory: 1, words: 1, spot: 1 }, store.skill);
 store.hist = Object.assign({ math: [], memory: [], words: [], spot: [] }, store.hist);
+store.log = store.log || [];         // every finished game: { game, score, day } (for the leaderboard)
+store.pending = store.pending || []; // results waiting to be sent online
+store.bestStreak = Math.max(store.bestStreak || 0, store.streak || 0);
+store.player = store.player || null; // { id, secret, name, country } once the profile is set
 function save() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} }
 function freshDay() { if (store.done.date !== today()) store.done = { date: today(), math: false, memory: false, words: false, spot: false }; }
 function spark(id) {
@@ -431,7 +505,7 @@ function confetti() {
 }
 
 let screen = 'home', run = 0, inSession = false, current = null;
-function show(id) { screen = id; ['home', 'count', 'math', 'memory', 'words', 'spot', 'end'].forEach(x => { $(x).hidden = x !== id; }); window.scrollTo(0, 0); }
+function show(id) { screen = id; ['home', 'count', 'math', 'memory', 'words', 'spot', 'end', 'board', 'profile'].forEach(x => { $(x).hidden = x !== id; }); window.scrollTo(0, 0); }
 const nextUndone = () => GAMES.find(g => !store.done[g.id]);
 
 function ringSvg() {
@@ -499,8 +573,11 @@ function finishGame(score, label, stats, skill) {
   if (!nextUndone() && store.lastDay !== today()) {
     store.streak = store.lastDay === yesterday() ? store.streak + 1 : 1;
     store.lastDay = today();
+    store.bestStreak = Math.max(store.bestStreak, store.streak);
   }
+  store.log = store.log.concat({ game: id, score, day: today() }).slice(-500);
   save();
+  submitScore({ game: id, score, day: today() });
   const celebrate = isBest && score > 0;
   // Stars: 3 for a new best, 2 for at least 70% of your best, 1 for any points.
   const stars = celebrate ? 3 : score >= 0.7 * prev && score > 0 ? 2 : score > 0 ? 1 : 0;
@@ -843,8 +920,163 @@ function sTick() {
   requestAnimationFrame(sTick);
 }
 
+/* Leaderboard
+   Works offline today: it ranks your own results. To make it worldwide, create the free Supabase
+   project described in LAUNCH.md (database setup in supabase/schema.sql) and fill in ONLINE below.
+   The "key" is Supabase's public "anon" key, which is safe to put in the app. */
+const ONLINE = { url: '', key: '' };
+const isOnline = () => !!(ONLINE.url && ONLINE.key);
+const CATS = [{ id: 'daily', name: 'Daily' }, { id: 'weekly', name: 'Weekly' }, { id: 'streak', name: 'Streak' }]
+  .concat(GAMES.map(g => ({ id: g.id, name: g.name, game: true })));
+const COUNTRY_CODES = ('AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BV BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ ' +
+  'DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GS GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN IO IQ IR IS IT JE JM JO JP ' +
+  'KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ ' +
+  'OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RU RW SA SB SC SD SE SG SH SI SJ SK SL SM SN SO SR SS ST SV SX SY SZ TC TD TF TG TH TJ TK TL TM TN TO TR TT TV TW TZ ' +
+  'UA UG UM US UY UZ VA VC VE VG VI VN VU WF WS YE YT ZA ZM ZW').split(' ');
+const regionNames = (() => { try { return new Intl.DisplayNames(undefined, { type: 'region' }); } catch (e) { return null; } })();
+const countryName = c => (regionNames && regionNames.of(c)) || c;
+const COUNTRIES = COUNTRY_CODES.map(c => [c, countryName(c)]).sort((a, b) => a[1].localeCompare(b[1]));
+const flagEmoji = c => String.fromCodePoint(...[...c].map(ch => 0x1F1E6 + ch.charCodeAt(0) - 65));
+// Some systems (e.g. Windows) show flag emoji as two letters, so check once and fall back to a code badge.
+const flagsWork = (() => {
+  try { const x = document.createElement('canvas').getContext('2d'); x.font = '32px sans-serif'; return x.measureText(flagEmoji('FR')).width < x.measureText('FR').width * 1.5 && x.measureText(flagEmoji('FR')).width > 20; } catch (e) { return false; }
+})();
+const flagHtml = c => flagsWork ? '<span class="flag" title="' + countryName(c) + '">' + flagEmoji(c) + '</span>' : '<span class="cc" title="' + countryName(c) + '">' + c + '</span>';
+const esc = t => String(t).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+const uuid = () => (crypto.randomUUID ? crypto.randomUUID() : '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, c => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)));
+const weekKey = day => { const d = new Date(day + 'T12:00'); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return dayKey(d); };
+const fmtDay = day => new Date(day + 'T12:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+let boardCat = 'daily', boardCountry = 'ALL', boardReq = 0, afterProfile = 'home';
+
+async function rpc(name, body) {
+  const res = await fetch(ONLINE.url + '/rest/v1/rpc/' + name, {
+    method: 'POST', body: JSON.stringify(body),
+    headers: { apikey: ONLINE.key, Authorization: 'Bearer ' + ONLINE.key, 'Content-Type': 'application/json' }
+  });
+  if (!res.ok) throw new Error('rpc ' + name + ' ' + res.status);
+}
+function submitScore(entry) {
+  if (!isOnline() || !store.player) return;
+  store.pending = store.pending.concat(entry).slice(-100);
+  save();
+  flushScores();
+}
+let flushing = false;
+async function flushScores() {
+  if (flushing || !isOnline() || !store.player) return;
+  flushing = true;
+  try {
+    while (store.pending.length) {
+      const e = store.pending[0], p = store.player;
+      await rpc('submit_score', { p_id: p.id, p_secret: p.secret, p_name: p.name, p_country: p.country, p_game: e.game, p_score: e.score, p_day: e.day, p_streak: store.bestStreak });
+      store.pending = store.pending.slice(1); save();
+    }
+  } catch (e) { /* offline or refused: try again next time */ }
+  flushing = false;
+}
+function localBoard(cat) {
+  const me = store.player, row = (score, note) => ({ name: me.name, country: me.country, score, note });
+  if (GAMES.some(g => g.id === cat)) return store.log.filter(e => e.game === cat).sort((a, b) => b.score - a.score).slice(0, 20).map(e => row(e.score, fmtDay(e.day)));
+  if (cat === 'streak') return store.bestStreak ? [row(store.bestStreak, 'Longest run of days')] : [];
+  const byDay = {}; // day -> best score per game that day; a day's total is the sum of those
+  store.log.forEach(e => { const d = byDay[e.day] = byDay[e.day] || {}; d[e.game] = Math.max(d[e.game] || 0, e.score); });
+  const days = Object.entries(byDay).map(([day, g]) => [day, Object.values(g).reduce((a, b) => a + b, 0)]);
+  if (cat === 'daily') return days.sort((a, b) => b[1] - a[1]).slice(0, 20).map(([d, t]) => row(t, fmtDay(d)));
+  const byWeek = {};
+  days.forEach(([d, t]) => { const k = weekKey(d); byWeek[k] = (byWeek[k] || 0) + t; });
+  return Object.entries(byWeek).sort((a, b) => b[1] - a[1]).slice(0, 20).map(([k, t]) => row(t, 'Week of ' + fmtDay(k)));
+}
+async function remoteBoard(cat, country) {
+  const game = GAMES.some(g => g.id === cat), view = game ? 'board_game' : 'board_' + cat;
+  const q = new URLSearchParams({ select: 'player_id,name,country,score', order: 'score.desc', limit: '50' });
+  if (game) q.set('game', 'eq.' + cat);
+  if (cat === 'daily') q.set('day', 'eq.' + today());
+  if (cat === 'weekly') q.set('week', 'eq.' + weekKey(today()));
+  if (country !== 'ALL') q.set('country', 'eq.' + country);
+  const res = await fetch(ONLINE.url + '/rest/v1/' + view + '?' + q, { headers: { apikey: ONLINE.key, Authorization: 'Bearer ' + ONLINE.key } });
+  if (!res.ok) throw new Error('board ' + res.status);
+  return (await res.json()).map(x => ({ name: x.name, country: x.country, score: x.score, you: x.player_id === store.player.id,
+    note: cat === 'daily' ? 'Today' : cat === 'weekly' ? 'This week' : '' }));
+}
+function countryOptions(sel, withWorld, value) {
+  sel.innerHTML = (withWorld ? '<option value="ALL">' + (flagsWork ? '🌍 ' : '') + 'All countries</option>' : '') +
+    COUNTRIES.map(([c, n]) => '<option value="' + c + '">' + (flagsWork ? flagEmoji(c) + ' ' : '') + esc(n) + '</option>').join('');
+  sel.value = value;
+}
+async function renderBoard() {
+  const my = ++boardReq;
+  $('boardTabs').innerHTML = CATS.map(c => '<button class="tab ' + (c.game ? 'g-' + c.id : 't-all') + '" role="tab" data-cat="' + c.id + '" aria-selected="' + (c.id === boardCat) + '">' + c.name + '</button>').join('');
+  $('meBtn').innerHTML = flagHtml(store.player.country) + esc(store.player.name);
+  if ($('countryFilter').options.length < 2) countryOptions($('countryFilter'), true, boardCountry);
+  $('boardNote').hidden = isOnline();
+  $('boardNote').textContent = 'Just you for now: these are your best results. Once Daily Sprint is online, you will compete with players around the world.';
+  $('boardRows').innerHTML = '<li class="empty">Loading…</li>';
+  let rows;
+  try {
+    if (isOnline()) { await flushScores(); rows = await remoteBoard(boardCat, boardCountry); }
+    else rows = boardCountry === 'ALL' || boardCountry === store.player.country ? localBoard(boardCat) : [];
+  } catch (e) {
+    if (my === boardReq) $('boardRows').innerHTML = '<li class="empty">Couldn’t load the leaderboard. Check your internet connection and try again.</li>';
+    return;
+  }
+  if (my !== boardReq) return; // a newer tab or filter was picked meanwhile
+  const unit = boardCat === 'streak' ? ' days' : '';
+  $('boardRows').innerHTML = rows.length ? rows.map((x, i) =>
+    '<li class="lb-row' + (x.you ? ' you' : '') + '"><span class="rank r' + (i + 1) + '">' + (i + 1) + '</span>' + flagHtml(x.country) +
+    '<div class="who"><b>' + esc(x.name) + (x.you ? ' (you)' : '') + '</b>' + (x.note ? '<small>' + esc(x.note) + '</small>' : '') + '</div>' +
+    '<span class="pts">' + x.score + unit + '</span></li>').join('')
+    : '<li class="empty">' + (boardCountry !== 'ALL' && (isOnline() || boardCountry !== store.player.country) ? 'No players from ' + esc(countryName(boardCountry)) + ' yet.'
+      : boardCat === 'streak' ? 'Finish a full daily session to start your streak.' : 'No results yet. Finish a game to get on the board!') + '</li>';
+}
+function openBoard() {
+  if (!store.player) return openProfile('board');
+  run++;
+  show('board');
+  renderBoard();
+}
+function openProfile(next) {
+  afterProfile = next;
+  const p = store.player, guess = (navigator.language.split('-')[1] || '').toUpperCase();
+  $('nameInput').value = p ? p.name : '';
+  countryOptions($('countryInput'), false, p ? p.country : COUNTRY_CODES.includes(guess) ? guess : 'US');
+  $('profileErr').hidden = true;
+  $('deleteData').hidden = !p;
+  show('profile');
+  if (!p) $('nameInput').focus();
+}
+function saveProfile() {
+  const name = $('nameInput').value.trim().replace(/\s+/g, ' ');
+  if (name.length < 2) { $('profileErr').textContent = 'Pick a nickname of at least 2 characters.'; $('profileErr').hidden = false; return; }
+  store.player = Object.assign(store.player || { id: uuid(), secret: uuid() }, { name, country: $('countryInput').value });
+  if (isOnline() && !store.pending.length) store.pending = store.log.slice(-20).filter(e => e.day >= weekKey(today())); // share this week's results
+  save();
+  flushScores();
+  afterProfile === 'board' ? openBoard() : renderHome();
+}
+async function deleteData() {
+  if (!confirm('Delete your nickname, country and leaderboard results? Your game levels and best scores stay.')) return;
+  try { if (isOnline()) await rpc('delete_player', { p_id: store.player.id, p_secret: store.player.secret }); }
+  catch (e) { alert('Couldn’t reach the leaderboard to delete your data. Check your internet connection and try again.'); return; }
+  store.player = null; store.log = []; store.pending = [];
+  save();
+  renderHome();
+}
+
 /* Wiring */
 document.querySelectorAll('.x').forEach(b => { b.innerHTML = ICON.x; });
+$('boardBtn').innerHTML = ICON.trophy;
+$('boardBack').innerHTML = ICON.back;
+$('profileBack').innerHTML = ICON.back;
+$('boardBtn').addEventListener('click', openBoard);
+$('endBoard').addEventListener('click', openBoard);
+$('boardBack').addEventListener('click', () => renderHome());
+$('profileBack').addEventListener('click', () => store.player && afterProfile === 'board' ? openBoard() : renderHome());
+$('meBtn').addEventListener('click', () => openProfile('board'));
+$('profileSave').addEventListener('click', saveProfile);
+$('nameInput').addEventListener('keydown', e => { if (e.key === 'Enter') saveProfile(); });
+$('deleteData').addEventListener('click', deleteData);
+$('boardTabs').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { boardCat = b.dataset.cat; renderBoard(); } });
+$('countryFilter').addEventListener('change', e => { boardCountry = e.target.value; renderBoard(); });
 $('sSentence').addEventListener('click', e => { const b = e.target.closest('button'); if (b) spotTap(b); });
 $('opts').addEventListener('click', e => { const b = e.target.closest('button'); if (b) choose(b); });
 $('pad').addEventListener('click', e => { const b = e.target.closest('button'); if (b) press(b.dataset.k); });
@@ -864,6 +1096,7 @@ document.addEventListener('keydown', e => {
   else if (e.key === 'Enter') { e.preventDefault(); press('enter'); }
 });
 renderHome();
+flushScores();
 // Offline support only works when the app is served from a website, not when opened as a file.
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
