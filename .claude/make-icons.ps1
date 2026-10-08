@@ -13,13 +13,13 @@ foreach ($size in 180, 192, 512) {
   $bmp = New-Object System.Drawing.Bitmap $size, $size
   $g = [System.Drawing.Graphics]::FromImage($bmp)
   $g.SmoothingMode = 'AntiAlias'
-  $g.Clear([System.Drawing.ColorTranslator]::FromHtml('#10262B'))
+  $g.Clear([System.Drawing.ColorTranslator]::FromHtml('#2B2370'))
   $s = $size / 512
-  # x, y, height, opacity (0-255) for each bar, matching icon.svg
-  $bars = @(@(150, 290, 90, 140), @(228, 230, 150, 204), @(306, 150, 230, 255))
+  # x, y, height, color for each bar, matching icon.svg (one bar per game)
+  $bars = @(@(132, 300, 80, '#5B82FF'), @(198, 250, 130, '#A57BFF'), @(264, 200, 180, '#1FC9B6'), @(330, 150, 230, '#FF9A55'))
   foreach ($b in $bars) {
-    $brush = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb($b[3], 242, 183, 5))
-    Bar $g $brush ($b[0] * $s) ($b[1] * $s) (56 * $s) ($b[2] * $s) (14 * $s)
+    $brush = New-Object System.Drawing.SolidBrush ([System.Drawing.ColorTranslator]::FromHtml($b[3]))
+    Bar $g $brush ($b[0] * $s) ($b[1] * $s) (50 * $s) ($b[2] * $s) (14 * $s)
   }
   $name = if ($size -eq 180) { 'apple-touch-icon.png' } else { "icon-$size.png" }
   $bmp.Save((Join-Path $out $name), [System.Drawing.Imaging.ImageFormat]::Png)

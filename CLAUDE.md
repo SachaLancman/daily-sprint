@@ -19,13 +19,16 @@ A personal brain-training web app in the spirit of apps like Elevate. All games,
 - Word Match's wrong options are other answers from the same level, so every pair on a level must have a clearly different meaning (otherwise a question has two right answers).
 - Spot the Error sentences mark the one wrong word as `[wrong|right]`, with no spaces inside the brackets. Every other word must be correct.
 
-## Design rules
+## Design rules (style: bold and colorful)
 - Colors and fonts are CSS variables at the top of the `<style>` block, with light and dark themes. Never hard-code a color elsewhere.
-- Each game has its own color (`--c-math`, `--c-memory`, `--c-words`, `--c-spot`), used for its icon, timer bar and session dot. Yellow `--accent` is for the main button and celebrations only.
-- Fonts: Bricolage Grotesque for text, DM Mono for numbers and small uppercase labels.
-- One narrow column (max 420px). The question or grid is the only loud thing on screen.
-- Text on colored backgrounds uses `--on-mark` and must stay readable (contrast 4.5:1 or more).
-- Icons are simple 24px line drawings (2px stroke, round ends) written as inline SVG.
+- Each game owns a vivid gradient set by a class: `.g-math`, `.g-memory`, `.g-words`, `.g-spot` define `--l` (light end), `--d` (dark end) and `--grad`. Used for its home card, countdown, in-game header, results screen, and session ring segment.
+- White text only sits on the dark end of a gradient (contrast 4.5:1 or more). Text on green/red feedback uses `--on-mark`.
+- The page around the color stays soft (`--bg`, `--surface`) so the gradients pop. The home "hero" card uses `--hero` (deep indigo). Yellow `--accent` is for the streak, badges, "hot" streak chips and celebrations.
+- Fonts: Bricolage Grotesque (700-800, tight letter-spacing) for text and big numbers; DM Mono for timers, math and small uppercase chips.
+- Buttons are chunky with a solid "lip" shadow underneath that squashes when pressed.
+- Illustrations are 120x120 inline SVGs in `GAMES[].art`: white shapes, with `currentColor` = the game's dark color. Small icons live in `ICON`.
+- Motion: screen entrances, card hovers, pops for stars/badges, floating "+points", confetti on a new best. All of it sits inside `prefers-reduced-motion: no-preference`.
+- One column, max 440px wide; home games are a 2-column card grid.
 
 ## Tools in this folder
 - `.claude/serve.ps1` serves the folder at http://localhost:8123 so Claude's browser pane can preview it.

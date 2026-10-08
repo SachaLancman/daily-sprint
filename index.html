@@ -4,172 +4,257 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Daily Sprint</title>
-<meta name="theme-color" content="#EEF3F1" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0E1E22" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F3F1FA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E0D1F" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Sprint">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=DM+Mono:wght@400;500&display=swap">
 <style>
 html{-webkit-text-size-adjust:100%}
 body{margin:0}
-img{max-width:100%}
 [hidden]{display:none!important}
-/* Layout: one narrow stopwatch-style column; the question or grid is the only loud thing on screen. */
+/* Style: bold and colorful. Each game owns a vivid gradient; the page around it stays soft so the color pops. */
 :root{
-  --bg:#EEF3F1; --surface:#FFFFFF; --ink:#10262B; --muted:#5B7177; --line:#D3DEDB;
-  --accent:#F2B705; --on-accent:#10262B; --good:#1B7D52; --bad:#C8402F; --on-mark:#FFFFFF;
-  /* One color per game, used for its icon, timer bar and session dot. */
-  --c-math:#2E6BD9; --c-memory:#7C4DDB; --c-words:#0E8483; --c-spot:#D2553A;
+  --bg:#F3F1FA; --surface:#FFFFFF; --ink:#17153A; --muted:#615E80; --line:#E3E0F0;
+  --shadow:0 12px 30px -14px rgba(40,30,110,.28);
+  --accent:#FFC83D; --on-accent:#17153A; --good:#0F7D55; --bad:#D93A3A; --on-mark:#FFFFFF;
+  --hero:linear-gradient(140deg,#2B2370 0%,#4B2FC0 100%);
   --display:"Bricolage Grotesque",system-ui,sans-serif;
   --mono:"DM Mono",ui-monospace,Menlo,monospace;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#0E1E22; --surface:#16292E; --ink:#EAF2F0; --muted:#8FA6AA; --line:#2A4046;
-    --accent:#F5C21B; --on-accent:#10262B; --good:#4CC38A; --bad:#F07A68; --on-mark:#0E1E22; color-scheme:dark;
-    --c-math:#6FA0FF; --c-memory:#AD8CF7; --c-words:#3CC2BE; --c-spot:#FF8A6B;
+    --bg:#0E0D1F; --surface:#1A1934; --ink:#F1EFFF; --muted:#A6A3C7; --line:#2C2A4A;
+    --shadow:0 12px 30px -14px rgba(0,0,0,.7);
+    --good:#3FD08F; --bad:#FF6B6B; --on-mark:#0E0D1F; --hero:linear-gradient(140deg,#231C5C 0%,#3D25A0 100%); color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#0E1E22; --surface:#16292E; --ink:#EAF2F0; --muted:#8FA6AA; --line:#2A4046;
-  --accent:#F5C21B; --on-accent:#10262B; --good:#4CC38A; --bad:#F07A68; --on-mark:#0E1E22; color-scheme:dark;
-  --c-math:#6FA0FF; --c-memory:#AD8CF7; --c-words:#3CC2BE; --c-spot:#FF8A6B;
+  --bg:#0E0D1F; --surface:#1A1934; --ink:#F1EFFF; --muted:#A6A3C7; --line:#2C2A4A;
+  --shadow:0 12px 30px -14px rgba(0,0,0,.7);
+  --good:#3FD08F; --bad:#FF6B6B; --on-mark:#0E0D1F; --hero:linear-gradient(140deg,#231C5C 0%,#3D25A0 100%); color-scheme:dark;
 }
+/* Game colors: --l is the light end, --d the dark end. White text always sits on the dark end (contrast 4.5:1 or more). */
+.g-math{--l:#5B82FF;--d:#2846C8}
+.g-memory{--l:#A57BFF;--d:#5E2FD6}
+.g-words{--l:#1FC9B6;--d:#087A73}
+.g-spot{--l:#FF9A55;--d:#C83A18}
+.g-math,.g-memory,.g-words,.g-spot{--grad:linear-gradient(200deg,var(--l) 0%,var(--d) 72%)}
+
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--display);font-size:16px;line-height:1.5;
+body{background:var(--bg);color:var(--ink);font-family:var(--display);font-size:16px;line-height:1.45;
   /* env(...) keeps content clear of a phone's notch and home bar. */
-  padding:max(24px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left))}
-main{max-width:420px;margin:0 auto}
-h1{font-size:40px;line-height:1;font-weight:700;margin:0;letter-spacing:-.02em}
-h2{font-size:18px;font-weight:700;margin:0;line-height:1.2}
+  padding:max(20px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left))}
+main{max-width:440px;margin:0 auto}
+h1{font-size:34px;line-height:1;font-weight:800;margin:0;letter-spacing:-.03em}
+h2{font-size:20px;font-weight:700;margin:0;line-height:1.2;letter-spacing:-.01em}
+h3{margin:0}
 p{margin:0;color:var(--muted)}
-.label{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+svg{display:block}
 .num{font-family:var(--mono);font-variant-numeric:tabular-nums}
-.screen{display:flex;flex-direction:column;gap:20px}
-.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
-.streak{text-align:right;display:flex;flex-direction:column}
-.streak .num{font-size:32px;font-weight:500;line-height:1}
-.btn{font:700 18px var(--display);background:var(--accent);color:var(--on-accent);border:0;border-radius:14px;padding:16px;cursor:pointer;width:100%}
-.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
-.btn.small{width:auto;font-size:15px;padding:10px 18px;border-radius:10px}
-.link{font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;background:none;border:0;color:var(--muted);cursor:pointer;padding:6px 0;text-decoration:underline;align-self:flex-start}
-.btn:active{transform:translateY(1px)}
-button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
-@media (hover:hover){
-  .btn:hover{filter:brightness(1.06)}
-  .btn.ghost:hover,.opt:hover,.pad button:hover,.tile:hover,.word-btn:hover{border-color:var(--muted)}
-  .link:hover{color:var(--ink)}
-}
-.gicon{flex:none;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;color:var(--c);background:color-mix(in srgb, var(--c) 14%, var(--surface))}
-.gicon svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.gicon.lg{width:64px;height:64px;border-radius:18px}
-.gicon.lg svg{width:34px;height:34px}
-#math{--c:var(--c-math)} #memory{--c:var(--c-memory)} #words{--c:var(--c-words)} #spot{--c:var(--c-spot)}
-.session{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:14px}
-.dots{display:flex;gap:8px}
-.dots i{flex:1;height:8px;border-radius:4px;background:var(--line)}
-.dots i.on{background:var(--c, var(--good))}
-.games{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
-.games li{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
-.games .info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
-.games .info p{font-size:14px}
-.stats{display:flex;justify-content:space-between;gap:12px}
-.stat{display:flex;flex-direction:column;gap:2px}
-.stat .num{font-size:22px;font-weight:500}
-.stats .stat:last-child{text-align:right}
-.stats .stat:nth-child(2){text-align:center}
-.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden}
-.bar i{display:block;height:100%;width:100%;background:var(--c, var(--accent));transform-origin:left}
-.bar.low i{background:var(--bad)}
-.board{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:28px 16px;text-align:center;display:flex;flex-direction:column;gap:12px}
-.q{font-family:var(--mono);font-size:44px;font-weight:500;line-height:1.1}
-.a{font-family:var(--mono);font-size:32px;min-height:44px;border-bottom:2px solid var(--line);width:160px;margin:0 auto;line-height:44px}
-.board.ok{border-color:var(--good)} .board.ok .a{color:var(--good);border-color:var(--good)}
-.board.no{border-color:var(--bad)} .board.no .a{color:var(--bad);border-color:var(--bad)}
-@media (prefers-reduced-motion: no-preference){
-  .board.no{animation:shake .3s}
-  @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-  .tile{transition:background .12s, transform .12s}
-  .tile.lit{transform:scale(1.04)}
-  .count{animation:pop .7s}
-  @keyframes pop{from{transform:scale(.6);opacity:.3}to{transform:scale(1);opacity:1}}
-  #end:not([hidden]) .big{animation:pop .5s cubic-bezier(.2,1.4,.4,1)}
-  .btn,.opt,.pad button,.word-btn{transition:border-color .15s, filter .15s, background .12s}
-}
+.screen{display:flex;flex-direction:column;gap:18px}
+button{font:inherit;color:inherit}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+
+/* Buttons: chunky, with a solid "lip" underneath that squashes when pressed. */
+.btn{font:700 18px var(--display);background:var(--accent);color:var(--on-accent);border:0;border-radius:18px;padding:16px;cursor:pointer;width:100%;
+  display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 0 rgba(0,0,0,.2);touch-action:manipulation}
+.btn svg{width:20px;height:20px}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.2)}
+.btn.white{background:#fff;color:#17153A}
+.btn.glass{background:rgba(255,255,255,.18);color:#fff;box-shadow:none}
+.link{background:none;border:0;color:inherit;opacity:.8;font:500 13px var(--mono);letter-spacing:.06em;text-transform:uppercase;cursor:pointer;padding:8px;text-decoration:underline;text-underline-offset:3px}
+
+/* Home */
+.home-top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.hello{font-size:15px;font-weight:500;color:var(--muted);margin-bottom:4px}
+.pill{flex:none;display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:var(--on-accent);font:800 20px var(--display);padding:8px 16px 8px 10px;border-radius:999px;box-shadow:0 8px 18px -8px rgba(230,150,0,.8)}
+.pill svg{width:24px;height:24px}
+.pill small{font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;opacity:.75}
+.pill.cold{background:var(--surface);color:var(--muted);box-shadow:none;border:1px solid var(--line)}
+.hero{position:relative;overflow:hidden;isolation:isolate;background:var(--hero);color:#fff;border-radius:28px;padding:22px;display:grid;grid-template-columns:1fr auto;gap:16px 14px;align-items:center;box-shadow:var(--shadow)}
+.hero::before,.hero::after{content:"";position:absolute;z-index:-1;border-radius:50%;background:rgba(255,255,255,.07)}
+.hero::before{width:220px;height:220px;right:-70px;top:-90px}
+.hero::after{width:140px;height:140px;left:-50px;bottom:-70px}
+.hero h2{font-size:23px}
+.hero p{color:rgba(255,255,255,.8);font-size:15px;margin-top:6px}
+.hero .btn{grid-column:1/-1}
+.ring{position:relative;width:88px;height:88px}
+.ring b{position:absolute;inset:0;display:grid;place-items:center;font:800 22px var(--display)}
+.ring b small{display:block;font:500 10px var(--mono);letter-spacing:.06em;text-transform:uppercase;opacity:.8;text-align:center;margin-top:-4px}
+.ring circle{fill:none;stroke-width:9;stroke-linecap:round;stroke:rgba(255,255,255,.18)}
+.ring circle.on{stroke:var(--l)}
+.sec-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:-6px}
+.sec-head p{font-size:14px}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;list-style:none;margin:0;padding:0}
+.card{position:relative;overflow:hidden;width:100%;min-height:196px;border:0;border-radius:24px;padding:16px;cursor:pointer;text-align:left;color:#fff;
+  background:var(--grad);display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;gap:8px;box-shadow:0 14px 26px -16px var(--d)}
+.card .art{position:absolute;top:-2px;right:-10px;width:104px;height:104px;color:var(--d)}
+.card-meta{display:flex;align-items:flex-end;justify-content:space-between;gap:6px;width:100%;position:relative}
+.card-meta .chip{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.card h3{font-size:19px;line-height:1.1;font-weight:800;letter-spacing:-.01em;position:relative}
+.card .done{position:absolute;top:12px;left:12px;width:28px;height:28px;border-radius:50%;background:#fff;color:var(--d);display:grid;place-items:center;box-shadow:0 4px 10px -4px rgba(0,0,0,.4)}
+.card .done svg{width:16px;height:16px}
+.chip{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.2);color:#fff;font:500 12px var(--mono);letter-spacing:.04em;text-transform:uppercase;padding:5px 9px;border-radius:999px;white-space:nowrap}
+.chip b{font-weight:500}
+.chip svg{width:14px;height:14px}
+.chip.hot{background:var(--accent);color:var(--on-accent)}
+.spark{flex:none;display:flex;align-items:flex-end;gap:2px;height:16px}
+.spark i{width:5px;background:rgba(255,255,255,.4);border-radius:2px}
+.spark i:last-child{background:#fff}
+.foot{display:flex;justify-content:center}
+.toggle{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:8px 14px;font:500 14px var(--display);cursor:pointer}
+.toggle svg{width:18px;height:18px}
+
+/* Full-screen colored screens (countdown and results) */
+.full{position:fixed;inset:0;z-index:10;overflow-y:auto;background:var(--grad);color:#fff;
+  padding:max(24px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left))}
+.full .inner{width:100%;max-width:440px;min-height:100%;margin:0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center}
+.full p{color:rgba(255,255,255,.85)}
+#countArt{width:150px;height:150px;color:var(--d)}
+.count{font:800 150px/1 var(--display);text-shadow:0 10px 30px rgba(0,0,0,.25)}
+.kicker{font:500 13px var(--mono);letter-spacing:.1em;text-transform:uppercase;opacity:.9}
+.badge{background:var(--accent);color:var(--on-accent);font:800 15px var(--display);padding:6px 14px;border-radius:999px;box-shadow:0 8px 18px -8px rgba(0,0,0,.4)}
+.stars{display:flex;gap:10px;align-items:flex-end}
+.stars svg{width:46px;height:46px;fill:rgba(255,255,255,.28)}
+.stars svg:nth-child(2){width:58px;height:58px}
+.stars svg.on{fill:var(--accent);filter:drop-shadow(0 4px 10px rgba(0,0,0,.25))}
+.big{font:800 88px/1 var(--display);letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.end-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
+.end-stats div{background:rgba(255,255,255,.16);border-radius:18px;padding:12px 8px;display:flex;flex-direction:column;gap:2px}
+.end-stats span{font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;opacity:.85}
+.end-stats b{font:800 22px var(--display)}
+.end-btns{display:flex;flex-direction:column;gap:10px;width:100%;margin-top:6px}
+
+/* In-game header: the game's gradient, with quit, name, timer and chips. */
+.hud{background:var(--grad);color:#fff;border-radius:24px;padding:12px 14px 14px;display:flex;flex-direction:column;gap:12px;box-shadow:0 14px 28px -16px var(--d)}
+.hud-row{display:flex;align-items:center;gap:12px}
+.x{flex:none;width:38px;height:38px;border-radius:50%;border:0;background:rgba(255,255,255,.2);color:#fff;display:grid;place-items:center;cursor:pointer}
+.x svg{width:18px;height:18px}
+.hud-name{flex:1;font-weight:800;font-size:18px;letter-spacing:-.01em}
+.hud-time{font:500 24px var(--mono);min-width:2.2ch;text-align:right}
+.hud .bar{height:10px;background:rgba(255,255,255,.25);border-radius:5px;overflow:hidden}
+.hud .bar i{display:block;height:100%;width:100%;background:#fff;border-radius:5px;transform-origin:left}
+.hud .bar.low i{background:var(--accent)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.board{position:relative;background:var(--surface);border-radius:24px;padding:26px 16px;text-align:center;display:flex;flex-direction:column;gap:12px;box-shadow:var(--shadow);transition:box-shadow .15s}
+.board.ok{box-shadow:0 0 0 3px var(--good),var(--shadow)}
+.board.no{box-shadow:0 0 0 3px var(--bad),var(--shadow)}
+.prompt{font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.q{font:500 46px/1.1 var(--mono)}
+.a{font:500 34px/46px var(--mono);min-height:48px;border-bottom:3px solid var(--line);width:170px;margin:0 auto;border-radius:2px}
+.board.ok .a{color:var(--good);border-color:var(--good)}
+.board.no .a{color:var(--bad);border-color:var(--bad)}
+.q.word{font:800 40px/1.1 var(--display);letter-spacing:-.02em;overflow-wrap:anywhere}
+.fix{font:500 15px var(--display);color:var(--muted);min-height:22px}
+.float{position:absolute;left:50%;top:18px;transform:translateX(-50%);font:800 24px var(--display);color:var(--good);pointer-events:none;white-space:nowrap}
+.float.lvl{top:auto;bottom:10px;font-size:16px;background:var(--accent);color:var(--on-accent);padding:4px 12px;border-radius:999px}
 .pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.pad button{font:500 24px var(--mono);background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:14px 0;cursor:pointer;touch-action:manipulation}
-.pad button:active{background:var(--line)}
-.pad .go{background:var(--ink);color:var(--bg);border-color:var(--ink);font-size:16px;font-family:var(--display);font-weight:700}
+.pad button{font:500 26px var(--mono);background:var(--surface);border:0;border-radius:16px;padding:13px 0;cursor:pointer;touch-action:manipulation;box-shadow:0 4px 0 var(--line)}
+.pad button:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.pad .go{background:var(--grad);color:#fff;font:800 17px var(--display);box-shadow:0 4px 0 var(--d)}
+.pad .go:active{box-shadow:0 1px 0 var(--d)}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{font:700 18px var(--display);background:var(--surface);border:0;border-radius:18px;padding:18px 10px;cursor:pointer;touch-action:manipulation;box-shadow:0 4px 0 var(--line);overflow-wrap:anywhere}
+.opt:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.opt.ok{background:var(--good);color:var(--on-mark);box-shadow:0 4px 0 rgba(0,0,0,.2)}
+.opt.no{background:var(--bad);color:var(--on-mark);box-shadow:0 4px 0 rgba(0,0,0,.2)}
+.status-wrap{position:relative;display:flex;justify-content:center}
+.status{font:800 22px var(--display);background:var(--surface);border-radius:999px;padding:8px 22px;box-shadow:var(--shadow)}
+.status.go{background:var(--grad);color:#fff}
 .tiles{display:grid;gap:10px;grid-template-columns:repeat(var(--n,3),1fr)}
-.tile{aspect-ratio:1;background:var(--surface);border:1px solid var(--line);border-radius:14px;cursor:pointer;touch-action:manipulation;padding:0}
-.tile.lit{background:var(--accent);border-color:var(--accent)}
-.tile.ok{background:var(--good);border-color:var(--good)}
-.tile.no{background:var(--bad);border-color:var(--bad)}
-.status{text-align:center;font-size:20px;font-weight:700;color:var(--ink)}
-.countwrap{min-height:320px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center}
-.count{font-family:var(--mono);font-size:120px;font-weight:500;line-height:1}
-.big{font-family:var(--mono);font-size:72px;font-weight:500;line-height:1}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;border-top:1px solid var(--line);padding-top:16px}
-.row{display:flex;flex-direction:column;gap:10px}
-.opts{display:flex;flex-direction:column;gap:10px}
-.opt{font:500 18px var(--display);background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:14px;cursor:pointer;touch-action:manipulation}
-.opt.ok{background:var(--good);border-color:var(--good);color:var(--on-mark)}
-.opt.no{background:var(--bad);border-color:var(--bad);color:var(--on-mark)}
-.label.best{align-self:flex-start;background:var(--accent);color:var(--on-accent);padding:4px 10px;border-radius:999px}
-.q.word{font-family:var(--display);font-weight:700;font-size:36px;overflow-wrap:anywhere}
-.sentence{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;padding:8px 0}
-.word-btn{font:500 21px var(--display);background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:6px 10px;cursor:pointer;touch-action:manipulation}
-.word-btn.ok{background:var(--good);border-color:var(--good);color:var(--on-mark)}
-.word-btn.no{background:var(--bad);border-color:var(--bad);color:var(--on-mark)}
+.tile{aspect-ratio:1;background:var(--surface);border:0;border-radius:18px;cursor:pointer;touch-action:manipulation;padding:0;box-shadow:0 4px 0 var(--line)}
+.tile.lit{background:var(--grad);box-shadow:0 0 0 3px var(--l),0 0 26px var(--l)}
+.tile.ok{background:var(--good);box-shadow:0 0 18px var(--good)}
+.tile.no{background:var(--bad);box-shadow:0 0 18px var(--bad)}
+.hearts{display:flex;gap:4px}
+.hearts svg{width:18px;height:18px;fill:#fff}
+.hearts svg.off{fill:rgba(255,255,255,.3)}
+.sentence{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;padding:6px 0}
+.word-btn{font:700 21px var(--display);background:var(--bg);border:0;border-radius:12px;padding:7px 11px;cursor:pointer;touch-action:manipulation;box-shadow:0 3px 0 var(--line)}
+.word-btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--line)}
+.word-btn.ok{background:var(--good);color:var(--on-mark);box-shadow:none}
+.word-btn.no{background:var(--bad);color:var(--on-mark);box-shadow:none}
 .word-btn s{opacity:.7;margin-right:6px}
-.spark{display:flex;align-items:flex-end;gap:2px;height:20px;margin-top:4px}
-.spark i{width:6px;background:var(--line);border-radius:2px}
-.spark i:last-child{background:var(--accent)}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:20}
+
+@media (hover:hover){
+  .btn:hover,.card:hover{filter:brightness(1.06)}
+  .pad button:hover,.opt:hover,.tile:hover,.word-btn:hover{filter:brightness(.97)}
+  .toggle:hover{color:var(--ink)}
+}
+/* Motion, only for people who haven't asked their device to reduce it. */
+@media (prefers-reduced-motion: no-preference){
+  main > .screen:not([hidden]){animation:enter .35s cubic-bezier(.2,.8,.2,1)}
+  .full:not([hidden]){animation:fade .25s ease-out}
+  @keyframes enter{from{opacity:0;transform:translateY(12px)}}
+  @keyframes fade{from{opacity:0}}
+  .card{transition:transform .2s cubic-bezier(.2,1.4,.4,1),filter .15s}
+  .card:hover{transform:translateY(-3px) rotate(-.6deg)}
+  .card:active{transform:scale(.97)}
+  .cards li{animation:enter .45s cubic-bezier(.2,.8,.2,1) backwards}
+  .cards li:nth-child(2){animation-delay:.05s} .cards li:nth-child(3){animation-delay:.1s} .cards li:nth-child(4){animation-delay:.15s}
+  .count{animation:pop .7s cubic-bezier(.2,1.4,.4,1)}
+  #countArt{animation:bob 2s ease-in-out infinite}
+  @keyframes bob{50%{transform:translateY(-8px) rotate(3deg)}}
+  @keyframes pop{from{transform:scale(.4);opacity:0}}
+  .stars svg{animation:pop .5s cubic-bezier(.2,1.6,.4,1) backwards}
+  .stars svg:nth-child(1){animation-delay:.25s} .stars svg:nth-child(2){animation-delay:.4s} .stars svg:nth-child(3){animation-delay:.55s}
+  .badge{animation:pop .5s .7s cubic-bezier(.2,1.6,.4,1) backwards}
+  .float{animation:floatUp .9s ease-out forwards}
+  @keyframes floatUp{from{opacity:1;transform:translate(-50%,6px) scale(.8)}20%{opacity:1;transform:translate(-50%,-4px) scale(1.1)}to{opacity:0;transform:translate(-50%,-34px)}}
+  .board.no{animation:shake .3s}
+  @keyframes shake{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+  .tile{transition:background .12s,transform .12s,box-shadow .12s}
+  .tile.lit{transform:scale(1.05)}
+  .chip.hot{animation:pulse 1s ease-in-out infinite}
+  @keyframes pulse{50%{transform:scale(1.08)}}
+  .hud-time.low{animation:pulse .5s ease-in-out infinite}
+  .pill{animation:pop .5s .2s cubic-bezier(.2,1.6,.4,1) backwards}
+}
 </style>
 </head>
 <body>
 <main>
   <section class="screen" id="home">
-    <div class="top">
-      <div><span class="label" id="dateLabel">Today</span><h1>Daily Sprint</h1></div>
-      <div class="streak"><span class="num" id="streakNum">0</span><span class="label">Day streak</span></div>
+    <div class="home-top">
+      <div><p class="hello" id="hello">Hello</p><h1>Daily Sprint</h1></div>
+      <div class="pill" id="streakPill"><span id="flameSlot"></span><span><span id="streakNum">0</span> <small>days</small></span></div>
     </div>
-    <div class="session">
-      <h2 id="sessionTitle">Today's session</h2>
-      <div class="dots" id="dots"></div>
-      <p id="sessionNote">Three short games. Finish all three to keep your streak.</p>
-      <button class="btn" id="sessionBtn">Start today's session</button>
+    <div class="hero">
+      <div>
+        <h2 id="sessionTitle">Today's session</h2>
+        <p id="sessionNote">Four short games. Finish all four to keep your streak.</p>
+      </div>
+      <div class="ring" aria-hidden="true"><svg viewBox="0 0 88 88" id="ring"></svg><b><span id="ringNum">0/4</span></b></div>
+      <button class="btn white" id="sessionBtn">Start today's session</button>
     </div>
-    <div>
-      <span class="label">Practice any game</span>
-      <ul class="games" id="games"></ul>
-    </div>
-    <button class="link" id="soundBtn">Sound: on</button>
+    <div class="sec-head"><h2>All games</h2><p>Tap to practice</p></div>
+    <ul class="cards" id="games"></ul>
+    <div class="foot"><button class="toggle" id="soundBtn">Sound on</button></div>
   </section>
 
-  <section class="screen" id="count" hidden>
-    <div class="countwrap" id="countWrap">
-      <div class="gicon lg" id="countIcon" aria-hidden="true"></div>
-      <span class="label" id="countName">Math Sprint</span>
-      <div class="count num" id="countNum">3</div>
+  <section class="screen full" id="count" hidden>
+    <div class="inner">
+      <svg id="countArt" viewBox="0 0 120 120" aria-hidden="true"></svg>
+      <span class="kicker" id="countName">Math Sprint</span>
+      <div class="count" id="countNum">3</div>
       <p id="countHint"></p>
     </div>
   </section>
 
-  <section class="screen" id="math" hidden>
-    <div class="stats">
-      <div class="stat"><span class="label">Score</span><span class="num" id="score">0</span></div>
-      <div class="stat"><span class="label">Level</span><span class="num" id="level">1</span></div>
-      <div class="stat"><span class="label">Time</span><span class="num" id="time">60</span></div>
+  <section class="screen g-math" id="math" hidden>
+    <div class="hud">
+      <div class="hud-row"><button class="x quit" aria-label="Quit"></button><span class="hud-name">Math Sprint</span><span class="hud-time" id="time">60</span></div>
+      <div class="bar"><i id="barFill"></i></div>
+      <div class="chips"><span class="chip">Score <b id="score">0</b></span><span class="chip">Level <b id="level">1</b></span><span class="chip" id="streak"></span></div>
     </div>
-    <div class="bar"><i id="barFill"></i></div>
     <div class="board" id="board">
       <div class="q" id="q">7 + 5</div>
       <div class="a" id="a" aria-live="polite"></div>
-      <span class="label" id="streak">Streak 0</span>
     </div>
     <div class="pad" id="pad">
       <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
@@ -177,78 +262,93 @@ button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
       <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button>
       <button data-k="back" aria-label="Delete">&#9003;</button><button data-k="0">0</button><button data-k="enter" class="go">Enter</button>
     </div>
-    <button class="link quit">Quit</button>
   </section>
 
-  <section class="screen" id="memory" hidden>
-    <div class="stats">
-      <div class="stat"><span class="label">Score</span><span class="num" id="mScore">0</span></div>
-      <div class="stat"><span class="label">Sequence</span><span class="num" id="mLen">3</span></div>
-      <div class="stat"><span class="label">Lives</span><span class="num" id="mLives">3</span></div>
+  <section class="screen g-memory" id="memory" hidden>
+    <div class="hud">
+      <div class="hud-row"><button class="x quit" aria-label="Quit"></button><span class="hud-name">Memory Grid</span><span class="hud-time" id="mScore">0</span></div>
+      <div class="chips"><span class="chip">Sequence <b id="mLen">3</b></span><span class="chip hearts" id="mLives" aria-label="3 lives"></span></div>
     </div>
-    <div class="status" id="mStatus" aria-live="polite">Watch</div>
+    <div class="status-wrap" id="mStatusWrap"><div class="status" id="mStatus" aria-live="polite">Watch</div></div>
     <div class="tiles" id="tiles"></div>
-    <button class="link quit">Quit</button>
   </section>
 
-  <section class="screen" id="words" hidden>
-    <div class="stats">
-      <div class="stat"><span class="label">Score</span><span class="num" id="wScore">0</span></div>
-      <div class="stat"><span class="label">Level</span><span class="num" id="wLevel">1</span></div>
-      <div class="stat"><span class="label">Time</span><span class="num" id="wTime">60</span></div>
+  <section class="screen g-words" id="words" hidden>
+    <div class="hud">
+      <div class="hud-row"><button class="x quit" aria-label="Quit"></button><span class="hud-name">Word Match</span><span class="hud-time" id="wTime">60</span></div>
+      <div class="bar"><i id="wBar"></i></div>
+      <div class="chips"><span class="chip">Score <b id="wScore">0</b></span><span class="chip">Level <b id="wLevel">1</b></span><span class="chip" id="wStreak"></span></div>
     </div>
-    <div class="bar"><i id="wBar"></i></div>
-    <div class="board">
-      <span class="label">Which word means the same as</span>
+    <div class="board" id="wBoard">
+      <span class="prompt">Which word means the same as</span>
       <div class="q word" id="wWord">quick</div>
-      <span class="label" id="wStreak">Streak 0</span>
     </div>
     <div class="opts" id="opts"></div>
-    <button class="link quit">Quit</button>
   </section>
 
-  <section class="screen" id="spot" hidden>
-    <div class="stats">
-      <div class="stat"><span class="label">Score</span><span class="num" id="sScore">0</span></div>
-      <div class="stat"><span class="label">Level</span><span class="num" id="sLevel">1</span></div>
-      <div class="stat"><span class="label">Time</span><span class="num" id="sTime">60</span></div>
+  <section class="screen g-spot" id="spot" hidden>
+    <div class="hud">
+      <div class="hud-row"><button class="x quit" aria-label="Quit"></button><span class="hud-name">Spot the Error</span><span class="hud-time" id="sTime">60</span></div>
+      <div class="bar"><i id="sBar"></i></div>
+      <div class="chips"><span class="chip">Score <b id="sScore">0</b></span><span class="chip">Level <b id="sLevel">1</b></span><span class="chip" id="sStreak"></span></div>
     </div>
-    <div class="bar"><i id="sBar"></i></div>
-    <div class="board">
-      <span class="label">Tap the word with the mistake</span>
+    <div class="board" id="sBoard">
+      <span class="prompt">Tap the word with the mistake</span>
       <div class="sentence" id="sSentence"></div>
-      <span class="label" id="sFix" aria-live="polite">Streak 0</span>
+      <div class="fix" id="sFix" aria-live="polite"></div>
     </div>
-    <button class="link quit">Quit</button>
   </section>
 
-  <section class="screen" id="end" hidden>
-    <span class="label" id="endLabel">Time's up</span>
-    <div class="big" id="finalScore">0</div>
-    <p id="endNote">points</p>
-    <div class="grid" id="endStats"></div>
-    <div class="row">
-      <button class="btn" id="nextBtn">Back to home</button>
-      <button class="btn ghost" id="againBtn">Play again</button>
+  <section class="screen full" id="end" hidden>
+    <div class="inner">
+      <span class="kicker" id="endLabel">Time's up</span>
+      <div class="stars" id="stars" aria-hidden="true"></div>
+      <div class="big" id="finalScore">0</div>
+      <p id="endNote">points</p>
+      <span class="badge" id="endBadge" hidden>New best!</span>
+      <div class="end-stats" id="endStats"></div>
+      <div class="end-btns">
+        <button class="btn white" id="nextBtn">Back to home</button>
+        <button class="btn glass" id="againBtn">Play again</button>
+        <button class="link" id="homeBtn" hidden>Back to home</button>
+      </div>
     </div>
   </section>
 </main>
+<canvas id="fx" aria-hidden="true"></canvas>
 
 <script>
 const $ = id => document.getElementById(id);
 const KEY = 'dailysprint.v1';
+/* Small line icons (24x24) */
+const ICON = {
+  flame: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2c.9 3.6 5.5 5.6 5.5 11.2A5.5 5.5 0 0 1 6.5 13.6c0-2.6 1.3-4.3 2.7-5.3.2 1.9 1.1 3 2.4 3.3C11 8.2 12.3 5.3 12 2z"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  play: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M8 5.5v13a1 1 0 0 0 1.5.86l10.4-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>',
+  heart: '<svg viewBox="0 0 24 24"><path d="M12 20.5s-8-4.9-8-11A4.5 4.5 0 0 1 12 6.6 4.5 4.5 0 0 1 20 9.5c0 6.1-8 11-8 11z"/></svg>',
+  star: '<svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z"/></svg>',
+  soundOn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>',
+  soundOff: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg>'
+};
+/* Big illustrations (120x120) for the game cards and countdown. White shapes; currentColor is the game's dark color. */
 const GAMES = [
-  { id: 'math', name: 'Math Sprint', desc: '60 seconds of mental arithmetic', hint: 'Answer as many as you can in 60 seconds.',
-    icon: '<path d="M7 4v6M4 7h6M15 4l4 4M19 4l-4 4M4 17h6M14 15.5h6M14 18.5h6"/>' },
-  { id: 'memory', name: 'Memory Grid', desc: 'Repeat a growing sequence of tiles', hint: 'Watch the tiles light up, then tap them in the same order.',
-    icon: '<rect x="4" y="4" width="7" height="7" rx="2" fill="currentColor"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/>' },
-  { id: 'words', name: 'Word Match', desc: '60 seconds of matching synonyms', hint: 'Pick the word that means the same. You have 60 seconds.',
-    icon: '<path d="M4 8h16M16 4l4 4-4 4M20 16H4M8 12l-4 4 4 4"/>' },
-  { id: 'spot', name: 'Spot the Error', desc: '60 seconds of finding the wrong word', hint: 'Tap the one word that is wrong. You have 60 seconds.',
-    icon: '<circle cx="10" cy="10" r="6"/><path d="M14.5 14.5L20 20M7 10.5c1-1.5 2-1.5 3 0s2 1.5 3 0"/>' }
+  { id: 'math', name: 'Math Sprint', hint: 'Answer as many as you can in 60 seconds.',
+    art: '<g transform="rotate(12 86 34)"><rect x="66" y="14" width="40" height="40" rx="11" fill="#fff" fill-opacity=".5"/><path d="M78 26l16 16M94 26L78 42" stroke="#fff" stroke-width="6" stroke-linecap="round"/></g>' +
+      '<g transform="rotate(8 80 86)"><rect x="60" y="66" width="40" height="40" rx="11" fill="#fff" fill-opacity=".28"/><path d="M70 81h20M70 92h20" stroke="#fff" stroke-width="6" stroke-linecap="round"/></g>' +
+      '<g transform="rotate(-10 40 46)"><rect x="18" y="24" width="44" height="44" rx="12" fill="#fff"/><path d="M40 35v22M29 46h22" stroke="currentColor" stroke-width="7" stroke-linecap="round"/></g>' },
+  { id: 'memory', name: 'Memory Grid', hint: 'Watch the tiles light up, then tap them in the same order.',
+    art: '<g transform="rotate(-8 64 60)">' + [0, 1, 2, 3, 4, 5, 6, 7, 8].map(i => '<rect x="' + (22 + (i % 3) * 30) + '" y="' + (16 + Math.floor(i / 3) * 30) + '" width="24" height="24" rx="7" fill="#fff" fill-opacity="' + ([0, 4, 5].includes(i) ? 1 : .28) + '"/>').join('') + '</g>' },
+  { id: 'words', name: 'Word Match', hint: 'Pick the word that means the same. You have 60 seconds.',
+    art: '<rect x="52" y="58" width="60" height="40" rx="12" fill="#fff" fill-opacity=".35"/><path d="M96 96l4 14-16-14z" fill="#fff" fill-opacity=".35"/><path d="M64 72h30M64 84h18" stroke="#fff" stroke-width="5" stroke-linecap="round"/>' +
+      '<rect x="12" y="20" width="68" height="50" rx="14" fill="#fff"/><path d="M26 68v16l16-16z" fill="#fff"/><text x="46" y="55" text-anchor="middle" font-family="Bricolage Grotesque, system-ui, sans-serif" font-weight="800" font-size="28" fill="currentColor">Aa</text>' },
+  { id: 'spot', name: 'Spot the Error', hint: 'Tap the one word that is wrong. You have 60 seconds.',
+    art: '<g transform="rotate(-7 48 58)"><rect x="16" y="14" width="66" height="86" rx="10" fill="#fff"/><path d="M28 32h42M28 46h34M28 74h40M28 88h26" stroke="currentColor" stroke-opacity=".3" stroke-width="5" stroke-linecap="round"/><path d="M28 61q5-6 10 0t10 0t10 0" fill="none" stroke="#E5484D" stroke-width="4" stroke-linecap="round"/></g>' +
+      '<circle cx="80" cy="66" r="19" fill="#fff" fill-opacity=".25" stroke="#fff" stroke-width="8"/><path d="M94 80l14 14" stroke="#fff" stroke-width="10" stroke-linecap="round"/>' }
 ];
-const iconSvg = g => '<svg viewBox="0 0 24 24">' + g.icon + '</svg>';
+const artSvg = g => '<svg class="art" viewBox="0 0 120 120" aria-hidden="true">' + g.art + '</svg>';
 const NUMBER_WORDS = ['No', 'One', 'Two', 'Three', 'Four', 'Five'];
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const sleep = ms => new Promise(res => setTimeout(res, ms));
 const r = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
 const dayKey = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
@@ -269,7 +369,7 @@ function spark(id) {
   const h = store.hist[id];
   if (h.length < 2) return '';
   const max = Math.max(1, ...h);
-  return '<div class="spark" aria-hidden="true">' + h.map(v => '<i style="height:' + Math.max(3, Math.round(20 * v / max)) + 'px"></i>').join('') + '</div>';
+  return '<div class="spark" aria-hidden="true">' + h.map(v => '<i style="height:' + Math.max(3, Math.round(16 * v / max)) + 'px"></i>').join('') + '</div>';
 }
 
 let ac = null;
@@ -285,38 +385,97 @@ function beep(freq, dur) {
   } catch (e) {}
 }
 
+/* Feedback helpers */
+function floatText(host, text, cls) {
+  const el = document.createElement('span');
+  el.className = 'float' + (cls ? ' ' + cls : ''); el.textContent = text;
+  host.appendChild(el);
+  setTimeout(() => el.remove(), 900);
+}
+function streakChip(id, n) {
+  const el = $(id);
+  el.innerHTML = ICON.flame + '<b>' + n + '</b>';
+  el.classList.toggle('hot', n >= 3);
+  el.setAttribute('aria-label', 'Streak ' + n);
+}
+function countUp(el, to) {
+  if (reduced || !to) { el.textContent = to; return; }
+  const t0 = performance.now();
+  const step = now => {
+    const k = Math.min(1, (now - t0) / 900);
+    el.textContent = Math.round(to * (1 - Math.pow(1 - k, 3)));
+    if (k < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+  setTimeout(() => { el.textContent = to; }, 1000); // in case animation frames are paused (e.g. a background tab)
+}
+function confetti() {
+  if (reduced) return;
+  const c = $('fx'), x = c.getContext('2d'), dpr = devicePixelRatio || 1;
+  const W = c.width = innerWidth * dpr, H = c.height = innerHeight * dpr;
+  const cols = ['#FFC83D', '#5B82FF', '#A57BFF', '#1FC9B6', '#FF9A55', '#FFFFFF'];
+  const ps = Array.from({ length: 150 }, () => ({
+    x: W / 2 + (Math.random() - .5) * W * .3, y: H * .35,
+    vx: (Math.random() - .5) * 18 * dpr, vy: (-Math.random() * 16 - 6) * dpr,
+    s: (Math.random() * 6 + 6) * dpr, a: Math.random() * 6, va: (Math.random() - .5) * .4, c: cols[r(0, cols.length - 1)]
+  }));
+  const t0 = performance.now();
+  (function frame(now) {
+    x.clearRect(0, 0, W, H);
+    ps.forEach(p => {
+      p.vy += .45 * dpr; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.a += p.va;
+      x.save(); x.translate(p.x, p.y); x.rotate(p.a); x.fillStyle = p.c; x.fillRect(-p.s / 2, -p.s / 3, p.s, p.s * .66); x.restore();
+    });
+    if (now - t0 < 2800) requestAnimationFrame(frame); else x.clearRect(0, 0, W, H);
+  })(t0);
+}
+
 let screen = 'home', run = 0, inSession = false, current = null;
-function show(id) { screen = id; ['home', 'count', 'math', 'memory', 'words', 'spot', 'end'].forEach(x => { $(x).hidden = x !== id; }); }
+function show(id) { screen = id; ['home', 'count', 'math', 'memory', 'words', 'spot', 'end'].forEach(x => { $(x).hidden = x !== id; }); window.scrollTo(0, 0); }
 const nextUndone = () => GAMES.find(g => !store.done[g.id]);
 
+function ringSvg() {
+  const R = 36, C = 2 * Math.PI * R, seg = C / GAMES.length, gap = 14;
+  return GAMES.map((g, i) => '<circle class="g-' + g.id + (store.done[g.id] ? ' on' : '') + '" cx="44" cy="44" r="' + R + '" stroke-dasharray="' + (seg - gap).toFixed(1) + ' ' + C.toFixed(1) +
+    '" stroke-dashoffset="' + (-(i * seg) - gap / 2).toFixed(1) + '" transform="rotate(-90 44 44)"/>').join('');
+}
 function renderHome() {
   freshDay();
-  const live = store.lastDay === today() || store.lastDay === yesterday();
-  $('streakNum').textContent = live ? store.streak : 0;
-  $('dateLabel').textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
-  $('dots').innerHTML = GAMES.map(g => '<i class="' + (store.done[g.id] ? 'on' : '') + '" style="--c:var(--c-' + g.id + ')" title="' + g.name + '"></i>').join('');
-  const left = GAMES.filter(g => !store.done[g.id]).length;
+  const live = store.lastDay === today() || store.lastDay === yesterday(), streak = live ? store.streak : 0;
+  const h = new Date().getHours(), hello = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+  $('hello').textContent = hello + ' · ' + new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+  $('flameSlot').innerHTML = ICON.flame;
+  $('streakNum').textContent = streak;
+  $('streakPill').className = 'pill' + (streak ? '' : ' cold');
+  $('streakPill').setAttribute('aria-label', streak + ' day streak');
+  $('streakPill').querySelector('small').textContent = streak === 1 ? 'day' : 'days';
+  const done = GAMES.filter(g => store.done[g.id]).length, left = GAMES.length - done;
+  $('ring').innerHTML = ringSvg();
+  $('ringNum').innerHTML = left === 0 ? ICON.check.replace('<svg', '<svg width="34" height="34"') : done + '/' + GAMES.length;
   $('sessionBtn').hidden = left === 0;
-  $('sessionTitle').textContent = left === 0 ? 'Done for today' : "Today's session";
-  $('sessionNote').textContent = left === 0 ? 'Come back tomorrow to keep your streak going. You can still practice below.'
-    : left === GAMES.length ? NUMBER_WORDS[GAMES.length] + ' short games. Finish all ' + NUMBER_WORDS[GAMES.length].toLowerCase() + ' to keep your streak.'
-    : left === 1 ? 'One game left to finish today.' : left + ' games left to finish today.';
-  $('sessionBtn').textContent = left === GAMES.length ? "Start today's session" : 'Continue session';
+  $('sessionTitle').textContent = left === 0 ? 'Done for today!' : "Today's session";
+  $('sessionNote').textContent = left === 0 ? 'Come back tomorrow to keep your streak going.'
+    : left === GAMES.length ? NUMBER_WORDS[GAMES.length] + ' quick games. Finish all ' + NUMBER_WORDS[GAMES.length].toLowerCase() + ' to keep your streak.'
+    : left === 1 ? 'One game left. Finish it to keep your streak!' : left + ' games left to finish today.';
+  if (left) $('sessionBtn').innerHTML = ICON.play + (left === GAMES.length ? "Start today's session" : 'Continue: ' + nextUndone().name);
   $('games').innerHTML = GAMES.map(g =>
-    '<li><div class="gicon" style="--c:var(--c-' + g.id + ')" aria-hidden="true">' + iconSvg(g) + '</div><div class="info"><h2>' + g.name + '</h2><p>' + g.desc + '</p><span class="label">Level ' + store.skill[g.id] + ' · Best ' + (store.best[g.id] || 'none yet') + '</span>' + spark(g.id) + '</div>' +
-    '<button class="btn ghost small" data-g="' + g.id + '">Play</button></li>').join('');
-  $('soundBtn').textContent = 'Sound: ' + (store.sound ? 'on' : 'off');
+    '<li><button class="card g-' + g.id + '" data-g="' + g.id + '">' + artSvg(g) +
+    (store.done[g.id] ? '<span class="done" aria-label="Done today">' + ICON.check + '</span>' : '') +
+    '<h3>' + g.name + '</h3><div class="card-meta"><span class="chip">Lvl ' + store.skill[g.id] + ' · Best ' + (store.best[g.id] || '–') + '</span>' + spark(g.id) + '</div></button></li>').join('');
+  $('soundBtn').innerHTML = (store.sound ? ICON.soundOn : ICON.soundOff) + 'Sound ' + (store.sound ? 'on' : 'off');
   show('home');
 }
 
 async function launch(id) {
   const my = ++run;
   current = GAMES.find(g => g.id === id);
+  $('count').className = 'screen full g-' + id;
+  $('end').className = 'screen full g-' + id;
   $('countName').textContent = current.name;
   $('countHint').textContent = current.hint;
-  $('countIcon').innerHTML = iconSvg(current);
-  $('countWrap').style.setProperty('--c', 'var(--c-' + id + ')');
+  $('countArt').innerHTML = current.art;
   document.querySelectorAll('.bar').forEach(b => b.classList.remove('low'));
+  document.querySelectorAll('.hud-time').forEach(t => t.classList.remove('low'));
   show('count');
   for (let n = 3; n >= 1; n--) {
     const el = $('countNum');
@@ -343,16 +502,23 @@ function finishGame(score, label, stats, skill) {
   }
   save();
   const celebrate = isBest && score > 0;
-  $('endLabel').textContent = celebrate ? 'New best score' : label;
-  $('endLabel').classList.toggle('best', celebrate);
-  if (celebrate) setTimeout(() => { beep(784, 0.12); setTimeout(() => beep(1047, 0.2), 120); }, 450);
-  $('finalScore').textContent = score;
-  $('endNote').textContent = isBest || !prev ? 'points' : 'points. Your best is ' + prev + '.';
-  $('endStats').innerHTML = stats.map(x => '<div class="stat"><span class="label">' + x[0] + '</span><span class="num">' + x[1] + '</span></div>').join('');
+  // Stars: 3 for a new best, 2 for at least 70% of your best, 1 for any points.
+  const stars = celebrate ? 3 : score >= 0.7 * prev && score > 0 ? 2 : score > 0 ? 1 : 0;
+  $('endLabel').textContent = label;
+  $('stars').innerHTML = [0, 1, 2].map(i => ICON.star.replace('<svg', '<svg class="' + (i < stars ? 'on' : '') + '"')).join('');
+  $('endBadge').hidden = !celebrate;
+  countUp($('finalScore'), score);
+  $('endNote').textContent = isBest || !prev ? 'points' : 'points · your best is ' + prev;
+  $('endStats').innerHTML = stats.map(x => '<div><span>' + x[0] + '</span><b>' + x[1] + '</b></div>').join('');
   const nxt = inSession ? nextUndone() : null;
-  $('nextBtn').textContent = nxt ? 'Next: ' + nxt.name : 'Back to home';
+  $('nextBtn').innerHTML = nxt ? ICON.play + 'Next: ' + nxt.name : 'Back to home';
   $('nextBtn').dataset.next = nxt ? nxt.id : '';
+  $('homeBtn').hidden = !nxt;
   show('end');
+  if (celebrate) {
+    setTimeout(() => { beep(784, 0.12); setTimeout(() => beep(1047, 0.2), 120); }, 450);
+    setTimeout(confetti, 300);
+  }
 }
 
 /* Math Sprint */
@@ -390,14 +556,15 @@ function nextQuestion() {
   mathHud();
 }
 function mathHud() {
-  $('score').textContent = s.score; $('level').textContent = s.level; $('streak').textContent = 'Streak ' + s.streak;
+  $('score').textContent = s.score; $('level').textContent = s.level; streakChip('streak', s.streak);
 }
 function settle(correct) {
   s.locked = true; s.total++;
   if (correct) {
     s.correct++; s.streak++; s.row++;
     s.score += 10 * s.level;
-    if (s.row >= 3 && s.level < LEVELS.length) { s.level++; s.row = 0; beep(990, 0.18); } else beep(660, 0.08);
+    floatText($('board'), '+' + 10 * s.level);
+    if (s.row >= 3 && s.level < LEVELS.length) { s.level++; s.row = 0; beep(990, 0.18); floatText($('board'), 'Level up!', 'lvl'); } else beep(660, 0.08);
     s.top = Math.max(s.top, s.level);
     $('board').className = 'board ok';
   } else {
@@ -419,12 +586,16 @@ function press(k) {
   $('a').textContent = s.input;
   if (s.input !== '' && Number(s.input) === s.answer) settle(true);
 }
+function timer(bar, time, left) {
+  $(time).textContent = Math.ceil(left);
+  $(bar).style.transform = 'scaleX(' + (left / ROUND) + ')';
+  $(bar).parentNode.classList.toggle('low', left <= 10);
+  $(time).classList.toggle('low', left <= 10);
+}
 function tick() {
   if (!s || s.my !== run) return;
   const left = Math.max(0, ROUND - (performance.now() - s.t0) / 1000);
-  $('time').textContent = Math.ceil(left);
-  $('barFill').style.transform = 'scaleX(' + (left / ROUND) + ')';
-  $('barFill').parentNode.classList.toggle('low', left <= 10);
+  timer('barFill', 'time', left);
   if (left <= 0) {
     beep(520, 0.4);
     return finishGame(s.score, "Time's up", [['Correct', s.correct], ['Accuracy', (s.total ? Math.round(100 * s.correct / s.total) : 0) + '%'], ['Top level', s.top]], s.level);
@@ -440,7 +611,12 @@ function startMemory(my) {
   show('memory');
   newRound();
 }
-function memHud() { $('mScore').textContent = m.score; $('mLen').textContent = m.len; $('mLives').textContent = m.lives; }
+function memHud() {
+  $('mScore').textContent = m.score; $('mLen').textContent = m.len;
+  $('mLives').innerHTML = [0, 1, 2].map(i => ICON.heart.replace('<svg', '<svg class="' + (i < m.lives ? '' : 'off') + '"')).join('');
+  $('mLives').setAttribute('aria-label', m.lives + ' lives');
+}
+function memStatus(text, go) { $('mStatus').textContent = text; $('mStatus').classList.toggle('go', !!go); }
 function tileEl(i) { return $('tiles').children[i]; }
 async function newRound() {
   const my = m.my, n = m.len >= 6 ? 4 : 3;
@@ -453,7 +629,7 @@ async function newRound() {
   m.seq = []; m.pos = 0; m.accepting = false;
   while (m.seq.length < m.len) { const c = r(0, n * n - 1); if (c !== m.seq[m.seq.length - 1]) m.seq.push(c); }
   memHud();
-  $('mStatus').textContent = 'Watch';
+  memStatus('Watch');
   await sleep(600);
   for (const c of m.seq) {
     if (my !== run) return;
@@ -465,7 +641,7 @@ async function newRound() {
   }
   if (my !== run) return;
   m.accepting = true;
-  $('mStatus').textContent = 'Your turn';
+  memStatus('Your turn', true);
 }
 function tap(i) {
   if (screen !== 'memory' || !m || m.my !== run || !m.accepting) return;
@@ -476,15 +652,17 @@ function tap(i) {
     setTimeout(() => t.classList.remove('ok'), 200);
     if (m.pos === m.len) {
       m.accepting = false; m.rounds++;
-      m.score += 10 * m.len; m.top = Math.max(m.top, m.len); m.len++;
-      $('mStatus').textContent = 'Correct';
+      m.score += 10 * m.len; m.top = Math.max(m.top, m.len);
+      floatText($('mStatusWrap'), '+' + 10 * m.len);
+      m.len++;
+      memStatus('Correct!');
       memHud();
       setTimeout(() => { if (my === run) newRound(); }, 700);
     }
   } else {
     m.accepting = false; m.lives--;
     t.classList.add('no'); tileEl(m.seq[m.pos]).classList.add('lit'); beep(180, 0.3);
-    $('mStatus').textContent = m.lives ? 'Missed. Try again' : 'Out of lives';
+    memStatus(m.lives ? 'Missed. Try again' : 'Out of lives');
     memHud();
     setTimeout(() => {
       if (my !== run) return;
@@ -519,7 +697,7 @@ function startWords(my) {
   nextWord();
   requestAnimationFrame(wTick);
 }
-function wHud() { $('wScore').textContent = w.score; $('wLevel').textContent = w.tier; $('wStreak').textContent = 'Streak ' + w.streak; }
+function wHud() { $('wScore').textContent = w.score; $('wLevel').textContent = w.tier; streakChip('wStreak', w.streak); }
 function nextWord() {
   const set = BANK[w.tier - 1];
   let p;
@@ -530,6 +708,7 @@ function nextWord() {
   while (opts.length < 4) { const c = set[r(0, set.length - 1)][1]; if (!opts.includes(c)) opts.push(c); }
   for (let i = opts.length - 1; i > 0; i--) { const j = r(0, i); [opts[i], opts[j]] = [opts[j], opts[i]]; }
   $('wWord').textContent = p[0];
+  $('wBoard').className = 'board';
   $('opts').innerHTML = opts.map(o => '<button class="opt" data-o="' + o + '">' + o + '</button>').join('');
   wHud();
 }
@@ -540,15 +719,18 @@ function choose(btn) {
   if (correct) {
     w.correct++; w.streak++; w.row++;
     w.score += 10 * w.tier;
-    if (w.row >= 3 && w.tier < BANK.length) { w.tier++; w.row = 0; beep(990, 0.18); } else beep(660, 0.08);
+    floatText($('wBoard'), '+' + 10 * w.tier);
+    if (w.row >= 3 && w.tier < BANK.length) { w.tier++; w.row = 0; beep(990, 0.18); floatText($('wBoard'), 'Level up!', 'lvl'); } else beep(660, 0.08);
     w.top = Math.max(w.top, w.tier);
     btn.classList.add('ok');
+    $('wBoard').className = 'board ok';
   } else {
     w.streak = 0; w.row = 0;
     if (w.tier > 1) w.tier--;
     btn.classList.add('no');
     const right = [...$('opts').children].find(b => b.dataset.o === w.answer);
     if (right) right.classList.add('ok');
+    $('wBoard').className = 'board no';
     beep(180, 0.25);
   }
   wHud();
@@ -558,9 +740,7 @@ function choose(btn) {
 function wTick() {
   if (!w || w.my !== run) return;
   const left = Math.max(0, ROUND - (performance.now() - w.t0) / 1000);
-  $('wTime').textContent = Math.ceil(left);
-  $('wBar').style.transform = 'scaleX(' + (left / ROUND) + ')';
-  $('wBar').parentNode.classList.toggle('low', left <= 10);
+  timer('wBar', 'wTime', left);
   if (left <= 0) {
     beep(520, 0.4);
     return finishGame(w.score, "Time's up", [['Correct', w.correct], ['Accuracy', (w.total ? Math.round(100 * w.correct / w.total) : 0) + '%'], ['Top level', w.top]], w.tier);
@@ -614,15 +794,16 @@ function startSpot(my) {
   nextSentence();
   requestAnimationFrame(sTick);
 }
-function sHud() { $('sScore').textContent = sp.score; $('sLevel').textContent = sp.tier; }
+function sHud() { $('sScore').textContent = sp.score; $('sLevel').textContent = sp.tier; streakChip('sStreak', sp.streak); }
 function nextSentence() {
   const set = SENTENCES[sp.tier - 1];
   let words;
   do { words = set[r(0, set.length - 1)]; } while (sp.recent.includes(words));
   sp.recent = sp.recent.concat([words]).slice(-10);
   sp.words = words; sp.locked = false;
+  $('sBoard').className = 'board';
   $('sSentence').innerHTML = words.map((t, i) => '<button class="word-btn" data-i="' + i + '">' + t.text + '</button>').join('');
-  $('sFix').textContent = 'Streak ' + sp.streak;
+  $('sFix').textContent = '';
   sHud();
 }
 function spotTap(btn) {
@@ -633,12 +814,15 @@ function spotTap(btn) {
   if (correct) {
     sp.correct++; sp.streak++; sp.row++;
     sp.score += 10 * sp.tier;
-    if (sp.row >= 3 && sp.tier < SENTENCES.length) { sp.tier++; sp.row = 0; beep(990, 0.18); } else beep(660, 0.08);
+    floatText($('sBoard'), '+' + 10 * sp.tier);
+    if (sp.row >= 3 && sp.tier < SENTENCES.length) { sp.tier++; sp.row = 0; beep(990, 0.18); floatText($('sBoard'), 'Level up!', 'lvl'); } else beep(660, 0.08);
     sp.top = Math.max(sp.top, sp.tier);
+    $('sBoard').className = 'board ok';
   } else {
     sp.streak = 0; sp.row = 0;
     if (sp.tier > 1) sp.tier--;
     btn.classList.add('no');
+    $('sBoard').className = 'board no';
     beep(180, 0.25);
   }
   errBtn.classList.add('ok');
@@ -651,9 +835,7 @@ function spotTap(btn) {
 function sTick() {
   if (!sp || sp.my !== run) return;
   const left = Math.max(0, ROUND - (performance.now() - sp.t0) / 1000);
-  $('sTime').textContent = Math.ceil(left);
-  $('sBar').style.transform = 'scaleX(' + (left / ROUND) + ')';
-  $('sBar').parentNode.classList.toggle('low', left <= 10);
+  timer('sBar', 'sTime', left);
   if (left <= 0) {
     beep(520, 0.4);
     return finishGame(sp.score, "Time's up", [['Correct', sp.correct], ['Accuracy', (sp.total ? Math.round(100 * sp.correct / sp.total) : 0) + '%'], ['Top level', sp.top]], sp.tier);
@@ -662,6 +844,7 @@ function sTick() {
 }
 
 /* Wiring */
+document.querySelectorAll('.x').forEach(b => { b.innerHTML = ICON.x; });
 $('sSentence').addEventListener('click', e => { const b = e.target.closest('button'); if (b) spotTap(b); });
 $('opts').addEventListener('click', e => { const b = e.target.closest('button'); if (b) choose(b); });
 $('pad').addEventListener('click', e => { const b = e.target.closest('button'); if (b) press(b.dataset.k); });
@@ -670,6 +853,7 @@ $('games').addEventListener('click', e => { const b = e.target.closest('button')
 $('sessionBtn').addEventListener('click', () => { const g = nextUndone(); if (g) { inSession = true; launch(g.id); } });
 $('nextBtn').addEventListener('click', () => { const n = $('nextBtn').dataset.next; if (n) launch(n); else renderHome(); });
 $('againBtn').addEventListener('click', () => { inSession = false; launch(current.id); });
+$('homeBtn').addEventListener('click', () => renderHome());
 $('soundBtn').addEventListener('click', () => { store.sound = !store.sound; save(); renderHome(); beep(660, 0.1); });
 document.querySelectorAll('.quit').forEach(b => b.addEventListener('click', () => { run++; renderHome(); }));
 document.addEventListener('keydown', e => {
