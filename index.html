@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Daily Sprint</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Mono:wght@400;500&display=swap">
+<style>
+html{-webkit-text-size-adjust:100%}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+/* Layout: one narrow stopwatch-style column; the question or grid is the only loud thing on screen. */
+:root{
+  --bg:#EEF3F1; --surface:#FFFFFF; --ink:#10262B; --muted:#5B7177; --line:#D3DEDB;
+  --accent:#F2B705; --on-accent:#10262B; --good:#1F8A5B; --bad:#C8402F;
+  --display:"Bricolage Grotesque",system-ui,sans-serif;
+  --mono:"DM Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1E22; --surface:#16292E; --ink:#EAF2F0; --muted:#8FA6AA; --line:#2A4046;
+    --accent:#F5C21B; --on-accent:#10262B; --good:#4CC38A; --bad:#F07A68; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1E22; --surface:#16292E; --ink:#EAF2F0; --muted:#8FA6AA; --line:#2A4046;
+  --accent:#F5C21B; --on-accent:#10262B; --good:#4CC38A; --bad:#F07A68; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--display);font-size:16px;line-height:1.5;padding-inline:16px;padding-block:24px}
+main{max-width:420px;margin:0 auto}
+h1{font-size:40px;line-height:1;font-weight:700;margin:0;letter-spacing:-.02em}
+h2{font-size:18px;font-weight:700;margin:0;line-height:1.2}
+p{margin:0;color:var(--muted)}
+.label{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.screen{display:flex;flex-direction:column;gap:20px}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.streak{text-align:right;display:flex;flex-direction:column}
+.streak .num{font-size:32px;font-weight:500;line-height:1}
+.btn{font:700 18px var(--display);background:var(--accent);color:var(--on-accent);border:0;border-radius:14px;padding:16px;cursor:pointer;width:100%}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.small{width:auto;font-size:15px;padding:10px 18px;border-radius:10px}
+.link{font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;background:none;border:0;color:var(--muted);cursor:pointer;padding:6px 0;text-decoration:underline;align-self:flex-start}
+.btn:active{transform:translateY(1px)}
+button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.session{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.dots{display:flex;gap:8px}
+.dots i{flex:1;height:8px;border-radius:4px;background:var(--line)}
+.dots i.on{background:var(--good)}
+.games{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.games li{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
+.games .info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.games .info p{font-size:14px}
+.stats{display:flex;justify-content:space-between;gap:12px}
+.stat{display:flex;flex-direction:column;gap:2px}
+.stat .num{font-size:22px;font-weight:500}
+.stats .stat:last-child{text-align:right}
+.stats .stat:nth-child(2){text-align:center}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;width:100%;background:var(--accent);transform-origin:left}
+.board{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:28px 16px;text-align:center;display:flex;flex-direction:column;gap:12px}
+.q{font-family:var(--mono);font-size:44px;font-weight:500;line-height:1.1}
+.a{font-family:var(--mono);font-size:32px;min-height:44px;border-bottom:2px solid var(--line);width:160px;margin:0 auto;line-height:44px}
+.board.ok{border-color:var(--good)} .board.ok .a{color:var(--good);border-color:var(--good)}
+.board.no{border-color:var(--bad)} .board.no .a{color:var(--bad);border-color:var(--bad)}
+@media (prefers-reduced-motion: no-preference){
+  .board.no{animation:shake .3s}
+  @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .tile{transition:background .12s, transform .12s}
+  .tile.lit{transform:scale(1.04)}
+  .count{animation:pop .7s}
+  @keyframes pop{from{transform:scale(.6);opacity:.3}to{transform:scale(1);opacity:1}}
+}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.pad button{font:500 24px var(--mono);background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:14px 0;cursor:pointer;touch-action:manipulation}
+.pad button:active{background:var(--line)}
+.pad .go{background:var(--ink);color:var(--bg);border-color:var(--ink);font-size:16px;font-family:var(--display);font-weight:700}
+.tiles{display:grid;gap:10px;grid-template-columns:repeat(var(--n,3),1fr)}
+.tile{aspect-ratio:1;background:var(--surface);border:1px solid var(--line);border-radius:14px;cursor:pointer;touch-action:manipulation;padding:0}
+.tile.lit{background:var(--accent);border-color:var(--accent)}
+.tile.ok{background:var(--good);border-color:var(--good)}
+.tile.no{background:var(--bad);border-color:var(--bad)}
+.status{text-align:center;font-size:20px;font-weight:700;color:var(--ink)}
+.countwrap{min-height:320px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center}
+.count{font-family:var(--mono);font-size:120px;font-weight:500;line-height:1}
+.big{font-family:var(--mono);font-size:72px;font-weight:500;line-height:1}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;border-top:1px solid var(--line);padding-top:16px}
+.row{display:flex;flex-direction:column;gap:10px}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{font:500 18px var(--display);background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:14px;cursor:pointer;touch-action:manipulation}
+.opt.ok{background:var(--good);border-color:var(--good);color:var(--bg)}
+.opt.no{background:var(--bad);border-color:var(--bad);color:var(--bg)}
+.q.word{font-family:var(--display);font-weight:700;font-size:36px;overflow-wrap:anywhere}
+.spark{display:flex;align-items:flex-end;gap:2px;height:20px;margin-top:4px}
+.spark i{width:6px;background:var(--line);border-radius:2px}
+.spark i:last-child{background:var(--accent)}
+</style>
+</head>
+<body>
+<main>
+  <section class="screen" id="home">
+    <div class="top">
+      <div><span class="label" id="dateLabel">Today</span><h1>Daily Sprint</h1></div>
+      <div class="streak"><span class="num" id="streakNum">0</span><span class="label">Day streak</span></div>
+    </div>
+    <div class="session">
+      <h2 id="sessionTitle">Today's session</h2>
+      <div class="dots" id="dots"></div>
+      <p id="sessionNote">Three short games. Finish all three to keep your streak.</p>
+      <button class="btn" id="sessionBtn">Start today's session</button>
+    </div>
+    <div>
+      <span class="label">Practice any game</span>
+      <ul class="games" id="games"></ul>
+    </div>
+    <button class="link" id="soundBtn">Sound: on</button>
+  </section>
+
+  <section class="screen" id="count" hidden>
+    <div class="countwrap">
+      <span class="label" id="countName">Math Sprint</span>
+      <div class="count num" id="countNum">3</div>
+      <p id="countHint"></p>
+    </div>
+  </section>
+
+  <section class="screen" id="math" hidden>
+    <div class="stats">
+      <div class="stat"><span class="label">Score</span><span class="num" id="score">0</span></div>
+      <div class="stat"><span class="label">Level</span><span class="num" id="level">1</span></div>
+      <div class="stat"><span class="label">Time</span><span class="num" id="time">60</span></div>
+    </div>
+    <div class="bar"><i id="barFill"></i></div>
+    <div class="board" id="board">
+      <div class="q" id="q">7 + 5</div>
+      <div class="a" id="a" aria-live="polite"></div>
+      <span class="label" id="streak">Streak 0</span>
+    </div>
+    <div class="pad" id="pad">
+      <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
+      <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
+      <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button>
+      <button data-k="back" aria-label="Delete">&#9003;</button><button data-k="0">0</button><button data-k="enter" class="go">Enter</button>
+    </div>
+    <button class="link quit">Quit</button>
+  </section>
+
+  <section class="screen" id="memory" hidden>
+    <div class="stats">
+      <div class="stat"><span class="label">Score</span><span class="num" id="mScore">0</span></div>
+      <div class="stat"><span class="label">Sequence</span><span class="num" id="mLen">3</span></div>
+      <div class="stat"><span class="label">Lives</span><span class="num" id="mLives">3</span></div>
+    </div>
+    <div class="status" id="mStatus" aria-live="polite">Watch</div>
+    <div class="tiles" id="tiles"></div>
+    <button class="link quit">Quit</button>
+  </section>
+
+  <section class="screen" id="words" hidden>
+    <div class="stats">
+      <div class="stat"><span class="label">Score</span><span class="num" id="wScore">0</span></div>
+      <div class="stat"><span class="label">Level</span><span class="num" id="wLevel">1</span></div>
+      <div class="stat"><span class="label">Time</span><span class="num" id="wTime">60</span></div>
+    </div>
+    <div class="bar"><i id="wBar"></i></div>
+    <div class="board">
+      <span class="label">Which word means the same as</span>
+      <div class="q word" id="wWord">quick</div>
+      <span class="label" id="wStreak">Streak 0</span>
+    </div>
+    <div class="opts" id="opts"></div>
+    <button class="link quit">Quit</button>
+  </section>
+
+  <section class="screen" id="end" hidden>
+    <span class="label" id="endLabel">Time's up</span>
+    <div class="big" id="finalScore">0</div>
+    <p id="endNote">points</p>
+    <div class="grid" id="endStats"></div>
+    <div class="row">
+      <button class="btn" id="nextBtn">Back to home</button>
+      <button class="btn ghost" id="againBtn">Play again</button>
+    </div>
+  </section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const KEY = 'dailysprint.v1';
+const GAMES = [
+  { id: 'math', name: 'Math Sprint', desc: '60 seconds of mental arithmetic', hint: 'Answer as many as you can in 60 seconds.' },
+  { id: 'memory', name: 'Memory Grid', desc: 'Repeat a growing sequence of tiles', hint: 'Watch the tiles light up, then tap them in the same order.' },
+  { id: 'words', name: 'Word Match', desc: '60 seconds of matching synonyms', hint: 'Pick the word that means the same. You have 60 seconds.' }
+];
+const sleep = ms => new Promise(res => setTimeout(res, ms));
+const r = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
+const dayKey = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+const today = () => dayKey(new Date());
+const yesterday = () => { const d = new Date(); d.setDate(d.getDate() - 1); return dayKey(d); };
+
+let store = { best: { math: 0, memory: 0 }, streak: 0, lastDay: '', done: { date: '', math: false, memory: false }, sound: true };
+try {
+  const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
+  if (saved) store = Object.assign(store, saved);
+  else store.best.math = Number(localStorage.getItem('mathsprint.best')) || 0;
+} catch (e) {}
+store.skill = Object.assign({ math: 1, memory: 1, words: 1 }, store.skill);
+store.hist = Object.assign({ math: [], memory: [], words: [] }, store.hist);
+function save() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} }
+function freshDay() { if (store.done.date !== today()) store.done = { date: today(), math: false, memory: false, words: false }; }
+function spark(id) {
+  const h = store.hist[id];
+  if (h.length < 2) return '';
+  const max = Math.max(1, ...h);
+  return '<div class="spark" aria-hidden="true">' + h.map(v => '<i style="height:' + Math.max(3, Math.round(20 * v / max)) + 'px"></i>').join('') + '</div>';
+}
+
+let ac = null;
+function beep(freq, dur) {
+  if (!store.sound) return;
+  try {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type = 'sine'; o.frequency.value = freq; o.connect(g); g.connect(ac.destination);
+    g.gain.setValueAtTime(0.08, ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + dur);
+    o.start(); o.stop(ac.currentTime + dur);
+  } catch (e) {}
+}
+
+let screen = 'home', run = 0, inSession = false, current = null;
+function show(id) { screen = id; ['home', 'count', 'math', 'memory', 'words', 'end'].forEach(x => { $(x).hidden = x !== id; }); }
+const nextUndone = () => GAMES.find(g => !store.done[g.id]);
+
+function renderHome() {
+  freshDay();
+  const live = store.lastDay === today() || store.lastDay === yesterday();
+  $('streakNum').textContent = live ? store.streak : 0;
+  $('dateLabel').textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+  $('dots').innerHTML = GAMES.map(g => '<i class="' + (store.done[g.id] ? 'on' : '') + '"></i>').join('');
+  const left = GAMES.filter(g => !store.done[g.id]).length;
+  $('sessionBtn').hidden = left === 0;
+  $('sessionTitle').textContent = left === 0 ? 'Done for today' : "Today's session";
+  $('sessionNote').textContent = left === 0 ? 'Come back tomorrow to keep your streak going. You can still practice below.'
+    : left === GAMES.length ? 'Three short games. Finish all three to keep your streak.'
+    : left === 1 ? 'One game left to finish today.' : left + ' games left to finish today.';
+  $('sessionBtn').textContent = left === GAMES.length ? "Start today's session" : 'Continue session';
+  $('games').innerHTML = GAMES.map(g =>
+    '<li><div class="info"><h2>' + g.name + '</h2><p>' + g.desc + '</p><span class="label">Level ' + store.skill[g.id] + ' · Best ' + (store.best[g.id] || 'none yet') + '</span>' + spark(g.id) + '</div>' +
+    '<button class="btn ghost small" data-g="' + g.id + '">Play</button></li>').join('');
+  $('soundBtn').textContent = 'Sound: ' + (store.sound ? 'on' : 'off');
+  show('home');
+}
+
+async function launch(id) {
+  const my = ++run;
+  current = GAMES.find(g => g.id === id);
+  $('countName').textContent = current.name;
+  $('countHint').textContent = current.hint;
+  show('count');
+  for (let n = 3; n >= 1; n--) {
+    const el = $('countNum');
+    el.textContent = n; el.classList.remove('count'); void el.offsetWidth; el.classList.add('count');
+    beep(440, 0.12);
+    await sleep(700);
+    if (my !== run) return;
+  }
+  beep(880, 0.2);
+  if (id === 'math') startMath(my); else if (id === 'memory') startMemory(my); else startWords(my);
+}
+
+function finishGame(score, label, stats, skill) {
+  run++;
+  const id = current.id, prev = store.best[id] || 0, isBest = score > prev;
+  if (isBest) store.best[id] = score;
+  store.skill[id] = skill;
+  store.hist[id] = store.hist[id].concat(score).slice(-12);
+  freshDay();
+  store.done[id] = true;
+  if (!nextUndone() && store.lastDay !== today()) {
+    store.streak = store.lastDay === yesterday() ? store.streak + 1 : 1;
+    store.lastDay = today();
+  }
+  save();
+  $('endLabel').textContent = isBest && score > 0 ? 'New best score' : label;
+  $('finalScore').textContent = score;
+  $('endNote').textContent = isBest || !prev ? 'points' : 'points. Your best is ' + prev + '.';
+  $('endStats').innerHTML = stats.map(x => '<div class="stat"><span class="label">' + x[0] + '</span><span class="num">' + x[1] + '</span></div>').join('');
+  const nxt = inSession ? nextUndone() : null;
+  $('nextBtn').textContent = nxt ? 'Next: ' + nxt.name : 'Back to home';
+  $('nextBtn').dataset.next = nxt ? nxt.id : '';
+  show('end');
+}
+
+/* Math Sprint */
+const ROUND = 60;
+const add = (lo, hi) => () => { const a = r(lo, hi), b = r(lo, hi); return [a + ' + ' + b, a + b]; };
+const sub = (lo, hi) => () => { let a = r(lo, hi), b = r(lo, hi); if (b > a) [a, b] = [b, a]; return [a + ' − ' + b, a - b]; };
+const mul = (al, ah, bl, bh) => () => { const a = r(al, ah), b = r(bl, bh); return [a + ' × ' + b, a * b]; };
+const div = (dl, dh, ql, qh) => () => { const d = r(dl, dh), q = r(ql, qh); return [d * q + ' ÷ ' + d, q]; };
+const LEVELS = [
+  [add(1, 9), sub(1, 9)],
+  [add(5, 20), sub(5, 20)],
+  [add(10, 50), sub(10, 50), mul(2, 5, 2, 9)],
+  [mul(3, 9, 3, 9), add(20, 99), sub(20, 99)],
+  [div(2, 9, 2, 12), mul(6, 12, 3, 12)],
+  [add(50, 199), sub(50, 199), mul(11, 25, 3, 9), div(3, 12, 5, 15)],
+  [add(100, 999), sub(100, 999), mul(12, 49, 4, 9)],
+  [mul(11, 19, 11, 19), div(6, 15, 11, 25), sub(200, 999)]
+];
+let s = null;
+
+function startMath(my) {
+  const lv = Math.max(1, store.skill.math - 1);
+  s = { my, score: 0, level: lv, top: lv, streak: 0, row: 0, correct: 0, total: 0, text: '', answer: 0, input: '', locked: false, t0: performance.now() };
+  show('math');
+  nextQuestion();
+  requestAnimationFrame(tick);
+}
+function nextQuestion() {
+  const set = LEVELS[s.level - 1];
+  let q;
+  do { q = set[r(0, set.length - 1)](); } while (q[0] === s.text);
+  s.text = q[0]; s.answer = q[1]; s.input = ''; s.locked = false;
+  $('board').className = 'board';
+  $('q').textContent = s.text; $('a').textContent = '';
+  mathHud();
+}
+function mathHud() {
+  $('score').textContent = s.score; $('level').textContent = s.level; $('streak').textContent = 'Streak ' + s.streak;
+}
+function settle(correct) {
+  s.locked = true; s.total++;
+  if (correct) {
+    s.correct++; s.streak++; s.row++;
+    s.score += 10 * s.level;
+    if (s.row >= 3 && s.level < LEVELS.length) { s.level++; s.row = 0; beep(990, 0.18); } else beep(660, 0.08);
+    s.top = Math.max(s.top, s.level);
+    $('board').className = 'board ok';
+  } else {
+    s.streak = 0; s.row = 0;
+    if (s.level > 1) s.level--;
+    $('a').textContent = s.answer;
+    $('board').className = 'board no';
+    beep(180, 0.25);
+  }
+  mathHud();
+  const my = s.my;
+  setTimeout(() => { if (my === run) nextQuestion(); }, correct ? 140 : 650);
+}
+function press(k) {
+  if (screen !== 'math' || !s || s.my !== run || s.locked) return;
+  if (k === 'back') s.input = s.input.slice(0, -1);
+  else if (k === 'enter') { if (s.input !== '') settle(Number(s.input) === s.answer); return; }
+  else if (s.input.length < 6) s.input += k;
+  $('a').textContent = s.input;
+  if (s.input !== '' && Number(s.input) === s.answer) settle(true);
+}
+function tick() {
+  if (!s || s.my !== run) return;
+  const left = Math.max(0, ROUND - (performance.now() - s.t0) / 1000);
+  $('time').textContent = Math.ceil(left);
+  $('barFill').style.transform = 'scaleX(' + (left / ROUND) + ')';
+  if (left <= 0) {
+    beep(520, 0.4);
+    return finishGame(s.score, "Time's up", [['Correct', s.correct], ['Accuracy', (s.total ? Math.round(100 * s.correct / s.total) : 0) + '%'], ['Top level', s.top]], s.level);
+  }
+  requestAnimationFrame(tick);
+}
+
+/* Memory Grid */
+let m = null;
+const NOTES = [392, 440, 494, 523, 587, 659, 698, 784];
+function startMemory(my) {
+  m = { my, len: Math.max(3, store.skill.memory + 1), lives: 3, score: 0, top: 0, rounds: 0, seq: [], pos: 0, accepting: false, n: 0 };
+  show('memory');
+  newRound();
+}
+function memHud() { $('mScore').textContent = m.score; $('mLen').textContent = m.len; $('mLives').textContent = m.lives; }
+function tileEl(i) { return $('tiles').children[i]; }
+async function newRound() {
+  const my = m.my, n = m.len >= 6 ? 4 : 3;
+  if (n !== m.n) {
+    m.n = n;
+    $('tiles').style.setProperty('--n', n);
+    $('tiles').innerHTML = Array.from({ length: n * n }, (_, i) => '<button class="tile" data-i="' + i + '" aria-label="Tile ' + (i + 1) + '"></button>').join('');
+  }
+  [...$('tiles').children].forEach(t => { t.className = 'tile'; });
+  m.seq = []; m.pos = 0; m.accepting = false;
+  while (m.seq.length < m.len) { const c = r(0, n * n - 1); if (c !== m.seq[m.seq.length - 1]) m.seq.push(c); }
+  memHud();
+  $('mStatus').textContent = 'Watch';
+  await sleep(600);
+  for (const c of m.seq) {
+    if (my !== run) return;
+    tileEl(c).classList.add('lit'); beep(NOTES[c % NOTES.length], 0.2);
+    await sleep(450);
+    if (my !== run) return;
+    tileEl(c).classList.remove('lit');
+    await sleep(180);
+  }
+  if (my !== run) return;
+  m.accepting = true;
+  $('mStatus').textContent = 'Your turn';
+}
+function tap(i) {
+  if (screen !== 'memory' || !m || m.my !== run || !m.accepting) return;
+  const my = m.my, t = tileEl(i);
+  if (i === m.seq[m.pos]) {
+    m.pos++;
+    t.classList.add('ok'); beep(NOTES[i % NOTES.length], 0.15);
+    setTimeout(() => t.classList.remove('ok'), 200);
+    if (m.pos === m.len) {
+      m.accepting = false; m.rounds++;
+      m.score += 10 * m.len; m.top = Math.max(m.top, m.len); m.len++;
+      $('mStatus').textContent = 'Correct';
+      memHud();
+      setTimeout(() => { if (my === run) newRound(); }, 700);
+    }
+  } else {
+    m.accepting = false; m.lives--;
+    t.classList.add('no'); tileEl(m.seq[m.pos]).classList.add('lit'); beep(180, 0.3);
+    $('mStatus').textContent = m.lives ? 'Missed. Try again' : 'Out of lives';
+    memHud();
+    setTimeout(() => {
+      if (my !== run) return;
+      if (m.lives) newRound();
+      else finishGame(m.score, 'Game over', [['Rounds', m.rounds], ['Longest', m.top || 0], ['Level', Math.max(1, m.top - 2)]], Math.max(1, m.top - 2));
+    }, 900);
+  }
+}
+
+/* Word Match
+   Wrong options are taken from other answers on the same level, so every pair on a level
+   must have a clearly different meaning. Otherwise a question can have two right answers. */
+const BANK = [
+  'happy:glad big:large small:tiny fast:quick begin:start end:finish angry:mad smart:clever quiet:silent rich:wealthy hard:difficult easy:simple sad:unhappy shout:yell gift:present ' +
+  'close:shut jump:leap scared:afraid sick:ill talk:speak cold:chilly wet:damp pretty:lovely dirty:filthy home:house pick:choose fix:repair below:under middle:center rock:stone ' +
+  'road:street sleepy:drowsy sofa:couch kid:child hurry:rush bucket:pail story:tale correct:right shiny:gleaming rip:tear grin:smile throw:toss loud:noisy kind:caring',
+  'brave:courageous ancient:old assist:help purchase:buy error:mistake rapid:swift fragile:delicate vacant:empty weary:tired humorous:funny peril:danger conceal:hide eager:keen feeble:weak vast:huge ' +
+  'reply:answer depart:leave obtain:get inquire:ask construct:build permit:allow accurate:exact brief:short odd:strange foe:enemy journey:trip gather:collect aroma:scent glance:peek sturdy:strong ' +
+  'recall:remember reveal:show annual:yearly grumpy:cranky timid:shy tidy:neat decline:refuse imitate:copy rude:impolite fortunate:lucky sorrow:grief tremble:shake famous:well-known boast:brag halt:stop',
+  'candid:frank frugal:thrifty lucid:clear obstinate:stubborn scarce:rare abundant:plentiful hostile:unfriendly lethargic:sluggish meticulous:thorough novice:beginner prudent:wise tranquil:calm diligent:hardworking elated:overjoyed futile:pointless ' +
+  'apprehensive:uneasy benevolent:kind concise:brief durable:long-lasting imminent:approaching vivid:colorful reluctant:unwilling replenish:refill commence:begin hinder:obstruct inept:clumsy ponder:consider rigid:stiff dwindle:shrink feasible:possible ' +
+  'genuine:authentic integrity:honesty mundane:ordinary eloquent:well-spoken vigilant:watchful deceive:trick coerce:force lament:mourn opulent:luxurious brittle:breakable famished:starving ascend:climb hazardous:risky banish:expel',
+  'ephemeral:fleeting laconic:terse ubiquitous:everywhere garrulous:talkative mendacious:dishonest pernicious:harmful intrepid:fearless capricious:fickle ostentatious:showy fastidious:fussy sagacious:shrewd magnanimous:generous truculent:aggressive perfunctory:cursory obsequious:fawning ' +
+  'recalcitrant:unruly ameliorate:improve enervate:weaken equanimity:composure esoteric:obscure insipid:bland obfuscate:confuse parsimonious:stingy sanguine:optimistic lugubrious:mournful indolent:lazy cogent:convincing exacerbate:worsen fortuitous:lucky impecunious:poor ' +
+  'pusillanimous:cowardly zealous:passionate venerate:revere ebullient:exuberant alacrity:eagerness cacophony:din diatribe:tirade frivolous:silly mollify:soothe nascent:emerging surreptitious:secret tenacious:persistent vindicate:justify querulous:whiny ineffable:indescribable'
+].map(t => t.split(' ').map(p => p.split(':')));
+let w = null;
+function startWords(my) {
+  const lv = Math.min(BANK.length, Math.max(1, store.skill.words - 1));
+  w = { my, score: 0, tier: lv, top: lv, row: 0, streak: 0, correct: 0, total: 0, recent: [], answer: '', locked: false, t0: performance.now() };
+  show('words');
+  nextWord();
+  requestAnimationFrame(wTick);
+}
+function wHud() { $('wScore').textContent = w.score; $('wLevel').textContent = w.tier; $('wStreak').textContent = 'Streak ' + w.streak; }
+function nextWord() {
+  const set = BANK[w.tier - 1];
+  let p;
+  do { p = set[r(0, set.length - 1)]; } while (w.recent.includes(p[0]));
+  w.recent = w.recent.concat(p[0]).slice(-10); // skip the last 10 words shown, across all levels
+  w.answer = p[1]; w.locked = false;
+  const opts = [p[1]];
+  while (opts.length < 4) { const c = set[r(0, set.length - 1)][1]; if (!opts.includes(c)) opts.push(c); }
+  for (let i = opts.length - 1; i > 0; i--) { const j = r(0, i); [opts[i], opts[j]] = [opts[j], opts[i]]; }
+  $('wWord').textContent = p[0];
+  $('opts').innerHTML = opts.map(o => '<button class="opt" data-o="' + o + '">' + o + '</button>').join('');
+  wHud();
+}
+function choose(btn) {
+  if (screen !== 'words' || !w || w.my !== run || w.locked) return;
+  w.locked = true; w.total++;
+  const correct = btn.dataset.o === w.answer;
+  if (correct) {
+    w.correct++; w.streak++; w.row++;
+    w.score += 10 * w.tier;
+    if (w.row >= 3 && w.tier < BANK.length) { w.tier++; w.row = 0; beep(990, 0.18); } else beep(660, 0.08);
+    w.top = Math.max(w.top, w.tier);
+    btn.classList.add('ok');
+  } else {
+    w.streak = 0; w.row = 0;
+    if (w.tier > 1) w.tier--;
+    btn.classList.add('no');
+    const right = [...$('opts').children].find(b => b.dataset.o === w.answer);
+    if (right) right.classList.add('ok');
+    beep(180, 0.25);
+  }
+  wHud();
+  const my = w.my;
+  setTimeout(() => { if (my === run) nextWord(); }, correct ? 250 : 900);
+}
+function wTick() {
+  if (!w || w.my !== run) return;
+  const left = Math.max(0, ROUND - (performance.now() - w.t0) / 1000);
+  $('wTime').textContent = Math.ceil(left);
+  $('wBar').style.transform = 'scaleX(' + (left / ROUND) + ')';
+  if (left <= 0) {
+    beep(520, 0.4);
+    return finishGame(w.score, "Time's up", [['Correct', w.correct], ['Accuracy', (w.total ? Math.round(100 * w.correct / w.total) : 0) + '%'], ['Top level', w.top]], w.tier);
+  }
+  requestAnimationFrame(wTick);
+}
+
+/* Wiring */
+$('opts').addEventListener('click', e => { const b = e.target.closest('button'); if (b) choose(b); });
+$('pad').addEventListener('click', e => { const b = e.target.closest('button'); if (b) press(b.dataset.k); });
+$('tiles').addEventListener('click', e => { const b = e.target.closest('button'); if (b) tap(Number(b.dataset.i)); });
+$('games').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { inSession = false; launch(b.dataset.g); } });
+$('sessionBtn').addEventListener('click', () => { const g = nextUndone(); if (g) { inSession = true; launch(g.id); } });
+$('nextBtn').addEventListener('click', () => { const n = $('nextBtn').dataset.next; if (n) launch(n); else renderHome(); });
+$('againBtn').addEventListener('click', () => { inSession = false; launch(current.id); });
+$('soundBtn').addEventListener('click', () => { store.sound = !store.sound; save(); renderHome(); beep(660, 0.1); });
+document.querySelectorAll('.quit').forEach(b => b.addEventListener('click', () => { run++; renderHome(); }));
+document.addEventListener('keydown', e => {
+  if (screen === 'words' && e.key >= '1' && e.key <= '4') { const b = $('opts').children[Number(e.key) - 1]; if (b) choose(b); return; }
+  if (screen !== 'math') return;
+  if (e.key >= '0' && e.key <= '9') press(e.key);
+  else if (e.key === 'Backspace') press('back');
+  else if (e.key === 'Enter') { e.preventDefault(); press('enter'); }
+});
+renderHome();
+</script>
+</body>
+</html>
