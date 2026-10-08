@@ -52,6 +52,16 @@ const dayKey = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2,
 const today = () => dayKey(new Date());
 const yesterday = () => { const d = new Date(); d.setDate(d.getDate() - 1); return dayKey(d); };
 
+// The automatic tests (test.html) back up the player's progress here and restore it when they finish.
+// If a test run was interrupted (tab closed), put the real progress back now.
+const TEST_MODE = /[?&]test\b/.test(location.search), TEST_BACKUP = KEY + '.testBackup';
+try {
+  const backup = localStorage.getItem(TEST_BACKUP);
+  if (backup !== null && !TEST_MODE) {
+    if (backup === '__none__') localStorage.removeItem(KEY); else localStorage.setItem(KEY, backup);
+    localStorage.removeItem(TEST_BACKUP);
+  }
+} catch (e) {}
 let store = { best: { math: 0, memory: 0 }, streak: 0, lastDay: '', done: { date: '', math: false, memory: false }, sound: true };
 try {
   const saved = JSON.parse(localStorage.getItem(KEY) || 'null');

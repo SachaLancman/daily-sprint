@@ -52,5 +52,7 @@ document.addEventListener('keydown', e => {
 });
 renderHome();
 flushScores();
+// test.html opens the app as index.html?test, which loads the automatic tests.
+if (TEST_MODE) { const t = document.createElement('script'); t.src = 'js/tests.js'; document.body.appendChild(t); }
 // Offline support only works when the app is served from a website, not when opened as a file.
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});

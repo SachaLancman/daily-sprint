@@ -52,6 +52,12 @@ A personal brain-training web app in the spirit of apps like Elevate, heading fo
 - Don't use text arrows (← → ↑ ↓) or other symbols the fonts lack: fallback fonts draw them in mismatched weights. Use `arrowSvg(dir)` or an SVG icon.
 - Class name `full` is reserved for full-screen screens (countdown/results); don't reuse it.
 
+## Automatic tests
+- Open `test.html` (it opens `index.html?test`, which loads `js/tests.js`) and press **Run** (levels 1–10) or **Full run** (1–30). Keep the tab visible so the end-of-game check runs too.
+- Each game: launches through the real countdown and checks every part of its screen is visible; per level makes a question, checks it is valid and fits a 360px phone, answers right (score must go up) and wrong (streak must reset); then lets the clock run out. Also checks unique page ids, the daily session/streak/calendar, library and leaderboard.
+- Player progress is backed up to `dailysprint.v1.testBackup` before a run and restored on "Close tests", or automatically on the next normal load if the tab was closed mid-run (see `TEST_BACKUP` in core.js). Scores are not sent online during tests.
+- **Adding a game: add its playbook to `T` in `js/tests.js`** (state, gen, check, solve, miss), or the run reports "no test playbook". Run the tests after every change.
+
 ## Tools in this folder
 - `.claude/serve.ps1` serves the folder at http://localhost:8123 for Claude's browser pane.
 - `.claude/make-icons.ps1` redraws the PNG icons after changing the icon design.
