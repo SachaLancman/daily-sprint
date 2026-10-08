@@ -115,6 +115,11 @@ button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
 .opt.no{background:var(--bad);border-color:var(--bad);color:var(--on-mark)}
 .label.best{align-self:flex-start;background:var(--accent);color:var(--on-accent);padding:4px 10px;border-radius:999px}
 .q.word{font-family:var(--display);font-weight:700;font-size:36px;overflow-wrap:anywhere}
+.sentence{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;padding:8px 0}
+.word-btn{font:500 21px var(--display);background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:6px 10px;cursor:pointer;touch-action:manipulation}
+.word-btn.ok{background:var(--good);border-color:var(--good);color:var(--on-mark)}
+.word-btn.no{background:var(--bad);border-color:var(--bad);color:var(--on-mark)}
+.word-btn s{opacity:.7;margin-right:6px}
 .spark{display:flex;align-items:flex-end;gap:2px;height:20px;margin-top:4px}
 .spark i{width:6px;background:var(--line);border-radius:2px}
 .spark i:last-child{background:var(--accent)}
@@ -197,6 +202,21 @@ button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
     <button class="link quit">Quit</button>
   </section>
 
+  <section class="screen" id="spot" hidden>
+    <div class="stats">
+      <div class="stat"><span class="label">Score</span><span class="num" id="sScore">0</span></div>
+      <div class="stat"><span class="label">Level</span><span class="num" id="sLevel">1</span></div>
+      <div class="stat"><span class="label">Time</span><span class="num" id="sTime">60</span></div>
+    </div>
+    <div class="bar"><i id="sBar"></i></div>
+    <div class="board">
+      <span class="label">Tap the word with the mistake</span>
+      <div class="sentence" id="sSentence"></div>
+      <span class="label" id="sFix" aria-live="polite">Streak 0</span>
+    </div>
+    <button class="link quit">Quit</button>
+  </section>
+
   <section class="screen" id="end" hidden>
     <span class="label" id="endLabel">Time's up</span>
     <div class="big" id="finalScore">0</div>
@@ -218,7 +238,9 @@ const GAMES = [
   { id: 'memory', name: 'Memory Grid', desc: 'Repeat a growing sequence of tiles', hint: 'Watch the tiles light up, then tap them in the same order.',
     icon: '<rect x="4" y="4" width="7" height="7" rx="2" fill="currentColor"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/>' },
   { id: 'words', name: 'Word Match', desc: '60 seconds of matching synonyms', hint: 'Pick the word that means the same. You have 60 seconds.',
-    icon: '<path d="M4 8h16M16 4l4 4-4 4M20 16H4M8 12l-4 4 4 4"/>' }
+    icon: '<path d="M4 8h16M16 4l4 4-4 4M20 16H4M8 12l-4 4 4 4"/>' },
+  { id: 'spot', name: 'Spot the Error', desc: '60 seconds of finding the wrong word', hint: 'Tap the one word that is wrong. You have 60 seconds.',
+    icon: '<circle cx="10" cy="10" r="6"/><path d="M14.5 14.5L20 20M7 10.5c1-1.5 2-1.5 3 0s2 1.5 3 0"/>' }
 ];
 const iconSvg = g => '<svg viewBox="0 0 24 24">' + g.icon + '</svg>';
 const NUMBER_WORDS = ['No', 'One', 'Two', 'Three', 'Four', 'Five'];
@@ -234,10 +256,10 @@ try {
   if (saved) store = Object.assign(store, saved);
   else store.best.math = Number(localStorage.getItem('mathsprint.best')) || 0;
 } catch (e) {}
-store.skill = Object.assign({ math: 1, memory: 1, words: 1 }, store.skill);
-store.hist = Object.assign({ math: [], memory: [], words: [] }, store.hist);
+store.skill = Object.assign({ math: 1, memory: 1, words: 1, spot: 1 }, store.skill);
+store.hist = Object.assign({ math: [], memory: [], words: [], spot: [] }, store.hist);
 function save() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} }
-function freshDay() { if (store.done.date !== today()) store.done = { date: today(), math: false, memory: false, words: false }; }
+function freshDay() { if (store.done.date !== today()) store.done = { date: today(), math: false, memory: false, words: false, spot: false }; }
 function spark(id) {
   const h = store.hist[id];
   if (h.length < 2) return '';
@@ -259,7 +281,7 @@ function beep(freq, dur) {
 }
 
 let screen = 'home', run = 0, inSession = false, current = null;
-function show(id) { screen = id; ['home', 'count', 'math', 'memory', 'words', 'end'].forEach(x => { $(x).hidden = x !== id; }); }
+function show(id) { screen = id; ['home', 'count', 'math', 'memory', 'words', 'spot', 'end'].forEach(x => { $(x).hidden = x !== id; }); }
 const nextUndone = () => GAMES.find(g => !store.done[g.id]);
 
 function renderHome() {
@@ -299,7 +321,7 @@ async function launch(id) {
     if (my !== run) return;
   }
   beep(880, 0.2);
-  if (id === 'math') startMath(my); else if (id === 'memory') startMemory(my); else startWords(my);
+  ({ math: startMath, memory: startMemory, words: startWords, spot: startSpot })[id](my);
 }
 
 function finishGame(score, label, stats, skill) {
@@ -541,7 +563,101 @@ function wTick() {
   requestAnimationFrame(wTick);
 }
 
+/* Spot the Error
+   Each sentence has exactly one wrong word, written as [wrong|right]. Keep every other word correct,
+   and don't put spaces inside the brackets (the sentence is split on spaces). */
+const SENTENCES = [
+  [
+    'I [recieved|received] a letter from my aunt.', 'We [was|were] late for the bus this morning.', "She [dont|doesn't] like cold coffee.",
+    'The children [is|are] playing in the garden.', 'He [goed|went] to the shop after lunch.', 'My brother is [tallest|taller] than me.',
+    'They [has|have] two cats and a dog.', 'I will see you [tommorow|tomorrow] at noon.', 'The [libary|library] closes at six on Fridays.',
+    'She [runned|ran] all the way home.', 'We need to buy some [bred|bread] and milk.', 'He [writed|wrote] a long email to his boss.',
+    'Please [wright|write] your name at the top.', 'I [seen|saw] a fox in the park yesterday.', 'There are three [peoples|people] waiting outside.',
+    'My [freind|friend] lives next door.', 'It was a [realy|really] good film.', 'We [goes|go] swimming every Sunday.',
+    'The [wheather|weather] was sunny all week.', 'He [catched|caught] the ball with one hand.', 'I am [hungrey|hungry] after the long walk.',
+    'Our teacher [give|gave] us homework yesterday.', 'The shop [sell|sells] fresh fruit every day.', 'I [beleive|believe] you are right.'
+  ],
+  [
+    "The dog wagged [it's|its] tail happily.", '[Their|There] is a new bakery on the corner.', "I think [your|you're] going to love this book.",
+    'She ate [to|too] much cake at the party.', 'We parked [are|our] car near the station.', 'I always [loose|lose] my keys.',
+    'The rain will not [effect|affect] our plans.', 'He is taller [then|than] his father.', "[Who's|Whose] jacket is this on the chair?",
+    'Please [except|accept] my apology.', 'I could [of|have] helped if you had asked.', 'They left [there|their] bags at the door.',
+    "I think [its|it's] going to rain.", 'We walked [passed|past] the old church.', 'The [principle|principal] of the school gave a speech.',
+    'Can I [borrow|lend] you my pen?', 'She gave the book to Sam and [I|me].', "[Your|You're] welcome to stay for dinner.",
+    'Each of the students [have|has] a locker.', 'The team played [good|well] last night.', 'I need some [advise|advice] about my new job.',
+    'He [lead|led] the group up the mountain yesterday.', 'The milk smells [badly|bad] today.', 'We [where|were] at home all evening.'
+  ],
+  [
+    'There were [less|fewer] people at the match than last year.', '[Whom|Who] do you think will win the race?', 'I need to [lay|lie] down for a few minutes.',
+    'Neither of the answers [are|is] correct.', 'The new manager hopes to [affect|effect] real change.', 'Between you and [I|me], the plan will not work.',
+    'She [complemented|complimented] him on his cooking.', 'The medicine had no [affect|effect] on my cold.', 'He was [laying|lying] on the beach all afternoon.',
+    'The [stationary|stationery] cupboard is full of pens.', 'My brother and [myself|I] will join you later.', "Let's [breath|breathe] deeply and relax.",
+    'The council approved the plan [irregardless|regardless] of the protests.', 'Please be [discrete|discreet] about the surprise party.', 'Every one of the players [were|was] tired.',
+    'She [past|passed] the exam with top marks.', 'The hotel was [quiet|quite] expensive.', 'He [rode|rowed] the boat across the lake.',
+    'If I [was|were] you, I would call her.', 'The [canon|cannon] fired at dawn.', 'The two colors [compliment|complement] each other well.',
+    'She [poured|pored] over the old maps for hours.', 'The old [led|lead] pipes were replaced last year.', 'The news [were|was] shocking.'
+  ]
+].map(level => level.map(text => text.split(' ').map(tok => {
+  const m = tok.match(/^(.*)\[([^|\]]+)\|([^\]]+)\](.*)$/);
+  return m ? { text: m[1] + m[2] + m[4], fix: m[1] + m[3] + m[4], wrong: m[2], right: m[3] } : { text: tok };
+})));
+let sp = null;
+function startSpot(my) {
+  const lv = Math.min(SENTENCES.length, Math.max(1, store.skill.spot - 1));
+  sp = { my, score: 0, tier: lv, top: lv, row: 0, streak: 0, correct: 0, total: 0, recent: [], words: null, locked: false, t0: performance.now() };
+  show('spot');
+  nextSentence();
+  requestAnimationFrame(sTick);
+}
+function sHud() { $('sScore').textContent = sp.score; $('sLevel').textContent = sp.tier; }
+function nextSentence() {
+  const set = SENTENCES[sp.tier - 1];
+  let words;
+  do { words = set[r(0, set.length - 1)]; } while (sp.recent.includes(words));
+  sp.recent = sp.recent.concat([words]).slice(-10);
+  sp.words = words; sp.locked = false;
+  $('sSentence').innerHTML = words.map((t, i) => '<button class="word-btn" data-i="' + i + '">' + t.text + '</button>').join('');
+  $('sFix').textContent = 'Streak ' + sp.streak;
+  sHud();
+}
+function spotTap(btn) {
+  if (screen !== 'spot' || !sp || sp.my !== run || sp.locked) return;
+  sp.locked = true; sp.total++;
+  const i = sp.words.findIndex(t => t.fix), err = sp.words[i], errBtn = $('sSentence').children[i];
+  const correct = Number(btn.dataset.i) === i;
+  if (correct) {
+    sp.correct++; sp.streak++; sp.row++;
+    sp.score += 10 * sp.tier;
+    if (sp.row >= 3 && sp.tier < SENTENCES.length) { sp.tier++; sp.row = 0; beep(990, 0.18); } else beep(660, 0.08);
+    sp.top = Math.max(sp.top, sp.tier);
+  } else {
+    sp.streak = 0; sp.row = 0;
+    if (sp.tier > 1) sp.tier--;
+    btn.classList.add('no');
+    beep(180, 0.25);
+  }
+  errBtn.classList.add('ok');
+  errBtn.innerHTML = '<s>' + err.wrong + '</s>' + err.fix;
+  $('sFix').textContent = '“' + err.wrong + '” should be “' + err.right + '”';
+  sHud();
+  const my = sp.my;
+  setTimeout(() => { if (my === run) nextSentence(); }, correct ? 900 : 1800);
+}
+function sTick() {
+  if (!sp || sp.my !== run) return;
+  const left = Math.max(0, ROUND - (performance.now() - sp.t0) / 1000);
+  $('sTime').textContent = Math.ceil(left);
+  $('sBar').style.transform = 'scaleX(' + (left / ROUND) + ')';
+  $('sBar').parentNode.classList.toggle('low', left <= 10);
+  if (left <= 0) {
+    beep(520, 0.4);
+    return finishGame(sp.score, "Time's up", [['Correct', sp.correct], ['Accuracy', (sp.total ? Math.round(100 * sp.correct / sp.total) : 0) + '%'], ['Top level', sp.top]], sp.tier);
+  }
+  requestAnimationFrame(sTick);
+}
+
 /* Wiring */
+$('sSentence').addEventListener('click', e => { const b = e.target.closest('button'); if (b) spotTap(b); });
 $('opts').addEventListener('click', e => { const b = e.target.closest('button'); if (b) choose(b); });
 $('pad').addEventListener('click', e => { const b = e.target.closest('button'); if (b) press(b.dataset.k); });
 $('tiles').addEventListener('click', e => { const b = e.target.closest('button'); if (b) tap(Number(b.dataset.i)); });
