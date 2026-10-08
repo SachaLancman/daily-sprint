@@ -42,7 +42,11 @@ body{margin:0}
 .g-memory{--l:#A57BFF;--d:#5E2FD6}
 .g-words{--l:#1FC9B6;--d:#087A73}
 .g-spot{--l:#FF9A55;--d:#C83A18}
-.g-math,.g-memory,.g-words,.g-spot{--grad:linear-gradient(200deg,var(--l) 0%,var(--d) 72%)}
+.g-colors{--l:#FF7EB3;--d:#C2185B}
+.g-hunt{--l:#FFC447;--d:#A65504}
+.g-pattern{--l:#86DE5E;--d:#2E7D32}
+.g-anagram{--l:#56C8FA;--d:#0B63A8}
+.g-math,.g-memory,.g-words,.g-spot,.g-colors,.g-hunt,.g-pattern,.g-anagram{--grad:linear-gradient(200deg,var(--l) 0%,var(--d) 72%)}
 
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--display);font-size:16px;line-height:1.45;
@@ -95,6 +99,7 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .card .art{position:absolute;top:-2px;right:-10px;width:104px;height:104px;color:var(--d)}
 .card-meta{display:flex;align-items:flex-end;justify-content:space-between;gap:6px;width:100%;position:relative}
 .card-meta .chip{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.card .skill{font:500 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;opacity:.85;position:relative;margin-bottom:-6px}
 .card h3{font-size:19px;line-height:1.1;font-weight:800;letter-spacing:-.01em;position:relative}
 .card .done{position:absolute;top:12px;left:12px;width:28px;height:28px;border-radius:50%;background:#fff;color:var(--d);display:grid;place-items:center;box-shadow:0 4px 10px -4px rgba(0,0,0,.4)}
 .card .done svg{width:16px;height:16px}
@@ -181,6 +186,37 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .word-btn s{opacity:.7;margin-right:6px}
 #fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:20}
 
+/* New games */
+.stroop{font-size:52px;letter-spacing:.02em;text-transform:uppercase;transition:background .15s}
+.yn{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.yn .opt{font-size:22px;padding:22px 10px;display:flex;align-items:center;justify-content:center;gap:8px}
+.yn .opt svg{width:22px;height:22px}
+.hunt-wrap{position:relative}
+.num-tile{font:800 24px var(--display);color:var(--ink)}
+.tiles.n5 .num-tile{font-size:20px;border-radius:14px}
+.num-tile.found{background:var(--grad);color:#fff;opacity:.5;box-shadow:none;cursor:default}
+.q.seq{font-size:34px;overflow-wrap:anywhere}
+.slots,.letters{display:grid;grid-template-columns:repeat(var(--n,5),minmax(0,48px));justify-content:center;gap:6px}
+.slot{height:50px;border-bottom:3px solid var(--line);font:800 28px var(--display);text-transform:uppercase;display:grid;place-items:center}
+.slot.full{border-color:var(--d)}
+.board.ok .slot{color:var(--good);border-color:var(--good)}
+.board.no .slot{color:var(--bad);border-color:var(--bad)}
+.letter{height:56px;font:800 26px var(--display);text-transform:uppercase;background:var(--surface);color:var(--ink);border:0;border-radius:14px;box-shadow:0 4px 0 var(--line);cursor:pointer;touch-action:manipulation;padding:0}
+.letter:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.letter:disabled{opacity:.25;box-shadow:none;transform:translateY(3px);cursor:default}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* Bottom menu */
+body.has-nav{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:5;display:flex;justify-content:center;gap:4px;padding:8px 12px calc(8px + env(safe-area-inset-bottom));
+  background:color-mix(in srgb, var(--surface) 88%, transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line)}
+.nav button{flex:1;max-width:140px;border:0;background:none;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;border-radius:14px;cursor:pointer;font:700 12px var(--display)}
+.nav button svg{width:24px;height:24px}
+.nav button[aria-current="page"]{color:var(--ink);background:color-mix(in srgb, var(--accent) 30%, transparent)}
+.filters{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:2px 16px 6px}
+.filters::-webkit-scrollbar{display:none}
+.more{align-self:center}
+
 /* Leaderboard and profile */
 .top-actions{display:flex;align-items:center;gap:8px}
 .icon-btn{flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);display:grid;place-items:center;cursor:pointer}
@@ -258,10 +294,7 @@ a.link{color:var(--muted)}
   <section class="screen" id="home">
     <div class="home-top">
       <div><p class="hello" id="hello">Hello</p><h1>Daily Sprint</h1></div>
-      <div class="top-actions">
-        <button class="icon-btn" id="boardBtn" aria-label="Leaderboard"></button>
-        <div class="pill" id="streakPill"><span id="flameSlot"></span><span><span id="streakNum">0</span> <small>days</small></span></div>
-      </div>
+      <div class="pill" id="streakPill"><span id="flameSlot"></span><span><span id="streakNum">0</span> <small>days</small></span></div>
     </div>
     <div class="hero">
       <div>
@@ -271,9 +304,17 @@ a.link{color:var(--muted)}
       <div class="ring" aria-hidden="true"><svg viewBox="0 0 88 88" id="ring"></svg><b><span id="ringNum">0/4</span></b></div>
       <button class="btn white" id="sessionBtn">Start today's session</button>
     </div>
-    <div class="sec-head"><h2>All games</h2><p>Tap to practice</p></div>
+    <div class="sec-head"><h2>Today's games</h2><p>New picks every day</p></div>
     <ul class="cards" id="games"></ul>
+    <button class="toggle more" id="moreBtn">See all games</button>
     <div class="foot"><button class="toggle" id="soundBtn">Sound on</button></div>
+  </section>
+
+  <section class="screen" id="library" hidden>
+    <div class="topbar"><h1>All games</h1></div>
+    <p>Play any game, any time. Practice counts toward your levels and the leaderboard.</p>
+    <div class="filters" id="skillFilter" role="tablist" aria-label="Skill"></div>
+    <ul class="cards" id="libraryCards"></ul>
   </section>
 
   <section class="screen full" id="count" hidden>
@@ -338,6 +379,58 @@ a.link{color:var(--muted)}
     </div>
   </section>
 
+  <section class="screen g-colors" id="colors" hidden>
+    <div class="hud">
+      <div class="hud-row"><button class="x quit" aria-label="Quit"></button><span class="hud-name">Color Clash</span><span class="hud-time" id="cTime">60</span></div>
+      <div class="bar"><i id="cBar"></i></div>
+      <div class="chips"><span class="chip">Score <b id="cScore">0</b></span><span class="chip">Level <b id="cLevel">1</b></span><span class="chip" id="cStreak"></span></div>
+    </div>
+    <div class="board" id="cBoard">
+      <span class="prompt">Does the word match its ink color?</span>
+      <div class="q word stroop" id="cWord">Red</div>
+    </div>
+    <div class="yn" id="cButtons">
+      <button class="opt" data-a="0" aria-label="No (left arrow)"></button>
+      <button class="opt" data-a="1" aria-label="Yes (right arrow)"></button>
+    </div>
+  </section>
+
+  <section class="screen g-hunt" id="hunt" hidden>
+    <div class="hud">
+      <div class="hud-row"><button class="x quit" aria-label="Quit"></button><span class="hud-name">Number Hunt</span><span class="hud-time" id="hTime">60</span></div>
+      <div class="bar"><i id="hBar"></i></div>
+      <div class="chips"><span class="chip">Score <b id="hScore">0</b></span><span class="chip">Level <b id="hLevel">1</b></span><span class="chip hot">Find <b id="hNext">1</b></span></div>
+    </div>
+    <div class="hunt-wrap" id="hWrap"><div class="tiles" id="hGrid"></div></div>
+  </section>
+
+  <section class="screen g-pattern" id="pattern" hidden>
+    <div class="hud">
+      <div class="hud-row"><button class="x quit" aria-label="Quit"></button><span class="hud-name">Next in Line</span><span class="hud-time" id="pTime">60</span></div>
+      <div class="bar"><i id="pBar"></i></div>
+      <div class="chips"><span class="chip">Score <b id="pScore">0</b></span><span class="chip">Level <b id="pLevel">1</b></span><span class="chip" id="pStreak"></span></div>
+    </div>
+    <div class="board" id="pBoard">
+      <span class="prompt">What comes next?</span>
+      <div class="q seq" id="pSeq"></div>
+    </div>
+    <div class="opts" id="pOpts"></div>
+  </section>
+
+  <section class="screen g-anagram" id="anagram" hidden>
+    <div class="hud">
+      <div class="hud-row"><button class="x quit" aria-label="Quit"></button><span class="hud-name">Unscramble</span><span class="hud-time" id="aTime">60</span></div>
+      <div class="bar"><i id="aBar"></i></div>
+      <div class="chips"><span class="chip">Score <b id="aScore">0</b></span><span class="chip">Level <b id="aLevel">1</b></span><span class="chip" id="aStreak"></span></div>
+    </div>
+    <div class="board" id="aBoard">
+      <span class="prompt">Unscramble the word</span>
+      <div class="slots" id="aSlots"></div>
+    </div>
+    <div class="letters" id="aLetters"></div>
+    <div class="duo"><button class="opt" id="aUndo">Undo</button><button class="opt" id="aSkip">Skip</button></div>
+  </section>
+
   <section class="screen full" id="end" hidden>
     <div class="inner">
       <span class="kicker" id="endLabel">Time's up</span>
@@ -383,6 +476,11 @@ a.link{color:var(--muted)}
     </div>
   </section>
 </main>
+<nav class="nav" id="nav" aria-label="Main menu">
+  <button data-nav="home">Today</button>
+  <button data-nav="library">Games</button>
+  <button data-nav="board">Ranks</button>
+</nav>
 <canvas id="fx" aria-hidden="true"></canvas>
 
 <script>
@@ -397,25 +495,40 @@ const ICON = {
   heart: '<svg viewBox="0 0 24 24"><path d="M12 20.5s-8-4.9-8-11A4.5 4.5 0 0 1 12 6.6 4.5 4.5 0 0 1 20 9.5c0 6.1-8 11-8 11z"/></svg>',
   star: '<svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z"/></svg>',
   soundOn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>',
+  home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5L12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/></svg>',
+  grid: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>',
   trophy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7M10 17h4"/></svg>',
   back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
   soundOff: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg>'
 };
 /* Big illustrations (120x120) for the game cards and countdown. White shapes; currentColor is the game's dark color. */
 const GAMES = [
-  { id: 'math', name: 'Math Sprint', hint: 'Answer as many as you can in 60 seconds.',
+  { id: 'math', name: 'Math Sprint', skill: 'Math', hint: 'Answer as many as you can in 60 seconds.',
     art: '<g transform="rotate(12 86 34)"><rect x="66" y="14" width="40" height="40" rx="11" fill="#fff" fill-opacity=".5"/><path d="M78 26l16 16M94 26L78 42" stroke="#fff" stroke-width="6" stroke-linecap="round"/></g>' +
       '<g transform="rotate(8 80 86)"><rect x="60" y="66" width="40" height="40" rx="11" fill="#fff" fill-opacity=".28"/><path d="M70 81h20M70 92h20" stroke="#fff" stroke-width="6" stroke-linecap="round"/></g>' +
       '<g transform="rotate(-10 40 46)"><rect x="18" y="24" width="44" height="44" rx="12" fill="#fff"/><path d="M40 35v22M29 46h22" stroke="currentColor" stroke-width="7" stroke-linecap="round"/></g>' },
-  { id: 'memory', name: 'Memory Grid', hint: 'Watch the tiles light up, then tap them in the same order.',
+  { id: 'memory', name: 'Memory Grid', skill: 'Memory', hint: 'Watch the tiles light up, then tap them in the same order.',
     art: '<g transform="rotate(-8 64 60)">' + [0, 1, 2, 3, 4, 5, 6, 7, 8].map(i => '<rect x="' + (22 + (i % 3) * 30) + '" y="' + (16 + Math.floor(i / 3) * 30) + '" width="24" height="24" rx="7" fill="#fff" fill-opacity="' + ([0, 4, 5].includes(i) ? 1 : .28) + '"/>').join('') + '</g>' },
-  { id: 'words', name: 'Word Match', hint: 'Pick the word that means the same. You have 60 seconds.',
+  { id: 'words', name: 'Word Match', skill: 'Language', hint: 'Pick the word that means the same. You have 60 seconds.',
     art: '<rect x="52" y="58" width="60" height="40" rx="12" fill="#fff" fill-opacity=".35"/><path d="M96 96l4 14-16-14z" fill="#fff" fill-opacity=".35"/><path d="M64 72h30M64 84h18" stroke="#fff" stroke-width="5" stroke-linecap="round"/>' +
       '<rect x="12" y="20" width="68" height="50" rx="14" fill="#fff"/><path d="M26 68v16l16-16z" fill="#fff"/><text x="46" y="55" text-anchor="middle" font-family="Bricolage Grotesque, system-ui, sans-serif" font-weight="800" font-size="28" fill="currentColor">Aa</text>' },
-  { id: 'spot', name: 'Spot the Error', hint: 'Tap the one word that is wrong. You have 60 seconds.',
+  { id: 'spot', name: 'Spot the Error', skill: 'Language', hint: 'Tap the one word that is wrong. You have 60 seconds.',
     art: '<g transform="rotate(-7 48 58)"><rect x="16" y="14" width="66" height="86" rx="10" fill="#fff"/><path d="M28 32h42M28 46h34M28 74h40M28 88h26" stroke="currentColor" stroke-opacity=".3" stroke-width="5" stroke-linecap="round"/><path d="M28 61q5-6 10 0t10 0t10 0" fill="none" stroke="#E5484D" stroke-width="4" stroke-linecap="round"/></g>' +
-      '<circle cx="80" cy="66" r="19" fill="#fff" fill-opacity=".25" stroke="#fff" stroke-width="8"/><path d="M94 80l14 14" stroke="#fff" stroke-width="10" stroke-linecap="round"/>' }
+      '<circle cx="80" cy="66" r="19" fill="#fff" fill-opacity=".25" stroke="#fff" stroke-width="8"/><path d="M94 80l14 14" stroke="#fff" stroke-width="10" stroke-linecap="round"/>' },
+  { id: 'colors', name: 'Color Clash', skill: 'Focus', hint: 'Does the word match the color it is written in? Answer fast. 60 seconds.',
+    art: '<circle cx="90" cy="26" r="15" fill="#fff" fill-opacity=".45"/><circle cx="98" cy="90" r="11" fill="#FFC83D"/><circle cx="24" cy="98" r="8" fill="#fff" fill-opacity=".35"/>' +
+      '<g transform="rotate(-8 56 56)"><rect x="12" y="34" width="88" height="46" rx="14" fill="#fff"/><text x="56" y="66" text-anchor="middle" font-family="Bricolage Grotesque, system-ui, sans-serif" font-weight="800" font-size="25" fill="#3B6FF5">RED</text></g>' },
+  { id: 'hunt', name: 'Number Hunt', skill: 'Speed', hint: 'Tap the numbers in order, starting at 1. Each grid you finish gets bigger.',
+    art: '<g transform="rotate(7 60 60)">' + [[22, 22, 3], [62, 22, 1], [22, 62, 4], [62, 62, 2]].map(([x, y, n]) => '<rect x="' + x + '" y="' + y + '" width="36" height="36" rx="10" fill="#fff" fill-opacity="' + (n === 1 ? 1 : .55) + '"/><text x="' + (x + 18) + '" y="' + (y + 26) + '" text-anchor="middle" font-family="Bricolage Grotesque, system-ui, sans-serif" font-weight="800" font-size="21" fill="currentColor">' + n + '</text>').join('') +
+      '<circle cx="80" cy="40" r="26" fill="none" stroke="#fff" stroke-width="4" stroke-dasharray="6 6"/></g>' },
+  { id: 'pattern', name: 'Next in Line', skill: 'Logic', hint: 'Find the rule in the numbers and pick what comes next. 60 seconds.',
+    art: [[24, 46, .5, 2], [54, 46, .75, 4], [84, 46, 1, 6]].map(([x, y, o, n]) => '<circle cx="' + x + '" cy="' + y + '" r="14" fill="#fff" fill-opacity="' + o + '"/><text x="' + x + '" y="' + (y + 7) + '" text-anchor="middle" font-family="Bricolage Grotesque, system-ui, sans-serif" font-weight="800" font-size="18" fill="currentColor">' + n + '</text>').join('') +
+      '<path d="M30 70q30 18 60 0" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 8"/><g transform="rotate(8 92 92)"><rect x="72" y="74" width="40" height="36" rx="11" fill="#FFC83D"/><text x="92" y="101" text-anchor="middle" font-family="Bricolage Grotesque, system-ui, sans-serif" font-weight="800" font-size="24" fill="#17153A">?</text></g>' },
+  { id: 'anagram', name: 'Unscramble', skill: 'Language', hint: 'Tap the letters in the right order to make a word. 60 seconds.',
+    art: [[14, 40, -12, 'W', 1], [44, 22, 8, 'O', .6], [70, 50, -6, 'R', 1], [40, 70, 14, 'D', .6]].map(([x, y, a, ch, o]) => '<g transform="rotate(' + a + ' ' + (x + 17) + ' ' + (y + 17) + ')"><rect x="' + x + '" y="' + y + '" width="34" height="34" rx="9" fill="#fff" fill-opacity="' + o + '"/><text x="' + (x + 17) + '" y="' + (y + 25) + '" text-anchor="middle" font-family="Bricolage Grotesque, system-ui, sans-serif" font-weight="800" font-size="20" fill="currentColor">' + ch + '</text></g>').join('') }
 ];
+const SESSION = 4; // games in the daily session
+const SKILLS = [...new Set(GAMES.map(g => g.skill))];
 const artSvg = g => '<svg class="art" viewBox="0 0 120 120" aria-hidden="true">' + g.art + '</svg>';
 const NUMBER_WORDS = ['No', 'One', 'Two', 'Three', 'Four', 'Five'];
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -431,14 +544,36 @@ try {
   if (saved) store = Object.assign(store, saved);
   else store.best.math = Number(localStorage.getItem('mathsprint.best')) || 0;
 } catch (e) {}
-store.skill = Object.assign({ math: 1, memory: 1, words: 1, spot: 1 }, store.skill);
-store.hist = Object.assign({ math: [], memory: [], words: [], spot: [] }, store.hist);
+store.skill = Object.assign(Object.fromEntries(GAMES.map(g => [g.id, 1])), store.skill);
+store.hist = Object.assign(Object.fromEntries(GAMES.map(g => [g.id, []])), store.hist);
 store.log = store.log || [];         // every finished game: { game, score, day } (for the leaderboard)
 store.pending = store.pending || []; // results waiting to be sent online
 store.bestStreak = Math.max(store.bestStreak || 0, store.streak || 0);
 store.player = store.player || null; // { id, secret, name, country } once the profile is set
 function save() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} }
-function freshDay() { if (store.done.date !== today()) store.done = { date: today(), math: false, memory: false, words: false, spot: false }; }
+function freshDay() { if (store.done.date !== today()) store.done = { date: today() }; }
+// Today's session: SESSION games picked from the date, so everyone gets the same picks on the same day.
+// It prefers games that train different skills.
+function seededRandom(seed) {
+  let h = 2166136261;
+  for (const ch of seed) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); }
+  return () => { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; return (h >>> 0) / 4294967296; };
+}
+function pickGames(day, salt) {
+  const rnd = seededRandom('daily-sprint ' + day + salt), pool = GAMES.slice();
+  for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+  const pick = [], skills = new Set();
+  for (const g of pool) if (pick.length < SESSION && !skills.has(g.skill)) { pick.push(g); skills.add(g.skill); }
+  for (const g of pool) if (pick.length < SESSION && !pick.includes(g)) pick.push(g);
+  return pick;
+}
+// Never the same set two days running: compare with yesterday's picks (looking back a few days is plenty).
+function todaysGames(day = today(), depth = 0) {
+  const d = new Date(day + 'T12:00'); d.setDate(d.getDate() - 1);
+  const key = p => p.map(g => g.id).sort().join(), before = depth < 3 ? key(todaysGames(dayKey(d), depth + 1)) : '';
+  for (const salt of ['', '+', '++']) { const p = pickGames(day, salt); if (key(p) !== before) return p; }
+  return pickGames(day, '+++');
+}
 function spark(id) {
   const h = store.hist[id];
   if (h.length < 2) return '';
@@ -505,12 +640,32 @@ function confetti() {
 }
 
 let screen = 'home', run = 0, inSession = false, current = null;
-function show(id) { screen = id; ['home', 'count', 'math', 'memory', 'words', 'spot', 'end', 'board', 'profile'].forEach(x => { $(x).hidden = x !== id; }); window.scrollTo(0, 0); }
-const nextUndone = () => GAMES.find(g => !store.done[g.id]);
+const NAV_SCREENS = ['home', 'library', 'board'];
+function show(id) {
+  screen = id;
+  ['home', 'library', 'count', 'end', 'board', 'profile'].concat(GAMES.map(g => g.id)).forEach(x => { $(x).hidden = x !== id; });
+  const nav = NAV_SCREENS.includes(id);
+  $('nav').hidden = !nav;
+  document.body.classList.toggle('has-nav', nav);
+  [...$('nav').children].forEach(b => b.dataset.nav === id ? b.setAttribute('aria-current', 'page') : b.removeAttribute('aria-current'));
+  window.scrollTo(0, 0);
+}
+const nextUndone = () => todaysGames().find(g => !store.done[g.id]);
+function cardHtml(g, showDone) {
+  return '<li><button class="card g-' + g.id + '" data-g="' + g.id + '">' + artSvg(g) +
+    (showDone && store.done[g.id] ? '<span class="done" aria-label="Done today">' + ICON.check + '</span>' : '') +
+    '<span class="skill">' + g.skill + '</span><h3>' + g.name + '</h3><div class="card-meta"><span class="chip">Lvl ' + store.skill[g.id] + ' · Best ' + (store.best[g.id] || '–') + '</span>' + spark(g.id) + '</div></button></li>';
+}
+let librarySkill = 'All';
+function renderLibrary() {
+  $('skillFilter').innerHTML = ['All'].concat(SKILLS).map(s => '<button class="tab t-all" role="tab" data-skill="' + s + '" aria-selected="' + (s === librarySkill) + '">' + s + '</button>').join('');
+  $('libraryCards').innerHTML = GAMES.filter(g => librarySkill === 'All' || g.skill === librarySkill).map(g => cardHtml(g, false)).join('');
+}
+function openLibrary() { run++; renderLibrary(); show('library'); }
 
 function ringSvg() {
-  const R = 36, C = 2 * Math.PI * R, seg = C / GAMES.length, gap = 14;
-  return GAMES.map((g, i) => '<circle class="g-' + g.id + (store.done[g.id] ? ' on' : '') + '" cx="44" cy="44" r="' + R + '" stroke-dasharray="' + (seg - gap).toFixed(1) + ' ' + C.toFixed(1) +
+  const R = 36, C = 2 * Math.PI * R, seg = C / SESSION, gap = 14;
+  return todaysGames().map((g, i) => '<circle class="g-' + g.id + (store.done[g.id] ? ' on' : '') + '" cx="44" cy="44" r="' + R + '" stroke-dasharray="' + (seg - gap).toFixed(1) + ' ' + C.toFixed(1) +
     '" stroke-dashoffset="' + (-(i * seg) - gap / 2).toFixed(1) + '" transform="rotate(-90 44 44)"/>').join('');
 }
 function renderHome() {
@@ -523,19 +678,17 @@ function renderHome() {
   $('streakPill').className = 'pill' + (streak ? '' : ' cold');
   $('streakPill').setAttribute('aria-label', streak + ' day streak');
   $('streakPill').querySelector('small').textContent = streak === 1 ? 'day' : 'days';
-  const done = GAMES.filter(g => store.done[g.id]).length, left = GAMES.length - done;
+  const picks = todaysGames(), done = picks.filter(g => store.done[g.id]).length, left = SESSION - done;
   $('ring').innerHTML = ringSvg();
-  $('ringNum').innerHTML = left === 0 ? ICON.check.replace('<svg', '<svg width="34" height="34"') : done + '/' + GAMES.length;
+  $('ringNum').innerHTML = left === 0 ? ICON.check.replace('<svg', '<svg width="34" height="34"') : done + '/' + SESSION;
   $('sessionBtn').hidden = left === 0;
   $('sessionTitle').textContent = left === 0 ? 'Done for today!' : "Today's session";
-  $('sessionNote').textContent = left === 0 ? 'Come back tomorrow to keep your streak going.'
-    : left === GAMES.length ? NUMBER_WORDS[GAMES.length] + ' quick games. Finish all ' + NUMBER_WORDS[GAMES.length].toLowerCase() + ' to keep your streak.'
+  $('sessionNote').textContent = left === 0 ? 'Come back tomorrow for new games and to keep your streak going.'
+    : left === SESSION ? NUMBER_WORDS[SESSION] + ' quick games, picked fresh today. Finish all ' + NUMBER_WORDS[SESSION].toLowerCase() + ' to keep your streak.'
     : left === 1 ? 'One game left. Finish it to keep your streak!' : left + ' games left to finish today.';
-  if (left) $('sessionBtn').innerHTML = ICON.play + (left === GAMES.length ? "Start today's session" : 'Continue: ' + nextUndone().name);
-  $('games').innerHTML = GAMES.map(g =>
-    '<li><button class="card g-' + g.id + '" data-g="' + g.id + '">' + artSvg(g) +
-    (store.done[g.id] ? '<span class="done" aria-label="Done today">' + ICON.check + '</span>' : '') +
-    '<h3>' + g.name + '</h3><div class="card-meta"><span class="chip">Lvl ' + store.skill[g.id] + ' · Best ' + (store.best[g.id] || '–') + '</span>' + spark(g.id) + '</div></button></li>').join('');
+  if (left) $('sessionBtn').innerHTML = ICON.play + (left === SESSION ? "Start today's session" : 'Continue: ' + nextUndone().name);
+  $('games').innerHTML = picks.map(g => cardHtml(g, true)).join('');
+  $('moreBtn').innerHTML = ICON.grid + 'See all ' + GAMES.length + ' games';
   $('soundBtn').innerHTML = (store.sound ? ICON.soundOn : ICON.soundOff) + 'Sound ' + (store.sound ? 'on' : 'off');
   show('home');
 }
@@ -559,7 +712,7 @@ async function launch(id) {
     if (my !== run) return;
   }
   beep(880, 0.2);
-  ({ math: startMath, memory: startMemory, words: startWords, spot: startSpot })[id](my);
+  ({ math: startMath, memory: startMemory, words: startWords, spot: startSpot, colors: startColors, hunt: startHunt, pattern: startPattern, anagram: startAnagram })[id](my);
 }
 
 function finishGame(score, label, stats, skill) {
@@ -920,6 +1073,286 @@ function sTick() {
   requestAnimationFrame(sTick);
 }
 
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = r(0, i); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const accuracy = (ok, total) => (total ? Math.round(100 * ok / total) : 0) + '%';
+
+/* Color Clash: is the color word written in its own color? Each level adds one more color. */
+const INKS = [['Red', '#E5484D'], ['Blue', '#3B6FF5'], ['Green', '#18A058'], ['Yellow', '#E0A100'], ['Purple', '#8B5CF6'], ['Orange', '#F2711C']];
+let cc = null;
+function startColors(my) {
+  const lv = Math.min(4, Math.max(1, store.skill.colors - 1));
+  cc = { my, score: 0, tier: lv, top: lv, row: 0, streak: 0, correct: 0, total: 0, match: false, last: '', locked: false, t0: performance.now() };
+  show('colors');
+  nextColor();
+  requestAnimationFrame(cTick);
+}
+function cHud() { $('cScore').textContent = cc.score; $('cLevel').textContent = cc.tier; streakChip('cStreak', cc.streak); }
+function nextColor() {
+  const set = INKS.slice(0, 2 + cc.tier);
+  let word;
+  do { word = set[r(0, set.length - 1)]; } while (word[0] === cc.last);
+  cc.last = word[0];
+  cc.match = Math.random() < 0.5;
+  let ink = word;
+  if (!cc.match) do { ink = set[r(0, set.length - 1)]; } while (ink === word);
+  $('cWord').textContent = word[0];
+  $('cWord').style.color = ink[1];
+  // From level 3 the card is tinted with yet another color, to make it harder.
+  $('cBoard').style.background = cc.tier >= 3 ? 'color-mix(in srgb, ' + set[r(0, set.length - 1)][1] + ' 14%, var(--surface))' : '';
+  $('cBoard').className = 'board';
+  cc.locked = false;
+  cHud();
+}
+function colorAnswer(yes) {
+  if (screen !== 'colors' || !cc || cc.my !== run || cc.locked) return;
+  cc.locked = true; cc.total++;
+  const correct = yes === cc.match;
+  if (correct) {
+    cc.correct++; cc.streak++; cc.row++;
+    cc.score += 10 * cc.tier;
+    floatText($('cBoard'), '+' + 10 * cc.tier);
+    if (cc.row >= 4 && cc.tier < 4) { cc.tier++; cc.row = 0; beep(990, 0.18); floatText($('cBoard'), 'Level up!', 'lvl'); } else beep(660, 0.08);
+    cc.top = Math.max(cc.top, cc.tier);
+    $('cBoard').className = 'board ok';
+  } else {
+    cc.streak = 0; cc.row = 0;
+    if (cc.tier > 1) cc.tier--;
+    $('cBoard').className = 'board no';
+    beep(180, 0.25);
+  }
+  cHud();
+  const my = cc.my;
+  setTimeout(() => { if (my === run) nextColor(); }, correct ? 180 : 600);
+}
+function cTick() {
+  if (!cc || cc.my !== run) return;
+  const left = Math.max(0, ROUND - (performance.now() - cc.t0) / 1000);
+  timer('cBar', 'cTime', left);
+  if (left <= 0) {
+    beep(520, 0.4);
+    return finishGame(cc.score, "Time's up", [['Correct', cc.correct], ['Accuracy', accuracy(cc.correct, cc.total)], ['Top level', cc.top]], cc.tier);
+  }
+  requestAnimationFrame(cTick);
+}
+
+/* Number Hunt: tap 1, 2, 3... in order. Level 1 is a 3x3 grid, level 2 is 4x4, level 3 is 5x5. */
+let nh = null;
+function startHunt(my) {
+  const lv = Math.min(3, Math.max(1, store.skill.hunt - 1));
+  nh = { my, score: 0, tier: lv, top: lv, grids: 0, next: 1, size: 0, taps: 0, misses: 0, t0: performance.now() };
+  show('hunt');
+  newHuntGrid();
+  requestAnimationFrame(hTick);
+}
+function hHud() { $('hScore').textContent = nh.score; $('hLevel').textContent = nh.tier; $('hNext').textContent = nh.next; }
+function newHuntGrid() {
+  const n = nh.tier + 2;
+  nh.size = n * n; nh.next = 1;
+  $('hGrid').style.setProperty('--n', n);
+  $('hGrid').classList.toggle('n5', n === 5);
+  $('hGrid').innerHTML = shuffle(Array.from({ length: nh.size }, (_, i) => i + 1)).map(v => '<button class="tile num-tile" data-v="' + v + '">' + v + '</button>').join('');
+  hHud();
+}
+function huntTap(btn) {
+  if (screen !== 'hunt' || !nh || nh.my !== run || btn.disabled) return;
+  const v = Number(btn.dataset.v), my = nh.my;
+  nh.taps++;
+  if (v === nh.next) {
+    btn.classList.add('found'); btn.disabled = true;
+    nh.score += 2 * nh.tier;
+    beep(500 + nh.next * 15, 0.05);
+    nh.next++;
+    if (nh.next > nh.size) {
+      nh.grids++;
+      nh.score += 20 * nh.tier;
+      floatText($('hWrap'), '+' + 20 * nh.tier + ' bonus');
+      if (nh.tier < 3) { nh.tier++; floatText($('hWrap'), 'Level up!', 'lvl'); }
+      nh.top = Math.max(nh.top, nh.tier);
+      beep(990, 0.18);
+      setTimeout(() => { if (my === run) newHuntGrid(); }, 350);
+    }
+  } else {
+    nh.misses++;
+    btn.classList.add('no'); setTimeout(() => btn.classList.remove('no'), 250);
+    beep(180, 0.15);
+  }
+  hHud();
+}
+function hTick() {
+  if (!nh || nh.my !== run) return;
+  const left = Math.max(0, ROUND - (performance.now() - nh.t0) / 1000);
+  timer('hBar', 'hTime', left);
+  if (left <= 0) {
+    beep(520, 0.4);
+    return finishGame(nh.score, "Time's up", [['Grids', nh.grids], ['Accuracy', accuracy(nh.taps - nh.misses, nh.taps)], ['Top level', nh.top]], nh.tier);
+  }
+  requestAnimationFrame(hTick);
+}
+
+/* Next in Line: number sequences. Each maker returns [the numbers shown, the next number]. */
+const seqArith = (a, d, n = 4) => [Array.from({ length: n }, (_, i) => a + i * d), a + n * d];
+const seqGeo = (a, k) => [[a, a * k, a * k * k, a * k ** 3], a * k ** 4];
+const seqAlt = (a, x, y) => { const s = [a]; for (let i = 1; i < 6; i++) s.push(s[i - 1] + (i % 2 ? x : -y)); return [s.slice(0, 5), s[5]]; };
+const seqGrow = (a, d) => { const s = [a]; for (let i = 0; i < 4; i++) s.push(s[i] + d + i); return [s.slice(0, 4), s[4]]; };
+const seqSquares = k => [[k * k, (k + 1) ** 2, (k + 2) ** 2, (k + 3) ** 2], (k + 4) ** 2];
+const seqFib = (a, b) => { const s = [a, b]; for (let i = 2; i < 6; i++) s.push(s[i - 1] + s[i - 2]); return [s.slice(0, 5), s[5]]; };
+const seqTwin = (a, d, b, e) => [[a, b, a + d, b + e, a + 2 * d, b + 2 * e], a + 3 * d];
+const seqDouble = (a, c) => { const s = [a]; for (let i = 0; i < 4; i++) s.push(s[i] * 2 + c); return [s.slice(0, 4), s[4]]; };
+const PATTERNS = [
+  [() => seqArith(r(1, 20), r(2, 6)), () => { const d = r(2, 5); return seqArith(r(5 * d, 60), -d); }],
+  [() => seqArith(r(3, 40), r(7, 15)), () => seqGeo(r(1, 5), 2), () => seqAlt(r(1, 10), r(4, 8), r(1, 3))],
+  [() => seqGeo(r(1, 3), 3), () => seqGrow(r(1, 15), r(1, 4)), () => seqSquares(r(1, 6)), () => { const d = r(6, 12); return seqArith(r(6 * d, 120), -d); }],
+  [() => seqFib(r(1, 5), r(2, 7)), () => seqTwin(r(1, 9), r(2, 5), r(20, 40), r(-3, -1)), () => seqDouble(r(1, 4), r(1, 3)), () => seqAlt(r(20, 40), r(5, 9), r(2, 4))]
+];
+let pt = null;
+function startPattern(my) {
+  const lv = Math.min(PATTERNS.length, Math.max(1, store.skill.pattern - 1));
+  pt = { my, score: 0, tier: lv, top: lv, row: 0, streak: 0, correct: 0, total: 0, ans: 0, text: '', locked: false, t0: performance.now() };
+  show('pattern');
+  nextPattern();
+  requestAnimationFrame(pTick);
+}
+function pHud() { $('pScore').textContent = pt.score; $('pLevel').textContent = pt.tier; streakChip('pStreak', pt.streak); }
+function nextPattern() {
+  const set = PATTERNS[pt.tier - 1];
+  let seq, ans, text;
+  do { [seq, ans] = set[r(0, set.length - 1)](); text = seq.join(', ') + ', ?'; } while (text === pt.text || ans < 0);
+  pt.text = text; pt.ans = ans; pt.locked = false;
+  // Wrong options are believable: off by one, off by the last step, or "just repeat the last step".
+  const last = seq[seq.length - 1], step = last - seq[seq.length - 2];
+  const opts = [ans];
+  for (const c of shuffle([ans + 1, ans - 1, ans + step, ans - step, last + step, ans + 2, ans - 2, ans * 2, ans + 10])) {
+    if (opts.length < 4 && c >= 0 && !opts.includes(c)) opts.push(c);
+  }
+  $('pSeq').textContent = text;
+  $('pBoard').className = 'board';
+  $('pOpts').innerHTML = shuffle(opts).map(o => '<button class="opt num" data-o="' + o + '">' + o + '</button>').join('');
+  pHud();
+}
+function patternChoose(btn) {
+  if (screen !== 'pattern' || !pt || pt.my !== run || pt.locked) return;
+  pt.locked = true; pt.total++;
+  const correct = Number(btn.dataset.o) === pt.ans;
+  if (correct) {
+    pt.correct++; pt.streak++; pt.row++;
+    pt.score += 10 * pt.tier;
+    floatText($('pBoard'), '+' + 10 * pt.tier);
+    if (pt.row >= 3 && pt.tier < PATTERNS.length) { pt.tier++; pt.row = 0; beep(990, 0.18); floatText($('pBoard'), 'Level up!', 'lvl'); } else beep(660, 0.08);
+    pt.top = Math.max(pt.top, pt.tier);
+    btn.classList.add('ok');
+    $('pBoard').className = 'board ok';
+  } else {
+    pt.streak = 0; pt.row = 0;
+    if (pt.tier > 1) pt.tier--;
+    btn.classList.add('no');
+    const right = [...$('pOpts').children].find(b => Number(b.dataset.o) === pt.ans);
+    if (right) right.classList.add('ok');
+    $('pBoard').className = 'board no';
+    beep(180, 0.25);
+  }
+  pHud();
+  const my = pt.my;
+  setTimeout(() => { if (my === run) nextPattern(); }, correct ? 300 : 1100);
+}
+function pTick() {
+  if (!pt || pt.my !== run) return;
+  const left = Math.max(0, ROUND - (performance.now() - pt.t0) / 1000);
+  timer('pBar', 'pTime', left);
+  if (left <= 0) {
+    beep(520, 0.4);
+    return finishGame(pt.score, "Time's up", [['Correct', pt.correct], ['Accuracy', accuracy(pt.correct, pt.total)], ['Top level', pt.top]], pt.tier);
+  }
+  requestAnimationFrame(pTick);
+}
+
+/* Unscramble: levels are 4, 5, 6 and 7-letter words.
+   Every word was chosen so its letters spell only that one common word (no "listen/silent" pairs). */
+const ANAGRAMS = [
+  'jump frog milk fish gold duck mask king sock bell kite zero quiz bulk hand desk lazy glow gift film jury navy hawk cozy',
+  'plant magic quick candy beach honey pizza tiger chair crown giant globe juice knife laugh novel piano robot sugar voice storm happy jelly puppy',
+  'jungle rocket pencil puzzle guitar window frozen bridge carpet dragon hockey mirror ladder pirate bucket jacket wizard yellow summer kitten rabbit island zipper muffin',
+  'balloon captain dolphin journey kitchen monster pyramid rainbow blanket compass diamond freedom harvest lantern mustard octopus penguin quarter vampire whistle popcorn cabbage network trumpet'
+].map(t => t.split(' '));
+let an = null;
+function startAnagram(my) {
+  const lv = Math.min(ANAGRAMS.length, Math.max(1, store.skill.anagram - 1));
+  an = { my, score: 0, tier: lv, top: lv, row: 0, streak: 0, correct: 0, total: 0, recent: [], word: '', letters: [], picked: [], locked: false, t0: performance.now() };
+  show('anagram');
+  nextAnagram();
+  requestAnimationFrame(aTick);
+}
+function aHud() { $('aScore').textContent = an.score; $('aLevel').textContent = an.tier; streakChip('aStreak', an.streak); }
+function nextAnagram() {
+  const set = ANAGRAMS[an.tier - 1];
+  let word;
+  do { word = set[r(0, set.length - 1)]; } while (an.recent.includes(word));
+  an.recent = an.recent.concat(word).slice(-10);
+  let mix;
+  do { mix = shuffle([...word]); } while (mix.join('') === word);
+  an.word = word; an.letters = mix; an.picked = []; an.locked = false;
+  $('aBoard').className = 'board';
+  $('aSlots').style.setProperty('--n', word.length);
+  $('aLetters').style.setProperty('--n', word.length);
+  renderAnagram();
+  aHud();
+}
+function renderAnagram() {
+  $('aSlots').innerHTML = [...an.word].map((_, i) => '<span class="slot' + (i < an.picked.length ? ' full' : '') + '">' + (i < an.picked.length ? an.letters[an.picked[i]] : '') + '</span>').join('');
+  $('aLetters').innerHTML = an.letters.map((ch, i) => '<button class="letter" data-i="' + i + '"' + (an.picked.includes(i) ? ' disabled' : '') + '>' + ch + '</button>').join('');
+}
+function pickLetter(i) {
+  if (screen !== 'anagram' || !an || an.my !== run || an.locked || an.picked.includes(i)) return;
+  an.picked.push(i);
+  beep(600, 0.04);
+  renderAnagram();
+  if (an.picked.length === an.word.length) checkAnagram();
+}
+function typeLetter(ch) { const i = an.letters.findIndex((c, k) => c === ch && !an.picked.includes(k)); if (i >= 0) pickLetter(i); }
+function undoLetter() { if (screen === 'anagram' && an && !an.locked && an.picked.length) { an.picked.pop(); renderAnagram(); } }
+function checkAnagram() {
+  an.locked = true; an.total++;
+  const my = an.my, correct = an.picked.map(i => an.letters[i]).join('') === an.word;
+  if (correct) {
+    an.correct++; an.streak++; an.row++;
+    an.score += 10 * an.tier;
+    floatText($('aBoard'), '+' + 10 * an.tier);
+    if (an.row >= 2 && an.tier < ANAGRAMS.length) { an.tier++; an.row = 0; beep(990, 0.18); floatText($('aBoard'), 'Level up!', 'lvl'); } else beep(660, 0.08);
+    an.top = Math.max(an.top, an.tier);
+    $('aBoard').className = 'board ok';
+    setTimeout(() => { if (my === run) nextAnagram(); }, 450);
+  } else {
+    // A wrong guess just clears the letters so you can try again.
+    an.streak = 0; an.row = 0;
+    $('aBoard').className = 'board no';
+    beep(180, 0.25);
+    setTimeout(() => { if (my !== run) return; an.picked = []; an.locked = false; $('aBoard').className = 'board'; renderAnagram(); }, 600);
+  }
+  aHud();
+}
+function skipAnagram() {
+  if (screen !== 'anagram' || !an || an.my !== run || an.locked) return;
+  an.locked = true; an.total++; an.streak = 0; an.row = 0;
+  if (an.tier > 1) an.tier--;
+  // Reveal the answer in the slots
+  const used = [];
+  an.picked = [...an.word].map(ch => { const i = an.letters.findIndex((c, k) => c === ch && !used.includes(k)); used.push(i); return i; });
+  renderAnagram();
+  $('aBoard').className = 'board no';
+  aHud();
+  const my = an.my;
+  setTimeout(() => { if (my === run) nextAnagram(); }, 1200);
+}
+function aTick() {
+  if (!an || an.my !== run) return;
+  const left = Math.max(0, ROUND - (performance.now() - an.t0) / 1000);
+  timer('aBar', 'aTime', left);
+  if (left <= 0) {
+    beep(520, 0.4);
+    return finishGame(an.score, "Time's up", [['Words', an.correct], ['Accuracy', accuracy(an.correct, an.total)], ['Top level', an.top]], an.tier);
+  }
+  requestAnimationFrame(aTick);
+}
+
 /* Leaderboard
    Works offline today: it ranks your own results. To make it worldwide, create the free Supabase
    project described in LAUNCH.md (database setup in supabase/schema.sql) and fill in ONLINE below.
@@ -1064,10 +1497,24 @@ async function deleteData() {
 
 /* Wiring */
 document.querySelectorAll('.x').forEach(b => { b.innerHTML = ICON.x; });
-$('boardBtn').innerHTML = ICON.trophy;
 $('boardBack').innerHTML = ICON.back;
 $('profileBack').innerHTML = ICON.back;
-$('boardBtn').addEventListener('click', openBoard);
+[...$('nav').children].forEach(b => { b.insertAdjacentHTML('afterbegin', ICON[{ home: 'home', library: 'grid', board: 'trophy' }[b.dataset.nav]]); });
+$('nav').addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (b) ({ home: () => renderHome(), library: openLibrary, board: openBoard })[b.dataset.nav]();
+});
+$('moreBtn').addEventListener('click', openLibrary);
+$('libraryCards').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { inSession = false; launch(b.dataset.g); } });
+$('skillFilter').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { librarySkill = b.dataset.skill; renderLibrary(); } });
+$('cButtons').children[0].innerHTML = ICON.x + 'No';
+$('cButtons').children[1].innerHTML = ICON.check + 'Yes';
+$('cButtons').addEventListener('click', e => { const b = e.target.closest('button'); if (b) colorAnswer(b.dataset.a === '1'); });
+$('hGrid').addEventListener('click', e => { const b = e.target.closest('button'); if (b) huntTap(b); });
+$('pOpts').addEventListener('click', e => { const b = e.target.closest('button'); if (b) patternChoose(b); });
+$('aLetters').addEventListener('click', e => { const b = e.target.closest('button'); if (b) pickLetter(Number(b.dataset.i)); });
+$('aUndo').addEventListener('click', undoLetter);
+$('aSkip').addEventListener('click', skipAnagram);
 $('endBoard').addEventListener('click', openBoard);
 $('boardBack').addEventListener('click', () => renderHome());
 $('profileBack').addEventListener('click', () => store.player && afterProfile === 'board' ? openBoard() : renderHome());
@@ -1090,6 +1537,9 @@ $('soundBtn').addEventListener('click', () => { store.sound = !store.sound; save
 document.querySelectorAll('.quit').forEach(b => b.addEventListener('click', () => { run++; renderHome(); }));
 document.addEventListener('keydown', e => {
   if (screen === 'words' && e.key >= '1' && e.key <= '4') { const b = $('opts').children[Number(e.key) - 1]; if (b) choose(b); return; }
+  if (screen === 'pattern' && e.key >= '1' && e.key <= '4') { const b = $('pOpts').children[Number(e.key) - 1]; if (b) patternChoose(b); return; }
+  if (screen === 'colors') { if (e.key === 'ArrowLeft' || e.key === 'n') colorAnswer(false); else if (e.key === 'ArrowRight' || e.key === 'y') colorAnswer(true); return; }
+  if (screen === 'anagram') { if (e.key === 'Backspace') undoLetter(); else if (/^[a-z]$/i.test(e.key)) typeLetter(e.key.toLowerCase()); return; }
   if (screen !== 'math') return;
   if (e.key >= '0' && e.key <= '9') press(e.key);
   else if (e.key === 'Backspace') press('back');

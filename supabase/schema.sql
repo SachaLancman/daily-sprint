@@ -21,7 +21,7 @@ create table if not exists players (
 create table if not exists scores (
   id bigint generated always as identity primary key,
   player_id uuid not null references players(id) on delete cascade,
-  game text not null check (game in ('math', 'memory', 'words', 'spot')),
+  game text not null check (game in ('math', 'memory', 'words', 'spot', 'colors', 'hunt', 'pattern', 'anagram')),
   score int not null check (score between 0 and 10000),
   day date not null,
   created_at timestamptz not null default now()
@@ -37,7 +37,8 @@ revoke all on players, scores from anon, authenticated;
 
 -- Highest plausible score per game in one 60-second round (or one Memory Grid game).
 create or replace function max_score(p_game text) returns int language sql immutable as $$
-  select case p_game when 'math' then 6000 when 'memory' then 5000 when 'words' then 4000 when 'spot' then 2000 else 0 end;
+  select case p_game when 'math' then 6000 when 'memory' then 5000 when 'words' then 4000 when 'spot' then 2000
+    when 'colors' then 4000 when 'hunt' then 4000 when 'pattern' then 3000 when 'anagram' then 2500 else 0 end;
 $$;
 
 create or replace function submit_score(
