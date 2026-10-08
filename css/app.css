@@ -218,7 +218,8 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .scales .beam{stroke:var(--muted)}
 
 /* Batch 2 games */
-.recall-num{letter-spacing:.12em}
+.recall-num{letter-spacing:.12em;white-space:nowrap}
+#recallIn{width:auto;min-width:170px;max-width:100%;white-space:nowrap;padding:0 6px}
 .recall-num.hide{visibility:hidden}
 .arrow-row{display:flex;justify-content:center;gap:4px;color:var(--ink)}
 .arrow-row .arrow{width:52px;height:52px}

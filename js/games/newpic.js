@@ -8,6 +8,10 @@ function newpicStart() {
 }
 function newpicAdd() {
   const unused = PIC_NAMES.filter(p => !sn.set.includes(p));
+  if (!unused.length) { // every picture is in the group: big bonus, then start a fresh group
+    sn.score += 200; floatText($('newpicWrap'), '+200 all pictures!'); roundHud(sn);
+    return newpicStart();
+  }
   sn.fresh = pickOne(unused);
   sn.set = shuffle(sn.set.concat(sn.fresh));
   sn.tier = sn.set.length; sn.top = Math.max(sn.top, sn.tier); // the "level" here is the size of the group
@@ -17,7 +21,8 @@ function newpicAdd() {
 function newpicDraw(msg) {
   const n = sn.set.length;
   $('newpicMsg').textContent = msg;
-  $('newpicGrid').style.setProperty('--n', n <= 4 ? 2 : n <= 9 ? 3 : 4);
+  $('newpicGrid').style.setProperty('--n', n <= 4 ? 2 : n <= 9 ? 3 : n <= 16 ? 4 : n <= 25 ? 5 : 6);
+  $('newpicGrid').classList.toggle('tight', n > 16);
   $('newpicGrid').innerHTML = sn.set.map(p => '<button class="pic pop-in" data-p="' + p + '">' + picSvg(p) + '</button>').join('');
   roundHud(sn);
 }

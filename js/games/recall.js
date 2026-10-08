@@ -7,12 +7,17 @@ function nextRecall() {
   nr.num = num; nr.input = ''; nr.locked = true;
   nr.tier = nr.len; nr.top = Math.max(nr.top, nr.tier); // the "level" here is the number of digits
   roundHud(nr);
+  // Long numbers get a smaller font so they always fit on one line.
+  const size = Math.min(46, Math.floor(400 / nr.len)) + 'px';
+  $('recallShow').style.fontSize = size; $('recallIn').style.fontSize = Math.min(34, Math.floor(400 / nr.len)) + 'px';
   $('recallShow').textContent = num;
   $('recallShow').classList.remove('hide');
   $('recallMsg').textContent = 'Remember this number';
   $('recallIn').textContent = '';
   setBoard('recallBoard', null);
-  later(nr, 500 + 450 * nr.len, () => {
+  // Viewing time per digit shrinks past 8 digits.
+  const perDigit = Math.max(300, 450 - 15 * Math.max(0, nr.len - 8));
+  later(nr, 500 + perDigit * nr.len, () => {
     $('recallShow').classList.add('hide');
     $('recallMsg').textContent = 'Type it in';
     nr.locked = false;
@@ -30,7 +35,7 @@ function recallCheck() {
   nr.locked = true;
   const ok = nr.input === nr.num;
   $('recallShow').classList.remove('hide');
-  if (ok) { right(nr, $('recallBoard'), 5 * nr.len); setBoard('recallBoard', 'ok'); nr.len = Math.min(12, nr.len + 1); }
+  if (ok) { right(nr, $('recallBoard'), 5 * nr.len); setBoard('recallBoard', 'ok'); nr.len = Math.min(18, nr.len + 1); }
   else { wrong(nr, false); setBoard('recallBoard', 'no'); $('recallMsg').textContent = 'It was'; nr.len = Math.max(3, nr.len - 1); }
   later(nr, ok ? 500 : 1500, nextRecall);
 }

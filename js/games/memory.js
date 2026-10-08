@@ -13,11 +13,15 @@ function memHud() {
 }
 function memStatus(text, go) { $('mStatus').textContent = text; $('mStatus').classList.toggle('go', !!go); }
 function tileEl(i) { return $('tiles').children[i]; }
+// Grid size and flash speed for a sequence length: 3x3 → 4x4 (6+) → 5x5 (10+), and faster flashes past 8.
+const memGrid = len => len >= 10 ? 5 : len >= 6 ? 4 : 3;
+const memFlash = len => ({ on: Math.max(250, 450 - Math.max(0, len - 8) * 20), off: Math.max(110, 180 - Math.max(0, len - 8) * 8) });
 async function newRound() {
-  const my = m.my, n = m.len >= 6 ? 4 : 3;
+  const my = m.my, n = memGrid(m.len), flash = memFlash(m.len);
   if (n !== m.n) {
     m.n = n;
     $('tiles').style.setProperty('--n', n);
+    $('tiles').classList.toggle('n5', n === 5);
     $('tiles').innerHTML = Array.from({ length: n * n }, (_, i) => '<button class="tile" data-i="' + i + '" aria-label="Tile ' + (i + 1) + '"></button>').join('');
   }
   [...$('tiles').children].forEach(t => { t.className = 'tile'; });
@@ -29,10 +33,10 @@ async function newRound() {
   for (const c of m.seq) {
     if (my !== run) return;
     tileEl(c).classList.add('lit'); beep(NOTES[c % NOTES.length], 0.2);
-    await sleep(450);
+    await sleep(flash.on);
     if (my !== run) return;
     tileEl(c).classList.remove('lit');
-    await sleep(180);
+    await sleep(flash.off);
   }
   if (my !== run) return;
   m.accepting = true;
@@ -62,7 +66,7 @@ function tap(i) {
     setTimeout(() => {
       if (my !== run) return;
       if (m.lives) newRound();
-      else finishGame(m.score, 'Game over', [['Rounds', m.rounds], ['Longest', m.top || 0], ['Level', Math.max(1, m.top - 2)]], Math.max(1, m.top - 2));
+      else finishGame(m.score, 'Game over', [['Rounds', m.rounds], ['Longest', m.top || 0], ['Level', Math.max(1, m.top - 2)]], Math.max(1, m.top - 2), Math.max(1, m.top - 2));
     }, 900);
   }
 }

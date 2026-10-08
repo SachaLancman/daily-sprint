@@ -1,9 +1,12 @@
 /* Picture Pairs (Memory): flip two cards at a time to find matching pictures.
    Clearing a board gives a bonus and a bigger board: 12, then 16, then 20 cards. */
 let pp = null;
-const PAIR_BOARDS = [{ cards: 12, cols: 4 }, { cards: 16, cols: 4 }, { cards: 20, cols: 5 }];
+const PAIR_BOARDS = [{ cards: 12, cols: 4 }, { cards: 16, cols: 4 }, { cards: 20, cols: 5 }, { cards: 24, cols: 6 }, { cards: 30, cols: 6 }];
+// Past the biggest board, a wrong pair stays visible for less time each level.
+const pairBoard = level => PAIR_BOARDS[Math.min(level, PAIR_BOARDS.length) - 1];
+const pairPeek = level => Math.max(300, 750 - 45 * past(level, PAIR_BOARDS.length));
 function newPairsBoard() {
-  const B = PAIR_BOARDS[pp.tier - 1], pics = samplePics(B.cards / 2);
+  const B = pairBoard(pp.tier), pics = samplePics(B.cards / 2);
   pp.cards = shuffle(pics.concat(pics)); pp.up = []; pp.found = 0; pp.locked = false;
   $('pairsGrid').style.setProperty('--n', B.cols);
   $('pairsGrid').innerHTML = pp.cards.map((_, i) => '<button class="mcard" data-i="' + i + '" aria-label="Card ' + (i + 1) + '">' + ICON.star.replace('<svg', '<svg class="back" fill="#fff"') + '</button>').join('');
@@ -29,7 +32,7 @@ function flipCard(i) {
       pp.boards++;
       pp.score += 30 * pp.tier;
       later(pp, 400, () => floatText($('pairsWrap'), '+' + 30 * pp.tier + ' bonus'));
-      if (pp.tier < PAIR_BOARDS.length) { pp.tier++; later(pp, 400, () => floatText($('pairsWrap'), 'Level up!', 'lvl')); }
+      if (pp.tier < MAX_LEVEL) { pp.tier++; later(pp, 400, () => floatText($('pairsWrap'), 'Level up!', 'lvl')); }
       pp.top = Math.max(pp.top, pp.tier);
       beep(990, 0.18);
       pp.locked = true;
@@ -38,7 +41,7 @@ function flipCard(i) {
   } else {
     pp.streak = 0;
     pp.locked = true;
-    later(pp, 750, () => {
+    later(pp, pairPeek(pp.tier), () => {
       [A, Bc].forEach(c => { c.classList.remove('up', 'pop-in'); c.innerHTML = ICON.star.replace('<svg', '<svg class="back" fill="#fff"'); });
       pp.locked = false;
     });
@@ -53,7 +56,7 @@ registerGame({
     '<rect x="38" y="80" width="40" height="30" rx="8" fill="#fff" fill-opacity=".4"/>',
   html: '<div class="hunt-wrap" id="pairsWrap"><div class="pic-grid tight" id="pairsGrid"></div></div>',
   start(my) {
-    pp = makeRound('pairs', PAIR_BOARDS.length);
+    pp = makeRound('pairs', MAX_LEVEL);
     pp.boards = 0;
     show('pairs');
     newPairsBoard();
