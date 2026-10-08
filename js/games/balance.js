@@ -21,7 +21,20 @@ function scaleSvg(left, right) {
 }
 const many = (k, n) => Array(n).fill(k);
 const shapeIcon = (k, size = 26) => '<svg viewBox="0 0 30 30" width="' + size + '" height="' + size + '" style="display:inline-block;vertical-align:middle"><g stroke="#2B2350" stroke-width="2.5" stroke-linejoin="round">' + SHAPE[k](15, 15, 22) + '</g></svg>';
+SHAPE.d = (x, y, s) => '<path d="M' + x + ' ' + (y - s / 2) + 'l' + s / 2 + ' ' + s / 2 + '-' + s / 2 + ' ' + s / 2 + '-' + s / 2 + '-' + s / 2 + 'z" fill="#18A058"/>';
+SHAPE_NAME.d = 'diamond';
+// Past level 4 (expert): three-scale chains, two unknowns, or "how many for several circles".
+function expertBalance(depth) {
+  const big = depth >= 6 ? 3 : 2; // bigger numbers deeper in
+  return pickOne([
+    () => { const a = r(2, big), b = r(2, big), e = r(2, 3); return { scales: [[['c'], many('s', a)], [['s'], many('t', b)], [['t'], many('d', e)]], ask: [['c'], 'd'], ans: a * b * e }; },
+    () => { const k = 3 * r(1, 4); return { scales: [[['c', 's'], many('t', k)], [['c'], ['s', 's']]], ask: [['c'], 't'], ans: 2 * k / 3 }; },
+    () => { const per = r(2, 3), b = r(1, big), n = r(2, 3); return { scales: [[['c'], many('s', per)], [['s'], many('t', b)]], ask: [many('c', n), 't'], ans: n * per * b }; }
+  ])();
+}
 function makeBalance() {
+  const depth = past(bl.tier, 4);
+  if (depth) return expertBalance(depth);
   switch (bl.tier) {
     case 1: { const k = r(2, 4), n = r(2, 3); return { scales: [[['c'], many('s', k)]], ask: [many('c', n), 's'], ans: n * k }; }
     case 2: { const a = r(2, 3), b = r(2, 3); return { scales: [[['c'], many('s', a)], [['s'], many('t', b)]], ask: [['c'], 't'], ans: a * b }; }
@@ -38,14 +51,18 @@ function nextBalance() {
   for (const c of shuffle([p.ans - 1, p.ans + 1, p.ans + 2, p.ans * 2, p.ans - 2, p.ans + 3])) if (opts.length < 4 && c >= 1 && !opts.includes(c)) opts.push(c);
   $('balOpts').innerHTML = opts.sort((a, b) => a - b).map(o => '<button class="opt" data-o="' + o + '">' + o + ' ' + shapeIcon(p.ask[1], 20) + '</button>').join('');
   setBoard('balBoard', null);
+  const depth = past(bl.tier, 4);
+  if (depth) answerClock(bl, 'balBoard', clockMs(depth, 15, 0.4, 6), () => balanceChoose(null)); else stopAnswerClock(bl, 'balBoard');
 }
+// btn is null when the answer clock runs out
 function balanceChoose(btn) {
   if (!alive(bl) || bl.locked) return;
   bl.locked = true;
-  const ok = Number(btn.dataset.o) === bl.ans;
+  stopAnswerClock(bl, 'balBoard');
+  const ok = !!btn && Number(btn.dataset.o) === bl.ans;
   if (ok) { right(bl, $('balBoard')); btn.classList.add('ok'); setBoard('balBoard', 'ok'); }
   else {
-    wrong(bl); btn.classList.add('no'); setBoard('balBoard', 'no');
+    wrong(bl); if (btn) btn.classList.add('no'); setBoard('balBoard', 'no');
     [...$('balOpts').children].forEach(b => { if (Number(b.dataset.o) === bl.ans) b.classList.add('ok'); });
   }
   later(bl, ok ? 400 : 1500, nextBalance);
@@ -58,7 +75,7 @@ registerGame({
     '<rect x="88" y="46" width="12" height="12" rx="2" fill="#3B6FF5" stroke="currentColor" stroke-width="2"/><rect x="104" y="46" width="12" height="12" rx="2" fill="#3B6FF5" stroke="currentColor" stroke-width="2"/>',
   html: '<div class="board" id="balBoard"><span class="prompt">These scales are balanced</span><div class="scales" id="balScales"></div><div class="ask" id="balAsk"></div></div><div class="opts" id="balOpts"></div>',
   start(my) {
-    bl = makeRound('balance', 4);
+    bl = makeRound('balance', MAX_LEVEL);
     show('balance');
     roundHud(bl);
     nextBalance();

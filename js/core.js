@@ -66,7 +66,7 @@ store.bestStreak = Math.max(store.bestStreak || 0, store.streak || 0);
 store.player = store.player || null; // { id, secret, name, country } once the profile is set
 // Activity calendar: games played per day, and the days the full daily session was finished. Kept forever (small).
 // Highest level ever reached per game (for mastery ranks). Older saves start from the remembered level.
-store.peak = store.peak || Object.assign({}, store.skill);
+store.peak = store.peak || Object.fromEntries(Object.entries(store.skill).filter(([, v]) => v > 1)); // level 1 is just the default
 if (!store.days) {
   // First time: rebuild what we can from the game history. A day with 4+ different games counts as a finished session.
   store.days = {}; store.sessionDays = [];
@@ -336,8 +336,8 @@ function answerClock(st, hostId, ms, onTimeout) {
   if (!bar) { host.insertAdjacentHTML('beforeend', '<div class="qbar" aria-hidden="true"><i></i></div>'); bar = host.querySelector('.qbar'); }
   const fill = bar.firstChild;
   bar.hidden = false;
-  fill.style.transition = 'none'; fill.style.transform = 'scaleX(1)'; void fill.offsetWidth;
-  fill.style.transition = 'transform ' + ms + 'ms linear'; fill.style.transform = 'scaleX(0)';
+  if (fill.getAnimations) fill.getAnimations().forEach(a => a.cancel());
+  if (fill.animate) fill.animate([{ transform: 'scaleX(1)' }, { transform: 'scaleX(0)' }], { duration: ms, easing: 'linear', fill: 'forwards' });
   const token = st.clock = (st.clock || 0) + 1;
   later(st, ms, () => { if (st.clock === token) onTimeout(); }); // answering calls stopAnswerClock, which cancels this
 }

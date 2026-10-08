@@ -3,21 +3,29 @@
 let fa = null;
 const PATH_LEVELS = [{ n: 4, moves: 3 }, { n: 4, moves: 4 }, { n: 5, moves: 5 }, { n: 5, moves: 6, hideAfter: 2500 }];
 const STEP = { '↑': [0, -1], '↓': [0, 1], '←': [-1, 0], '→': [1, 0] };
+// Past level 4: longer paths, a 6x6 grid (from level 8), moves hidden sooner, and double steps (from level 10).
+function pathLevel(level) {
+  if (level <= PATH_LEVELS.length) return Object.assign({ doubles: 0 }, PATH_LEVELS[level - 1]);
+  const d = past(level, PATH_LEVELS.length);
+  return { n: d >= 4 ? 6 : 5, moves: Math.min(12, 6 + Math.floor(d / 2)), hideAfter: Math.max(1200, 2500 - 100 * d), doubles: d >= 6 ? Math.min(0.4, 0.15 + 0.02 * d) : 0 };
+}
 function nextPath() {
-  const L = PATH_LEVELS[fa.tier - 1];
+  const L = pathLevel(fa.tier);
   let x = r(0, L.n - 1), y = r(0, L.n - 1);
   const start = [x, y], moves = [];
   while (moves.length < L.moves) {
-    // Only moves that stay on the grid; avoid undoing the previous move straight away.
-    const last = moves[moves.length - 1], undo = { '↑': '↓', '↓': '↑', '←': '→', '→': '←' }[last];
-    const ok = Object.keys(STEP).filter(m => m !== undo && x + STEP[m][0] >= 0 && x + STEP[m][0] < L.n && y + STEP[m][1] >= 0 && y + STEP[m][1] < L.n);
+    // Only moves that stay on the grid; avoid undoing the previous move straight away. k = 2 for a double step.
+    const last = moves.length ? moves[moves.length - 1].m : null, undo = { '↑': '↓', '↓': '↑', '←': '→', '→': '←' }[last];
+    const k = Math.random() < L.doubles ? 2 : 1, fits = m => x + STEP[m][0] * k >= 0 && x + STEP[m][0] * k < L.n && y + STEP[m][1] * k >= 0 && y + STEP[m][1] * k < L.n;
+    const ok = Object.keys(STEP).filter(m => m !== undo && fits(m));
+    if (!ok.length) continue; // try again (a single step always fits)
     const m = pickOne(ok);
-    moves.push(m); x += STEP[m][0]; y += STEP[m][1];
+    moves.push({ m, k }); x += STEP[m][0] * k; y += STEP[m][1] * k;
   }
   fa.end = y * L.n + x; fa.locked = false;
   const dir = { '↑': 'up', '↓': 'down', '←': 'left', '→': 'right' };
-  $('pathMoves').innerHTML = moves.map(m => '<span aria-label="' + dir[m] + '">' + arrowSvg(dir[m]) + '</span>').join('');
-  $('pathMoves').setAttribute('aria-label', moves.map(m => dir[m]).join(', '));
+  $('pathMoves').innerHTML = moves.map(({ m, k }) => '<span aria-label="' + dir[m] + (k > 1 ? ' twice' : '') + '">' + arrowSvg(dir[m]) + (k > 1 ? '<b class="times">×2</b>' : '') + '</span>').join('');
+  $('pathMoves').setAttribute('aria-label', moves.map(({ m, k }) => dir[m] + (k > 1 ? ' twice' : '')).join(', '));
   $('pathMoves').classList.remove('hide');
   $('pathGrid').style.setProperty('--n', L.n);
   $('pathGrid').innerHTML = Array.from({ length: L.n * L.n }, (_, i) => '<button class="tile path-cell' + (i === start[1] * L.n + start[0] ? ' start' : '') + '" data-i="' + i + '" aria-label="Square ' + (i + 1) + '"></button>').join('');
@@ -41,7 +49,7 @@ registerGame({
     '<path d="M80 22l9 7-9 7" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>',
   html: '<div class="board" id="pathBoard"><span class="prompt">From the dot, follow</span><div class="path-moves" id="pathMoves"></div></div><div class="tiles" id="pathGrid"></div>',
   start(my) {
-    fa = makeRound('path', PATH_LEVELS.length);
+    fa = makeRound('path', MAX_LEVEL);
     show('path');
     roundHud(fa);
     nextPath();

@@ -13,9 +13,22 @@ const PATTERNS = [
   [() => seqGeo(r(1, 3), 3), () => seqGrow(r(1, 15), r(1, 4)), () => seqSquares(r(1, 6)), () => { const d = r(6, 12); return seqArith(r(6 * d, 120), -d); }],
   [() => seqFib(r(1, 5), r(2, 7)), () => seqTwin(r(1, 9), r(2, 5), r(20, 40), r(-3, -1)), () => seqDouble(r(1, 4), r(1, 3)), () => seqAlt(r(20, 40), r(5, 9), r(2, 4))]
 ];
+// Past level 4: harder kinds of sequence, with numbers that grow with depth `b`.
+const seqAccel = (a, d) => { const s = [a]; for (let i = 0; i < 4; i++) s.push(s[i] + d + 2 * i); return [s.slice(0, 4), s[4]]; };
+const seqTimesPlus = (a, k) => { const s = [a]; for (let i = 1; i < 6; i++) s.push(i % 2 ? s[i - 1] * 2 : s[i - 1] + k); return [s.slice(0, 5), s[5]]; };
+const seqSquarePlus = (k, c) => [[k * k + c, (k + 1) ** 2 + c, (k + 2) ** 2 + c, (k + 3) ** 2 + c], (k + 4) ** 2 + c];
+const expertPatterns = b => [
+  () => seqFib(r(2, 5 + b), r(3, 9 + b)),
+  () => seqDouble(r(2, 4 + Math.floor(b / 2)), r(1, 3 + Math.floor(b / 2))),
+  () => seqTwin(r(1, 9 + b), r(2, 5 + Math.floor(b / 2)), r(30, 60 + 2 * b), -r(1, 3 + Math.floor(b / 3))),
+  () => seqAccel(r(1, 10 + b), r(2, 4 + Math.floor(b / 2))),
+  () => seqTimesPlus(r(1, 3 + Math.floor(b / 3)), r(1, 4 + Math.floor(b / 2))),
+  () => seqSquarePlus(r(2, 6 + Math.floor(b / 2)), r(-3, 5 + b)),
+  () => seqAlt(r(20, 40 + 2 * b), r(5, 9 + b), r(2, 4 + Math.floor(b / 2)))
+];
 let pt = null;
 function startPattern(my) {
-  const lv = Math.min(PATTERNS.length, Math.max(1, store.skill.pattern - 1));
+  const lv = Math.min(MAX_LEVEL, Math.max(1, store.skill.pattern - 1));
   pt = { my, score: 0, tier: lv, top: lv, row: 0, streak: 0, correct: 0, total: 0, ans: 0, text: '', locked: false, t0: performance.now() };
   show('pattern');
   nextPattern();
@@ -23,7 +36,7 @@ function startPattern(my) {
 }
 function pHud() { $('pScore').textContent = pt.score; $('pLevel').textContent = pt.tier; streakChip('pStreak', pt.streak); }
 function nextPattern() {
-  const set = PATTERNS[pt.tier - 1];
+  const depth = past(pt.tier, PATTERNS.length), set = depth ? expertPatterns(depth) : PATTERNS[pt.tier - 1];
   let seq, ans, text;
   do { [seq, ans] = set[r(0, set.length - 1)](); text = seq.join(', ') + ', ?'; } while (text === pt.text || ans < 0);
   pt.text = text; pt.ans = ans; pt.locked = false;
@@ -36,24 +49,27 @@ function nextPattern() {
   $('pSeq').textContent = text;
   $('pBoard').className = 'board';
   $('pOpts').innerHTML = shuffle(opts).map(o => '<button class="opt num" data-o="' + o + '">' + o + '</button>').join('');
+  if (depth) answerClock(pt, 'pBoard', clockMs(depth, 9, 0.2, 3.5), () => patternChoose(null)); else stopAnswerClock(pt, 'pBoard');
   pHud();
 }
+// btn is null when the answer clock runs out
 function patternChoose(btn) {
   if (screen !== 'pattern' || !pt || pt.my !== run || pt.locked) return;
   pt.locked = true; pt.total++;
-  const correct = Number(btn.dataset.o) === pt.ans;
+  stopAnswerClock(pt, 'pBoard');
+  const correct = !!btn && Number(btn.dataset.o) === pt.ans;
   if (correct) {
     pt.correct++; pt.streak++; pt.row++;
     pt.score += 10 * pt.tier;
     floatText($('pBoard'), '+' + 10 * pt.tier);
-    if (pt.row >= 3 && pt.tier < PATTERNS.length) { pt.tier++; pt.row = 0; beep(990, 0.18); floatText($('pBoard'), 'Level up!', 'lvl'); } else beep(660, 0.08);
+    if (pt.row >= 3 && pt.tier < MAX_LEVEL) { pt.tier++; pt.row = 0; beep(990, 0.18); floatText($('pBoard'), 'Level up!', 'lvl'); } else beep(660, 0.08);
     pt.top = Math.max(pt.top, pt.tier);
     btn.classList.add('ok');
     $('pBoard').className = 'board ok';
   } else {
     pt.streak = 0; pt.row = 0;
     if (pt.tier > 1) pt.tier--;
-    btn.classList.add('no');
+    if (btn) btn.classList.add('no');
     const right = [...$('pOpts').children].find(b => Number(b.dataset.o) === pt.ans);
     if (right) right.classList.add('ok');
     $('pBoard').className = 'board no';
@@ -69,7 +85,7 @@ function pTick() {
   timer('pBar', 'pTime', left);
   if (left <= 0) {
     beep(520, 0.4);
-    return finishGame(pt.score, "Time's up", [['Correct', pt.correct], ['Accuracy', accuracy(pt.correct, pt.total)], ['Top level', pt.top]], pt.tier);
+    return finishGame(pt.score, "Time's up", [['Correct', pt.correct], ['Accuracy', accuracy(pt.correct, pt.total)], ['Top level', pt.top]], pt.tier, pt.top);
   }
   requestAnimationFrame(pTick);
 }

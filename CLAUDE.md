@@ -19,7 +19,9 @@ A personal brain-training web app in the spirit of apps like Elevate, heading fo
 | Speed | hunt: Number Hunt · flash: Flash Match 🖼 · bubbles: Bubble Pop · sort: Sort Rush |
 | Logic | pattern: Next in Line · balance: Balance · matrix: Missing Piece · path: Follow the Arrows |
 
-- Results screen: 1-3 stars, count-up score, confetti on a new best.
+- Results screen: 1-3 stars, count-up score, confetti on a new best or a new level record / rank.
+- Open-ended difficulty: every game has hand-made early levels, then formulas keep raising difficulty up to `MAX_LEVEL` (30): bigger numbers/grids, subtler differences, faster pace, and an **answer clock** (`answerClock` / `stopAnswerClock`, a shrinking bar; running out counts as a miss). Some games add twists at depth (Color Clash "NOT" question, Spot the Error "No mistake", Flash Match 2-back, Number Hunt shuffles/count-down, Follow the Arrows ×2 steps). Human limits are capped (e.g. grids ≤ 7×7, Number Recall ≤ 18 digits, bubbles ≥ 40px).
+- Mastery ranks from the highest level ever reached (`store.peak`): Bronze 5, Silver 10, Gold 15, Diamond 20 (`RANKS`), shown on game cards; "New level record" / "rank unlocked" on the results screen.
 - Leaderboard: player profile (nickname + self-chosen country), tabs Daily / Weekly / Streak / By game (with a game picker), country filter. Offline it ranks your own results; online it uses Supabase.
 - Progress is saved in localStorage under `dailysprint.v1` (`store`: best, skill, hist, log, days, sessionDays, done, streak, bestStreak, player, pending, sound).
 - Installable on a phone once hosted: `manifest.webmanifest`, `sw.js` (offline, network-first), icons. Not hosted yet; see `LAUNCH.md`.
@@ -30,7 +32,7 @@ A personal brain-training web app in the spirit of apps like Elevate, heading fo
 - `js/core.js`: storage, helpers, home, library, daily rotation, countdown (`launch`), results (`finishGame`), and the **shared game engine**.
 - `js/pictures.js`: 30 original sticker drawings (`PICS`, `picSvg`) and colored shapes (`drawShape`, `shapeTile`).
 - `js/games/<id>.js`: one file per game. `js/leaderboard.js`, `js/calendar.js`, `js/main.js` (wiring and start-up).
-- **Adding a game** (see any newer file, e.g. `js/games/greater.js`): call `registerGame({ id, name, skill, hint, art, colors: [light, dark], html, start, key })`. It creates the screen with a standard header (ids `<id>Time`, `<id>Bar`, `<id>Score`, `<id>Level`, `<id>Streak`). In `start`, use `makeRound(id, maxLevel, upAfter)`, then `right(st, host)` / `wrong(st)`, `later(st, ms, fn)` for timers, `startClock(st)` for the 60 seconds. Add a `<script>` tag in `index.html` and the id to `max_score()` in `supabase/schema.sql`. Dark color must give white text 4.5:1 contrast.
+- **Adding a game** (see any newer file, e.g. `js/games/greater.js`): call `registerGame({ id, name, skill, hint, art, colors: [light, dark], html, start, key })`. It creates the screen with a standard header (ids `<id>Time`, `<id>Bar`, `<id>Score`, `<id>Level`, `<id>Streak`). In `start`, use `makeRound(id, MAX_LEVEL, upAfter)`; give the game a `xxxLevel(level)` function that returns hand-made settings for early levels and formula-based ones after (`past(level, top)` = how far beyond); then then `right(st, host)` / `wrong(st)`, `later(st, ms, fn)` for timers, `startClock(st)` for the 60 seconds. Add a `<script>` tag in `index.html` and the id to `max_score()` in `supabase/schema.sql`. Dark color must give white text 4.5:1 contrast.
 - All scripts share one global scope: never reuse a top-level name (a clash silently replaces the earlier one). Check with a duplicate-name scan after adding files.
 - `run` counter: every timer checks it so quitting a game stops everything.
 - Content rules: Word Match pairs on one level must all mean different things; Spot the Error marks the one wrong word as `[wrong|right]` (no spaces inside); Unscramble words must have only one common anagram.
@@ -63,5 +65,6 @@ A personal brain-training web app in the spirit of apps like Elevate, heading fo
 ## Ideas for next steps
 - Follow `LAUNCH.md`: GitHub Pages, Supabase, Play Store.
 - Grow toward 8 games per skill, starting with the skills the owner enjoys most.
+- Tune expert-level speeds and answer clocks from real playtesting (they are formula guesses).
 - More content per game (Spot the Error sentences, Unscramble words, more pictures).
 - Move the first 8 games' markup out of `index.html` into `registerGame` like the newer ones.
