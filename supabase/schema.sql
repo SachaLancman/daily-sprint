@@ -21,7 +21,7 @@ create table if not exists players (
 create table if not exists scores (
   id bigint generated always as identity primary key,
   player_id uuid not null references players(id) on delete cascade,
-  game text not null check (game in ('math', 'memory', 'words', 'spot', 'colors', 'hunt', 'pattern', 'anagram')),
+  game text not null check (game ~ '^[a-z]{2,20}$'), -- the game's id from the app; max_score() below rejects unknown games
   score int not null check (score between 0 and 10000),
   day date not null,
   created_at timestamptz not null default now()
@@ -35,10 +35,19 @@ alter table players enable row level security;
 alter table scores enable row level security;
 revoke all on players, scores from anon, authenticated;
 
--- Highest plausible score per game in one 60-second round (or one Memory Grid game).
+-- Highest plausible score per game in one round. A game that isn't listed here can't be submitted,
+-- so add every new game id (see the list of games in CLAUDE.md).
 create or replace function max_score(p_game text) returns int language sql immutable as $$
-  select case p_game when 'math' then 6000 when 'memory' then 5000 when 'words' then 4000 when 'spot' then 2000
-    when 'colors' then 4000 when 'hunt' then 4000 when 'pattern' then 3000 when 'anagram' then 2500 else 0 end;
+  select case p_game
+    when 'math' then 6000 when 'memory' then 5000 when 'words' then 4000 when 'spot' then 2000
+    when 'colors' then 4000 when 'hunt' then 4000 when 'pattern' then 3000 when 'anagram' then 2500
+    when 'target' then 4000 when 'greater' then 4000 when 'count' then 3000
+    when 'pairs' then 4000 when 'newpic' then 4000 when 'recall' then 4000
+    when 'picspell' then 3000
+    when 'oddone' then 4000 when 'arrows' then 4000 when 'seeker' then 4000
+    when 'bubbles' then 5000 when 'sort' then 4000 when 'flash' then 4000
+    when 'balance' then 3000 when 'matrix' then 3000 when 'path' then 3000
+    else 0 end;
 $$;
 
 create or replace function submit_score(
