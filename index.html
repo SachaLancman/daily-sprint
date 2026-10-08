@@ -6,6 +6,11 @@
 <title>Daily Sprint</title>
 <meta name="theme-color" content="#EEF3F1" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0E1E22" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Sprint">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Mono:wght@400;500&display=swap">
 <style>
 html{-webkit-text-size-adjust:100%}
@@ -675,6 +680,8 @@ document.addEventListener('keydown', e => {
   else if (e.key === 'Enter') { e.preventDefault(); press('enter'); }
 });
 renderHome();
+// Offline support only works when the app is served from a website, not when opened as a file.
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
 </body>
 </html>
