@@ -173,7 +173,8 @@ function cardHtml(g, showDone) {
 let librarySkill = 'All';
 function renderLibrary() {
   $('skillFilter').innerHTML = ['All'].concat(SKILLS).map(s => '<button class="tab t-all" role="tab" data-skill="' + s + '" aria-selected="' + (s === librarySkill) + '">' + s + '</button>').join('');
-  $('libraryCards').innerHTML = GAMES.filter(g => librarySkill === 'All' || g.skill === librarySkill).map(g => cardHtml(g, false)).join('');
+  const bySkill = GAMES.slice().sort((a, b) => SKILLS.indexOf(a.skill) - SKILLS.indexOf(b.skill)); // stable, so file order within a skill
+  $('libraryCards').innerHTML = bySkill.filter(g => librarySkill === 'All' || g.skill === librarySkill).map(g => cardHtml(g, false)).join('');
 }
 function openLibrary() { run++; renderLibrary(); show('library'); }
 
@@ -300,7 +301,7 @@ function hudHtml(g) {
 
 /* Shared engine for the newer games: one "round" object per play.
    right()/wrong() handle points, streaks and levels (up after `upAfter` correct in a row, down on a mistake). */
-function newRound(id, maxTier, upAfter = 3) {
+function makeRound(id, maxTier, upAfter = 3) {
   const tier = Math.min(maxTier, Math.max(1, store.skill[id] - 1));
   return { id, my: run, score: 0, tier, top: tier, maxTier, upAfter, row: 0, streak: 0, correct: 0, total: 0, locked: false, t0: performance.now() };
 }

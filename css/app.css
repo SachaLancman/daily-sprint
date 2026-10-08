@@ -191,6 +191,32 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .letter:disabled{opacity:.25;box-shadow:none;transform:translateY(3px);cursor:default}
 .duo{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
+/* Picture games. Pictures always sit on a light "sticker" background, in dark mode too. */
+.pic{aspect-ratio:1;display:grid;place-items:center;background:#FBFAFF;border:0;border-radius:18px;padding:10%;box-shadow:0 4px 0 var(--line);cursor:pointer;touch-action:manipulation}
+.pic svg{width:100%;height:100%;overflow:visible}
+.pic:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.pic.ok{box-shadow:0 0 0 4px var(--good),0 4px 0 var(--line)}
+.pic.no{box-shadow:0 0 0 4px var(--bad),0 4px 0 var(--line)}
+.pic.static{cursor:default}
+.pic-grid{display:grid;gap:10px;grid-template-columns:repeat(var(--n,3),minmax(0,1fr))}
+.pic-grid.tight{gap:6px}
+.pic-grid.tight .pic{border-radius:12px;padding:8%}
+.pic-big{width:160px;height:160px;margin:0 auto;background:#FBFAFF;border-radius:28px;padding:16px;box-shadow:inset 0 0 0 2px var(--line)}
+.ask{display:flex;align-items:center;justify-content:center;gap:10px;font:800 22px var(--display)}
+.ask .pic{width:52px;padding:6px;border-radius:12px;box-shadow:none;cursor:default}
+.mcard{aspect-ratio:1;border:0;border-radius:14px;padding:8%;cursor:pointer;touch-action:manipulation;background:var(--grad);box-shadow:0 4px 0 var(--d);display:grid;place-items:center}
+.mcard svg{width:100%;height:100%}
+.mcard .back{width:40%;height:40%;opacity:.5}
+.mcard.up{background:#FBFAFF;box-shadow:0 4px 0 var(--line)}
+.mcard.gone{opacity:.35;box-shadow:none;cursor:default}
+.mcard.no{box-shadow:0 0 0 4px var(--bad)}
+.count-field{position:relative;aspect-ratio:6/5;background:#FBFAFF;border-radius:24px;box-shadow:var(--shadow);overflow:hidden}
+.count-field svg{position:absolute;width:14%;height:auto}
+.count-field .cover{position:absolute;inset:0;display:grid;place-items:center;background:var(--grad);color:#fff;font:800 64px var(--display)}
+.scales{display:flex;flex-direction:column;gap:6px}
+.scales svg{width:100%;height:auto}
+.scales .beam{stroke:var(--muted)}
+
 /* Bottom menu */
 body.has-nav{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
 .nav{position:fixed;left:0;right:0;bottom:0;z-index:5;display:flex;justify-content:center;gap:4px;padding:8px 12px calc(8px + env(safe-area-inset-bottom));
@@ -271,4 +297,6 @@ a.link{color:var(--muted)}
   @keyframes pulse{50%{transform:scale(1.08)}}
   .hud-time.low{animation:pulse .5s ease-in-out infinite}
   .pill{animation:pop .5s .2s cubic-bezier(.2,1.6,.4,1) backwards}
+  .pic,.mcard{transition:transform .12s,box-shadow .12s,background .15s,opacity .2s}
+  .pop-in{animation:pop .3s cubic-bezier(.2,1.6,.4,1)}
 }
