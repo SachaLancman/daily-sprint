@@ -122,7 +122,7 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 /* In-game header: the game's gradient, with quit, name, timer and chips. */
 .hud{background:var(--grad);color:#fff;border-radius:24px;padding:12px 14px 14px;display:flex;flex-direction:column;gap:12px;box-shadow:0 14px 28px -16px var(--d)}
 .hud-row{display:flex;align-items:center;gap:12px}
-.x{flex:none;width:38px;height:38px;border-radius:50%;border:0;background:rgba(255,255,255,.2);color:#fff;display:grid;place-items:center;cursor:pointer}
+.x{flex:none;width:42px;height:42px;border-radius:50%;border:0;background:rgba(255,255,255,.2);color:#fff;display:grid;place-items:center;cursor:pointer}
 .x svg{width:18px;height:18px}
 .hud-name{flex:1;font-weight:800;font-size:18px;letter-spacing:-.01em}
 .hud-time{font:500 24px var(--mono);min-width:2.2ch;text-align:right}
@@ -164,7 +164,7 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .hearts svg{width:18px;height:18px;fill:#fff}
 .hearts svg.off{fill:rgba(255,255,255,.3)}
 .sentence{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;padding:6px 0}
-.word-btn{font:700 21px var(--display);background:var(--bg);border:0;border-radius:12px;padding:7px 11px;cursor:pointer;touch-action:manipulation;box-shadow:0 3px 0 var(--line)}
+.word-btn{font:700 21px var(--display);background:var(--bg);border:0;border-radius:12px;padding:7px 11px;min-height:44px;cursor:pointer;touch-action:manipulation;box-shadow:0 3px 0 var(--line)}
 .word-btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--line)}
 .word-btn.ok{background:var(--good);color:var(--on-mark);box-shadow:none}
 .word-btn.no{background:var(--bad);color:var(--on-mark);box-shadow:none}
@@ -216,6 +216,27 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .scales{display:flex;flex-direction:column;gap:6px}
 .scales svg{width:100%;height:auto}
 .scales .beam{stroke:var(--muted)}
+
+/* Batch 2 games */
+.recall-num{letter-spacing:.12em}
+.recall-num.hide{visibility:hidden}
+.arrow-row{display:flex;justify-content:center;gap:6px;font:800 50px/1 var(--display)}
+#arrowAsk.flip{color:var(--bad)}
+.bubble-field{height:380px;padding:0;overflow:hidden;touch-action:none}
+.bubble{position:absolute;border:0;border-radius:50%;padding:0;cursor:pointer;display:grid;place-items:center;
+  background:radial-gradient(circle at 34% 28%, rgba(255,255,255,.6), transparent 38%), var(--grad);box-shadow:0 8px 16px -8px var(--d)}
+.bubble svg{width:46%;height:46%;fill:#FFC83D}
+.bubble.bad{background:radial-gradient(circle at 34% 28%, rgba(255,255,255,.5), transparent 38%), #D93A3A;box-shadow:0 8px 16px -8px #8B1A1A}
+.bubble.bad svg{fill:none;color:#fff}
+.sort-btns .opt{display:flex;align-items:center;justify-content:center;gap:8px;text-transform:capitalize;font-size:18px}
+.sort-btns .pic{width:40px;padding:4px;box-shadow:none;border-radius:10px}
+.qmark{font:800 40px var(--display);color:var(--muted)}
+.matrix{max-width:270px;margin:0 auto;width:100%}
+.matrix .pic{padding:6%}
+.path-moves{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;font:800 30px var(--display)}
+.path-moves span{background:var(--bg);border-radius:12px;width:46px;height:46px;display:grid;place-items:center}
+.path-moves.hide span{color:transparent}
+.path-cell.start{background:radial-gradient(circle, #FFC83D 0 24%, var(--surface) 26%)}
 
 /* Activity calendar */
 button.pill{border:0;cursor:pointer}
@@ -325,5 +346,5 @@ a.link{color:var(--muted)}
   .hud-time.low{animation:pulse .5s ease-in-out infinite}
   .pill{animation:pop .5s .2s cubic-bezier(.2,1.6,.4,1) backwards}
   .pic,.mcard{transition:transform .12s,box-shadow .12s,background .15s,opacity .2s}
-  .pop-in{animation:pop .3s cubic-bezier(.2,1.6,.4,1)}
+  .pop-in,.bubble{animation:pop .3s cubic-bezier(.2,1.6,.4,1)}
 }

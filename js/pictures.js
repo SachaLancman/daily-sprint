@@ -39,3 +39,18 @@ const PIC_NAMES = Object.keys(PICS);
 const picSvg = (name, extra = '') => '<svg viewBox="0 0 100 100" aria-hidden="true"' + extra + '><g stroke="' + INK + '" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">' + PICS[name].svg + '</g></svg>';
 const picLabel = name => PICS[name].word[0].toUpperCase() + PICS[name].word.slice(1);
 const samplePics = (n, pool = PIC_NAMES) => shuffle(pool.slice()).slice(0, n);
+
+/* Simple colored shapes for the shape games. drawShape(kind, color, cx, cy, size) returns SVG. */
+const SHAPE_COLORS = { red: '#E5484D', blue: '#3B6FF5', yellow: '#FFC83D', green: '#18A058' };
+const SHAPE_KINDS = ['circle', 'square', 'triangle', 'diamond'];
+function drawShape(kind, color, x, y, s) {
+  const c = SHAPE_COLORS[color] || color, h = s / 2;
+  const body = {
+    circle: '<circle cx="' + x + '" cy="' + y + '" r="' + h + '"/>',
+    square: '<rect x="' + (x - h) + '" y="' + (y - h) + '" width="' + s + '" height="' + s + '" rx="' + s * 0.12 + '"/>',
+    triangle: '<path d="M' + x + ' ' + (y - h) + 'L' + (x + h) + ' ' + (y + h * 0.8) + 'H' + (x - h) + 'z"/>',
+    diamond: '<path d="M' + x + ' ' + (y - h) + 'L' + (x + h) + ' ' + y + 'L' + x + ' ' + (y + h) + 'L' + (x - h) + ' ' + y + 'z"/>'
+  }[kind];
+  return '<g fill="' + c + '" stroke="' + INK + '" stroke-width="' + Math.max(2, s * 0.07) + '" stroke-linejoin="round">' + body + '</g>';
+}
+const shapeTile = (kind, color, extra = '') => '<svg viewBox="0 0 100 100" aria-hidden="true"' + extra + '>' + drawShape(kind, color, 50, 50, 70) + '</svg>';
