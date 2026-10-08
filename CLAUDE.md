@@ -18,6 +18,7 @@ A personal brain-training web app in the spirit of apps like Elevate. All games,
 ## The owner
 - Beginner who is learning; explain changes in plain language and keep steps small.
 - Test in the browser after each change before moving on.
+- The folder uses git. After each change is tested, commit it with a short plain-English message so it can be undone later.
 
 ## Ideas for next steps
 - Add a fourth game (for example reading speed or spot-the-grammar-error).
