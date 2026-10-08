@@ -2,10 +2,10 @@
 
 The app is ready. The steps below need **your own accounts**, so they're yours to do (Claude can help at each step: just say which step you're on).
 
-## 1. Put it online (GitHub Pages, free)
-1. Create a free account at github.com.
-2. Tell Claude "publish to GitHub Pages". Claude will create the repository, upload the files and turn on Pages (you'll be asked to log in once).
-3. You get an address like `https://<your-username>.github.io/daily-sprint/`. Open it on your phone: in Chrome, menu → **Add to Home screen**.
+## 1. Put it online (GitHub Pages, free) ✅ done
+- Live at **https://sachalancman.github.io/daily-sprint/** (code: https://github.com/SachaLancman/daily-sprint).
+- On your phone: open the link in Chrome, menu → **Add to Home screen**.
+- To publish changes later, tell Claude "publish the update" (it runs the tests, then pushes).
 
 ## 2. Turn on the worldwide leaderboard (Supabase, free)
 1. Create a free account at supabase.com and a **New project** (any name, pick the region closest to you, save the database password somewhere safe).
@@ -29,7 +29,8 @@ Replace `[CONTACT EMAIL]` in `privacy.html` with an email address you're happy t
 5. New personal developer accounts must currently run a **closed test** (at least 12 testers for 14 days) before a public release. Check Play Console for the current rule.
 
 ## Before launch checklist
-- [ ] Online at GitHub Pages and installed on your phone
+- [x] Online at GitHub Pages
+- [ ] Installed on your phone
 - [ ] Supabase connected, test score appears on the leaderboard from two devices
 - [ ] Contact email in `privacy.html`
 - [ ] Offline mode checked on the phone (airplane mode, app still opens)

@@ -24,7 +24,9 @@ A personal brain-training web app in the spirit of apps like Elevate, heading fo
 - Mastery ranks from the highest level ever reached (`store.peak`): Bronze 5, Silver 10, Gold 15, Diamond 20 (`RANKS`), shown on game cards; "New level record" / "rank unlocked" on the results screen.
 - Leaderboard: player profile (nickname + self-chosen country), tabs Daily / Weekly / Streak / By game (with a game picker), country filter. Offline it ranks your own results; online it uses Supabase.
 - Progress is saved in localStorage under `dailysprint.v1` (`store`: best, skill, hist, log, days, sessionDays, done, streak, bestStreak, player, pending, sound).
-- Installable on a phone once hosted: `manifest.webmanifest`, `sw.js` (offline, network-first), icons. Not hosted yet; see `LAUNCH.md`.
+- **Live at https://sachalancman.github.io/daily-sprint/** (GitHub Pages, public repo https://github.com/SachaLancman/daily-sprint, branch `main`, root folder). Installable on a phone from there: `manifest.webmanifest`, `sw.js` (offline, network-first), icons.
+- **Publishing an update:** run the tests, commit, then `git push`. GitHub rebuilds the site in about a minute. Git and the GitHub CLI (`gh`, logged in as SachaLancman) live in `C:\Program Files\Git\cmd` and `C:\Program Files\GitHub CLI`; add them to PATH in a shell if `git`/`gh` aren't found.
+- Commits use the owner's private GitHub noreply email (`124744881+SachaLancman@users.noreply.github.com`); never commit the owner's personal email or other private data, since the repo is public.
 
 ## How the code is organised
 - `index.html`: the fixed screens (home, library, countdown, results, calendar, leaderboard, profile) and the first 8 games' markup. Script order matters: core → pictures → games → leaderboard → calendar → main.
