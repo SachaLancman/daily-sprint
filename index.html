@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Daily Sprint</title>
+<meta name="theme-color" content="#EEF3F1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E1E22" media="(prefers-color-scheme: dark)">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Mono:wght@400;500&display=swap">
 <style>
 html{-webkit-text-size-adjust:100%}
@@ -13,22 +15,28 @@ img{max-width:100%}
 /* Layout: one narrow stopwatch-style column; the question or grid is the only loud thing on screen. */
 :root{
   --bg:#EEF3F1; --surface:#FFFFFF; --ink:#10262B; --muted:#5B7177; --line:#D3DEDB;
-  --accent:#F2B705; --on-accent:#10262B; --good:#1F8A5B; --bad:#C8402F;
+  --accent:#F2B705; --on-accent:#10262B; --good:#1B7D52; --bad:#C8402F; --on-mark:#FFFFFF;
+  /* One color per game, used for its icon, timer bar and session dot. */
+  --c-math:#2E6BD9; --c-memory:#7C4DDB; --c-words:#0E8483; --c-spot:#D2553A;
   --display:"Bricolage Grotesque",system-ui,sans-serif;
   --mono:"DM Mono",ui-monospace,Menlo,monospace;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#0E1E22; --surface:#16292E; --ink:#EAF2F0; --muted:#8FA6AA; --line:#2A4046;
-    --accent:#F5C21B; --on-accent:#10262B; --good:#4CC38A; --bad:#F07A68; color-scheme:dark;
+    --accent:#F5C21B; --on-accent:#10262B; --good:#4CC38A; --bad:#F07A68; --on-mark:#0E1E22; color-scheme:dark;
+    --c-math:#6FA0FF; --c-memory:#AD8CF7; --c-words:#3CC2BE; --c-spot:#FF8A6B;
   }
 }
 :root[data-theme="dark"]{
   --bg:#0E1E22; --surface:#16292E; --ink:#EAF2F0; --muted:#8FA6AA; --line:#2A4046;
-  --accent:#F5C21B; --on-accent:#10262B; --good:#4CC38A; --bad:#F07A68; color-scheme:dark;
+  --accent:#F5C21B; --on-accent:#10262B; --good:#4CC38A; --bad:#F07A68; --on-mark:#0E1E22; color-scheme:dark;
+  --c-math:#6FA0FF; --c-memory:#AD8CF7; --c-words:#3CC2BE; --c-spot:#FF8A6B;
 }
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--display);font-size:16px;line-height:1.5;padding-inline:16px;padding-block:24px}
+body{background:var(--bg);color:var(--ink);font-family:var(--display);font-size:16px;line-height:1.5;
+  /* env(...) keeps content clear of a phone's notch and home bar. */
+  padding:max(24px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left))}
 main{max-width:420px;margin:0 auto}
 h1{font-size:40px;line-height:1;font-weight:700;margin:0;letter-spacing:-.02em}
 h2{font-size:18px;font-weight:700;margin:0;line-height:1.2}
@@ -45,10 +53,20 @@ p{margin:0;color:var(--muted)}
 .link{font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;background:none;border:0;color:var(--muted);cursor:pointer;padding:6px 0;text-decoration:underline;align-self:flex-start}
 .btn:active{transform:translateY(1px)}
 button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+@media (hover:hover){
+  .btn:hover{filter:brightness(1.06)}
+  .btn.ghost:hover,.opt:hover,.pad button:hover,.tile:hover,.word-btn:hover{border-color:var(--muted)}
+  .link:hover{color:var(--ink)}
+}
+.gicon{flex:none;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;color:var(--c);background:color-mix(in srgb, var(--c) 14%, var(--surface))}
+.gicon svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.gicon.lg{width:64px;height:64px;border-radius:18px}
+.gicon.lg svg{width:34px;height:34px}
+#math{--c:var(--c-math)} #memory{--c:var(--c-memory)} #words{--c:var(--c-words)} #spot{--c:var(--c-spot)}
 .session{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:14px}
 .dots{display:flex;gap:8px}
 .dots i{flex:1;height:8px;border-radius:4px;background:var(--line)}
-.dots i.on{background:var(--good)}
+.dots i.on{background:var(--c, var(--good))}
 .games{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
 .games li{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
 .games .info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
@@ -59,7 +77,8 @@ button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
 .stats .stat:last-child{text-align:right}
 .stats .stat:nth-child(2){text-align:center}
 .bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden}
-.bar i{display:block;height:100%;width:100%;background:var(--accent);transform-origin:left}
+.bar i{display:block;height:100%;width:100%;background:var(--c, var(--accent));transform-origin:left}
+.bar.low i{background:var(--bad)}
 .board{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:28px 16px;text-align:center;display:flex;flex-direction:column;gap:12px}
 .q{font-family:var(--mono);font-size:44px;font-weight:500;line-height:1.1}
 .a{font-family:var(--mono);font-size:32px;min-height:44px;border-bottom:2px solid var(--line);width:160px;margin:0 auto;line-height:44px}
@@ -72,6 +91,8 @@ button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
   .tile.lit{transform:scale(1.04)}
   .count{animation:pop .7s}
   @keyframes pop{from{transform:scale(.6);opacity:.3}to{transform:scale(1);opacity:1}}
+  #end:not([hidden]) .big{animation:pop .5s cubic-bezier(.2,1.4,.4,1)}
+  .btn,.opt,.pad button,.word-btn{transition:border-color .15s, filter .15s, background .12s}
 }
 .pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .pad button{font:500 24px var(--mono);background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:14px 0;cursor:pointer;touch-action:manipulation}
@@ -90,8 +111,9 @@ button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
 .row{display:flex;flex-direction:column;gap:10px}
 .opts{display:flex;flex-direction:column;gap:10px}
 .opt{font:500 18px var(--display);background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:14px;cursor:pointer;touch-action:manipulation}
-.opt.ok{background:var(--good);border-color:var(--good);color:var(--bg)}
-.opt.no{background:var(--bad);border-color:var(--bad);color:var(--bg)}
+.opt.ok{background:var(--good);border-color:var(--good);color:var(--on-mark)}
+.opt.no{background:var(--bad);border-color:var(--bad);color:var(--on-mark)}
+.label.best{align-self:flex-start;background:var(--accent);color:var(--on-accent);padding:4px 10px;border-radius:999px}
 .q.word{font-family:var(--display);font-weight:700;font-size:36px;overflow-wrap:anywhere}
 .spark{display:flex;align-items:flex-end;gap:2px;height:20px;margin-top:4px}
 .spark i{width:6px;background:var(--line);border-radius:2px}
@@ -119,7 +141,8 @@ button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
   </section>
 
   <section class="screen" id="count" hidden>
-    <div class="countwrap">
+    <div class="countwrap" id="countWrap">
+      <div class="gicon lg" id="countIcon" aria-hidden="true"></div>
       <span class="label" id="countName">Math Sprint</span>
       <div class="count num" id="countNum">3</div>
       <p id="countHint"></p>
@@ -190,10 +213,15 @@ button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
 const $ = id => document.getElementById(id);
 const KEY = 'dailysprint.v1';
 const GAMES = [
-  { id: 'math', name: 'Math Sprint', desc: '60 seconds of mental arithmetic', hint: 'Answer as many as you can in 60 seconds.' },
-  { id: 'memory', name: 'Memory Grid', desc: 'Repeat a growing sequence of tiles', hint: 'Watch the tiles light up, then tap them in the same order.' },
-  { id: 'words', name: 'Word Match', desc: '60 seconds of matching synonyms', hint: 'Pick the word that means the same. You have 60 seconds.' }
+  { id: 'math', name: 'Math Sprint', desc: '60 seconds of mental arithmetic', hint: 'Answer as many as you can in 60 seconds.',
+    icon: '<path d="M7 4v6M4 7h6M15 4l4 4M19 4l-4 4M4 17h6M14 15.5h6M14 18.5h6"/>' },
+  { id: 'memory', name: 'Memory Grid', desc: 'Repeat a growing sequence of tiles', hint: 'Watch the tiles light up, then tap them in the same order.',
+    icon: '<rect x="4" y="4" width="7" height="7" rx="2" fill="currentColor"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/>' },
+  { id: 'words', name: 'Word Match', desc: '60 seconds of matching synonyms', hint: 'Pick the word that means the same. You have 60 seconds.',
+    icon: '<path d="M4 8h16M16 4l4 4-4 4M20 16H4M8 12l-4 4 4 4"/>' }
 ];
+const iconSvg = g => '<svg viewBox="0 0 24 24">' + g.icon + '</svg>';
+const NUMBER_WORDS = ['No', 'One', 'Two', 'Three', 'Four', 'Five'];
 const sleep = ms => new Promise(res => setTimeout(res, ms));
 const r = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
 const dayKey = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
@@ -239,16 +267,16 @@ function renderHome() {
   const live = store.lastDay === today() || store.lastDay === yesterday();
   $('streakNum').textContent = live ? store.streak : 0;
   $('dateLabel').textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
-  $('dots').innerHTML = GAMES.map(g => '<i class="' + (store.done[g.id] ? 'on' : '') + '"></i>').join('');
+  $('dots').innerHTML = GAMES.map(g => '<i class="' + (store.done[g.id] ? 'on' : '') + '" style="--c:var(--c-' + g.id + ')" title="' + g.name + '"></i>').join('');
   const left = GAMES.filter(g => !store.done[g.id]).length;
   $('sessionBtn').hidden = left === 0;
   $('sessionTitle').textContent = left === 0 ? 'Done for today' : "Today's session";
   $('sessionNote').textContent = left === 0 ? 'Come back tomorrow to keep your streak going. You can still practice below.'
-    : left === GAMES.length ? 'Three short games. Finish all three to keep your streak.'
+    : left === GAMES.length ? NUMBER_WORDS[GAMES.length] + ' short games. Finish all ' + NUMBER_WORDS[GAMES.length].toLowerCase() + ' to keep your streak.'
     : left === 1 ? 'One game left to finish today.' : left + ' games left to finish today.';
   $('sessionBtn').textContent = left === GAMES.length ? "Start today's session" : 'Continue session';
   $('games').innerHTML = GAMES.map(g =>
-    '<li><div class="info"><h2>' + g.name + '</h2><p>' + g.desc + '</p><span class="label">Level ' + store.skill[g.id] + ' · Best ' + (store.best[g.id] || 'none yet') + '</span>' + spark(g.id) + '</div>' +
+    '<li><div class="gicon" style="--c:var(--c-' + g.id + ')" aria-hidden="true">' + iconSvg(g) + '</div><div class="info"><h2>' + g.name + '</h2><p>' + g.desc + '</p><span class="label">Level ' + store.skill[g.id] + ' · Best ' + (store.best[g.id] || 'none yet') + '</span>' + spark(g.id) + '</div>' +
     '<button class="btn ghost small" data-g="' + g.id + '">Play</button></li>').join('');
   $('soundBtn').textContent = 'Sound: ' + (store.sound ? 'on' : 'off');
   show('home');
@@ -259,6 +287,9 @@ async function launch(id) {
   current = GAMES.find(g => g.id === id);
   $('countName').textContent = current.name;
   $('countHint').textContent = current.hint;
+  $('countIcon').innerHTML = iconSvg(current);
+  $('countWrap').style.setProperty('--c', 'var(--c-' + id + ')');
+  document.querySelectorAll('.bar').forEach(b => b.classList.remove('low'));
   show('count');
   for (let n = 3; n >= 1; n--) {
     const el = $('countNum');
@@ -284,7 +315,10 @@ function finishGame(score, label, stats, skill) {
     store.lastDay = today();
   }
   save();
-  $('endLabel').textContent = isBest && score > 0 ? 'New best score' : label;
+  const celebrate = isBest && score > 0;
+  $('endLabel').textContent = celebrate ? 'New best score' : label;
+  $('endLabel').classList.toggle('best', celebrate);
+  if (celebrate) setTimeout(() => { beep(784, 0.12); setTimeout(() => beep(1047, 0.2), 120); }, 450);
   $('finalScore').textContent = score;
   $('endNote').textContent = isBest || !prev ? 'points' : 'points. Your best is ' + prev + '.';
   $('endStats').innerHTML = stats.map(x => '<div class="stat"><span class="label">' + x[0] + '</span><span class="num">' + x[1] + '</span></div>').join('');
@@ -363,6 +397,7 @@ function tick() {
   const left = Math.max(0, ROUND - (performance.now() - s.t0) / 1000);
   $('time').textContent = Math.ceil(left);
   $('barFill').style.transform = 'scaleX(' + (left / ROUND) + ')';
+  $('barFill').parentNode.classList.toggle('low', left <= 10);
   if (left <= 0) {
     beep(520, 0.4);
     return finishGame(s.score, "Time's up", [['Correct', s.correct], ['Accuracy', (s.total ? Math.round(100 * s.correct / s.total) : 0) + '%'], ['Top level', s.top]], s.level);
@@ -498,6 +533,7 @@ function wTick() {
   const left = Math.max(0, ROUND - (performance.now() - w.t0) / 1000);
   $('wTime').textContent = Math.ceil(left);
   $('wBar').style.transform = 'scaleX(' + (left / ROUND) + ')';
+  $('wBar').parentNode.classList.toggle('low', left <= 10);
   if (left <= 0) {
     beep(520, 0.4);
     return finishGame(w.score, "Time's up", [['Correct', w.correct], ['Accuracy', (w.total ? Math.round(100 * w.correct / w.total) : 0) + '%'], ['Top level', w.top]], w.tier);
