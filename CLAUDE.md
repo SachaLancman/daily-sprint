@@ -46,6 +46,7 @@ A personal brain-training web app in the spirit of apps like Elevate, heading fo
 - Buttons are chunky with a solid "lip" shadow underneath that squashes when pressed. Tap targets at least about 44px.
 - Motion only inside `prefers-reduced-motion: no-preference`.
 - One column, max 440px wide; must not overflow at 360px wide.
+- Don't use text arrows (← → ↑ ↓) or other symbols the fonts lack: fallback fonts draw them in mismatched weights. Use `arrowSvg(dir)` or an SVG icon.
 - Class name `full` is reserved for full-screen screens (countdown/results); don't reuse it.
 
 ## Tools in this folder

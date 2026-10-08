@@ -7,8 +7,8 @@ function nextArrows() {
   const side = Math.random() < ARROW_MISLEAD[af.tier - 1] ? other : mid;
   af.askOuter = af.tier >= 4 && Math.random() < 0.35;
   af.answer = af.askOuter ? side : mid;
-  const ch = d => d === 'left' ? '←' : '→';
-  $('arrowRow').innerHTML = [side, side, mid, side, side].map((d, i) => '<span' + (i === 2 ? ' class="mid"' : '') + '>' + ch(d) + '</span>').join('');
+  $('arrowRow').innerHTML = [side, side, mid, side, side].map(d => arrowSvg(d)).join('');
+  $('arrowRow').setAttribute('aria-label', 'Arrows: ' + [side, side, mid, side, side].join(', '));
   $('arrowAsk').textContent = af.askOuter ? 'Which way do the OUTER arrows point?' : 'Which way does the MIDDLE arrow point?';
   $('arrowAsk').classList.toggle('flip', af.askOuter);
   af.locked = false;
@@ -38,4 +38,6 @@ registerGame({
   },
   key(e) { if (e.key === 'ArrowLeft') arrowPick('left'); else if (e.key === 'ArrowRight') arrowPick('right'); }
 });
+$('arrowBtns').children[0].innerHTML = arrowSvg('left');
+$('arrowBtns').children[1].innerHTML = arrowSvg('right');
 $('arrowBtns').addEventListener('click', e => { const b = e.target.closest('button'); if (b) arrowPick(b.dataset.d); });

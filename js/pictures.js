@@ -53,4 +53,8 @@ function drawShape(kind, color, x, y, s) {
   }[kind];
   return '<g fill="' + c + '" stroke="' + INK + '" stroke-width="' + Math.max(2, s * 0.07) + '" stroke-linejoin="round">' + body + '</g>';
 }
-const shapeTile = (kind, color, extra = '') => '<svg viewBox="0 0 100 100" aria-hidden="true"' + extra + '>' + drawShape(kind, color, 50, 50, 70) + '</svg>';
+// Drawn arrows (text arrows like ← → come from different fallback fonts and don't match). dir: up, down, left, right.
+const ARROW_TURN = { right: 0, down: 90, left: 180, up: 270 };
+const arrowSvg = dir => '<svg class="arrow" viewBox="0 0 24 24" aria-hidden="true" style="transform:rotate(' + ARROW_TURN[dir] + 'deg)">' +
+  '<path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const shapeTile =(kind, color, extra = '') => '<svg viewBox="0 0 100 100" aria-hidden="true"' + extra + '>' + drawShape(kind, color, 50, 50, 70) + '</svg>';

@@ -15,7 +15,9 @@ function nextPath() {
     moves.push(m); x += STEP[m][0]; y += STEP[m][1];
   }
   fa.end = y * L.n + x; fa.locked = false;
-  $('pathMoves').innerHTML = moves.map(m => '<span>' + m + '</span>').join('');
+  const dir = { '↑': 'up', '↓': 'down', '←': 'left', '→': 'right' };
+  $('pathMoves').innerHTML = moves.map(m => '<span aria-label="' + dir[m] + '">' + arrowSvg(dir[m]) + '</span>').join('');
+  $('pathMoves').setAttribute('aria-label', moves.map(m => dir[m]).join(', '));
   $('pathMoves').classList.remove('hide');
   $('pathGrid').style.setProperty('--n', L.n);
   $('pathGrid').innerHTML = Array.from({ length: L.n * L.n }, (_, i) => '<button class="tile path-cell' + (i === start[1] * L.n + start[0] ? ' start' : '') + '" data-i="' + i + '" aria-label="Square ' + (i + 1) + '"></button>').join('');

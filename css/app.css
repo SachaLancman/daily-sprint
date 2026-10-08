@@ -220,7 +220,11 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 /* Batch 2 games */
 .recall-num{letter-spacing:.12em}
 .recall-num.hide{visibility:hidden}
-.arrow-row{display:flex;justify-content:center;gap:6px;font:800 50px/1 var(--display)}
+.arrow-row{display:flex;justify-content:center;gap:4px;color:var(--ink)}
+.arrow-row .arrow{width:52px;height:52px}
+#arrowBtns .opt{display:grid;place-items:center}
+#arrowBtns .arrow{width:34px;height:34px}
+.path-moves .arrow{width:28px;height:28px}
 #arrowAsk.flip{color:var(--bad)}
 .bubble-field{height:380px;padding:0;overflow:hidden;touch-action:none}
 .bubble{position:absolute;border:0;border-radius:50%;padding:0;cursor:pointer;display:grid;place-items:center;
