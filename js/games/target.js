@@ -2,8 +2,14 @@
    L1: two numbers up to 9. L2: two numbers up to 20. L3: three numbers up to 15. L4: three numbers up to 25. */
 let tt = null;
 const TARGET_LEVELS = [{ pick: 2, max: 9 }, { pick: 2, max: 20 }, { pick: 3, max: 15 }, { pick: 3, max: 25 }];
+// Past level 4: bigger numbers, and from level 8 four numbers to combine.
+function targetLevel(level) {
+  if (level <= TARGET_LEVELS.length) return TARGET_LEVELS[level - 1];
+  const b = past(level, TARGET_LEVELS.length);
+  return { pick: b >= 4 ? 4 : 3, max: Math.min(99, 25 + 6 * b) };
+}
 function nextTarget() {
-  const L = TARGET_LEVELS[tt.tier - 1];
+  const L = targetLevel(tt.tier);
   const nums = Array.from({ length: 9 }, () => r(1, L.max));
   const answer = shuffle([0, 1, 2, 3, 4, 5, 6, 7, 8]).slice(0, L.pick); // these tiles are one sure solution
   tt.goal = answer.reduce((s, i) => s + nums[i], 0);
@@ -38,7 +44,7 @@ registerGame({
     '<g transform="rotate(8 98 98)"><rect x="84" y="84" width="30" height="28" rx="8" fill="#FFC83D"/><text x="99" y="104" text-anchor="middle" font-family="Bricolage Grotesque, system-ui, sans-serif" font-weight="800" font-size="16" fill="#17153A">7</text></g>',
   html: '<div class="board" id="targetBoard"><span class="prompt">Make exactly</span><div class="q" id="targetGoal">10</div><span class="fix" id="targetHint"></span></div><div class="tiles" id="targetGrid"></div>',
   start(my) {
-    tt = makeRound('target', TARGET_LEVELS.length);
+    tt = makeRound('target', MAX_LEVEL);
     show('target');
     roundHud(tt);
     nextTarget();

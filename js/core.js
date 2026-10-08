@@ -65,6 +65,8 @@ store.pending = store.pending || []; // results waiting to be sent online
 store.bestStreak = Math.max(store.bestStreak || 0, store.streak || 0);
 store.player = store.player || null; // { id, secret, name, country } once the profile is set
 // Activity calendar: games played per day, and the days the full daily session was finished. Kept forever (small).
+// Highest level ever reached per game (for mastery ranks). Older saves start from the remembered level.
+store.peak = store.peak || Object.assign({}, store.skill);
 if (!store.days) {
   // First time: rebuild what we can from the game history. A day with 4+ different games counts as a finished session.
   store.days = {}; store.sessionDays = [];
@@ -174,10 +176,14 @@ function show(id) {
   window.scrollTo(0, 0);
 }
 const nextUndone = () => todaysGames().find(g => !store.done[g.id]);
+/* Mastery ranks, earned by the highest level ever reached in a game (store.peak). */
+const RANKS = [[20, 'Diamond', '#7FE3FF'], [15, 'Gold', '#FFC83D'], [10, 'Silver', '#D5DAEA'], [5, 'Bronze', '#E0A06A']];
+const rankOf = level => RANKS.find(([min]) => level >= min) || null;
+const rankHtml = level => { const k = rankOf(level); return k ? ' · <i class="medal" style="background:' + k[2] + '"></i>' + k[1] : ''; };
 function cardHtml(g, showDone) {
   return '<li><button class="card g-' + g.id + '" data-g="' + g.id + '">' + artSvg(g) +
     (showDone && store.done[g.id] ? '<span class="done" aria-label="Done today">' + ICON.check + '</span>' : '') +
-    '<span class="skill">' + g.skill + '</span><h3>' + g.name + '</h3><div class="card-meta"><span class="chip">Lvl ' + store.skill[g.id] + ' · Best ' + (store.best[g.id] || '–') + '</span>' + spark(g.id) + '</div></button></li>';
+    '<span class="skill">' + g.skill + rankHtml(store.peak[g.id] || 0) + '</span><h3>' + g.name + '</h3><div class="card-meta"><span class="chip">Lvl ' + store.skill[g.id] + ' · Best ' + (store.best[g.id] || '–') + '</span>' + spark(g.id) + '</div></button></li>';
 }
 let librarySkill = 'All';
 function renderLibrary() {
@@ -239,11 +245,14 @@ async function launch(id) {
   STARTERS[id](my);
 }
 
-function finishGame(score, label, stats, skill) {
+// `skill` = the level to remember for next time; `top` = the highest level reached in this round.
+function finishGame(score, label, stats, skill, top = skill) {
   run++;
   const id = current.id, prev = store.best[id] || 0, isBest = score > prev;
+  const prevPeak = store.peak[id] || 0, newPeak = top > prevPeak;
   if (isBest) store.best[id] = score;
   store.skill[id] = skill;
+  if (newPeak) store.peak[id] = top;
   store.hist[id] = store.hist[id].concat(score).slice(-12);
   freshDay();
   store.done[id] = true;
@@ -263,6 +272,10 @@ function finishGame(score, label, stats, skill) {
   $('endLabel').textContent = label;
   $('stars').innerHTML = [0, 1, 2].map(i => ICON.star.replace('<svg', '<svg class="' + (i < stars ? 'on' : '') + '"')).join('');
   $('endBadge').hidden = !celebrate;
+  // Level record (not on the very first play) and new mastery ranks
+  const newRank = rankOf(top), unlocked = newPeak && newRank && newRank !== rankOf(prevPeak), record = newPeak && prevPeak > 0;
+  $('endRecord').hidden = !(unlocked || record);
+  $('endRecord').innerHTML = unlocked ? '<i class="medal" style="background:' + newRank[2] + '"></i>' + newRank[1] + ' rank unlocked!' : 'New level record: ' + top;
   countUp($('finalScore'), score);
   $('endNote').textContent = isBest || !prev ? 'points' : 'points · your best is ' + prev;
   $('endStats').innerHTML = stats.map(x => '<div><span>' + x[0] + '</span><b>' + x[1] + '</b></div>').join('');
@@ -271,7 +284,7 @@ function finishGame(score, label, stats, skill) {
   $('nextBtn').dataset.next = nxt ? nxt.id : '';
   $('homeBtn').hidden = !nxt;
   show('end');
-  if (celebrate) {
+  if (celebrate || !$('endRecord').hidden) {
     setTimeout(() => { beep(784, 0.12); setTimeout(() => beep(1047, 0.2), 120); }, 450);
     setTimeout(confetti, 300);
   }
@@ -310,6 +323,32 @@ function hudHtml(g) {
     (g.chips || '<span class="chip" id="' + g.id + 'Streak"></span>') + '</div></div>';
 }
 
+/* Open-ended difficulty
+   Every game has hand-made early levels, then keeps getting harder up to MAX_LEVEL using formulas.
+   past(level, top) = how many levels beyond the hand-made ones (0 while still in them). */
+const MAX_LEVEL = 30;
+const past = (level, top) => Math.max(0, level - top);
+// Answer clock: a bar that empties; if it runs out before an answer, onTimeout() runs (usually counts as a miss).
+// Used by expert levels of self-paced games. Call stopAnswerClock when the player answers.
+function answerClock(st, hostId, ms, onTimeout) {
+  const host = $(hostId);
+  let bar = host.querySelector('.qbar');
+  if (!bar) { host.insertAdjacentHTML('beforeend', '<div class="qbar" aria-hidden="true"><i></i></div>'); bar = host.querySelector('.qbar'); }
+  const fill = bar.firstChild;
+  bar.hidden = false;
+  fill.style.transition = 'none'; fill.style.transform = 'scaleX(1)'; void fill.offsetWidth;
+  fill.style.transition = 'transform ' + ms + 'ms linear'; fill.style.transform = 'scaleX(0)';
+  const token = st.clock = (st.clock || 0) + 1;
+  later(st, ms, () => { if (st.clock === token && !st.locked) onTimeout(); });
+}
+function stopAnswerClock(st, hostId) {
+  st.clock = (st.clock || 0) + 1;
+  const bar = $(hostId) && $(hostId).querySelector('.qbar');
+  if (bar) bar.hidden = true;
+}
+// Seconds allowed per answer at a given expert depth: starts at `start`, loses `step` per level, never below `min`.
+const clockMs = (depth, start, step, min) => Math.round(1000 * Math.max(min, start - step * (depth - 1)));
+
 /* Shared engine for the newer games: one "round" object per play.
    right()/wrong() handle points, streaks and levels (up after `upAfter` correct in a row, down on a mistake). */
 function makeRound(id, maxTier, upAfter = 3) {
@@ -344,7 +383,7 @@ function startClock(st, stats = standardStats) {
     if (st.my !== run) return;
     const left = Math.max(0, ROUND - (performance.now() - st.t0) / 1000);
     timer(st.id + 'Bar', st.id + 'Time', left);
-    if (left <= 0) { beep(520, 0.4); return finishGame(st.score, "Time's up", stats(st), st.tier); }
+    if (left <= 0) { beep(520, 0.4); return finishGame(st.score, "Time's up", stats(st), st.tier, st.top); }
     requestAnimationFrame(loop);
   };
   requestAnimationFrame(loop);

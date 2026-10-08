@@ -13,6 +13,12 @@ const LEVELS = [
   [add(100, 999), sub(100, 999), mul(12, 49, 4, 9)],
   [mul(11, 19, 11, 19), div(6, 15, 11, 25), sub(200, 999)]
 ];
+// Past level 8 the numbers keep growing (answers stay at 5 digits or fewer).
+function mathSet(level) {
+  if (level <= LEVELS.length) return LEVELS[level - 1];
+  const b = past(level, LEVELS.length);
+  return [add(100 * b, 999 + 300 * b), sub(200 + 100 * b, 999 + 400 * b), mul(11 + b, 19 + 2 * b, 3 + Math.floor(b / 3), 9 + b), div(6 + Math.floor(b / 2), 12 + b, 11 + b, 20 + 2 * b)];
+}
 let s = null;
 
 function startMath(my) {
@@ -23,7 +29,7 @@ function startMath(my) {
   requestAnimationFrame(tick);
 }
 function nextQuestion() {
-  const set = LEVELS[s.level - 1];
+  const set = mathSet(s.level);
   let q;
   do { q = set[r(0, set.length - 1)](); } while (q[0] === s.text);
   s.text = q[0]; s.answer = q[1]; s.input = ''; s.locked = false;
@@ -40,7 +46,7 @@ function settle(correct) {
     s.correct++; s.streak++; s.row++;
     s.score += 10 * s.level;
     floatText($('board'), '+' + 10 * s.level);
-    if (s.row >= 3 && s.level < LEVELS.length) { s.level++; s.row = 0; beep(990, 0.18); floatText($('board'), 'Level up!', 'lvl'); } else beep(660, 0.08);
+    if (s.row >= 3 && s.level < MAX_LEVEL) { s.level++; s.row = 0; beep(990, 0.18); floatText($('board'), 'Level up!', 'lvl'); } else beep(660, 0.08);
     s.top = Math.max(s.top, s.level);
     $('board').className = 'board ok';
   } else {
@@ -68,7 +74,7 @@ function tick() {
   timer('barFill', 'time', left);
   if (left <= 0) {
     beep(520, 0.4);
-    return finishGame(s.score, "Time's up", [['Correct', s.correct], ['Accuracy', (s.total ? Math.round(100 * s.correct / s.total) : 0) + '%'], ['Top level', s.top]], s.level);
+    return finishGame(s.score, "Time's up", [['Correct', s.correct], ['Accuracy', (s.total ? Math.round(100 * s.correct / s.total) : 0) + '%'], ['Top level', s.top]], s.level, s.top);
   }
   requestAnimationFrame(tick);
 }

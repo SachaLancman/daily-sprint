@@ -7,9 +7,15 @@ const COUNT_LEVELS = [
   { kinds: 3, min: 4, max: 9, others: 5, ms: 2200 },
   { kinds: 3, min: 5, max: 11, others: 6, ms: 1900 }
 ];
+// Past level 4: more to count and less time to look (the field holds at most 30 pictures).
+function countLevel(level) {
+  if (level <= COUNT_LEVELS.length) return COUNT_LEVELS[level - 1];
+  const b = past(level, COUNT_LEVELS.length);
+  return { kinds: 3, min: 5 + Math.floor(b / 3), max: Math.min(14, 11 + Math.floor(b / 2)), others: 6, ms: Math.max(800, 1900 - 70 * b) };
+}
 const COUNT_PICS = ['apple', 'cherry', 'star', 'heart', 'fish', 'leaf', 'balloon', 'mushroom', 'lemon', 'bell', 'kite', 'cupcake'];
 function nextCount() {
-  const L = COUNT_LEVELS[qc.tier - 1], kinds = samplePics(L.kinds, COUNT_PICS), target = kinds[0];
+  const L = countLevel(qc.tier), kinds = samplePics(L.kinds, COUNT_PICS), target = kinds[0];
   const n = r(L.min, L.max), items = Array(n).fill(target);
   kinds.slice(1).forEach(k => { for (let i = r(1, L.others); i > 0; i--) items.push(k); });
   // Place pictures in a 6x5 grid of cells (with a little jitter) so they never overlap.
@@ -51,7 +57,7 @@ registerGame({
     '<g transform="rotate(10 96 30)"><rect x="78" y="10" width="34" height="34" rx="10" fill="#FFC83D"/><text x="95" y="35" text-anchor="middle" font-family="Bricolage Grotesque, system-ui, sans-serif" font-weight="800" font-size="22" fill="#17153A">4</text></g>',
   html: '<div class="board" id="countBoard"><div class="ask" id="countAsk"></div><div class="count-field" id="countField"></div></div><div class="opts" id="countOpts"></div>',
   start(my) {
-    qc = makeRound('count', COUNT_LEVELS.length);
+    qc = makeRound('count', MAX_LEVEL);
     show('count');
     roundHud(qc);
     nextCount();

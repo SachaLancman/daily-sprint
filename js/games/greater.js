@@ -1,28 +1,43 @@
 /* Greater Than (Math): tap the bigger of two values.
    L1: sums. L2: products. L3: fractions. L4: percentages ("25% of 80"). The two values are never equal. */
 let gt = null;
+// `depth` (levels past 4) makes the numbers bigger, so very close pairs exist.
 const GREATER_MAKERS = [
   () => { const a = r(2, 30), b = r(2, 30); return [a + ' + ' + b, a + b]; },
-  () => { const a = r(3, 12), b = r(3, 12); return [a + ' × ' + b, a * b]; },
-  () => { const d = pickOne([2, 3, 4, 5, 6, 8, 10]), n = r(1, d - 1); return [n + '/' + d, n / d]; },
-  () => { const p = pickOne([10, 20, 25, 50, 75]), base = pickOne([20, 40, 60, 80, 120, 200]); return [p + '% of ' + base, p * base / 100]; }
+  (depth = 0) => { const a = r(3, 12 + depth), b = r(3, 12 + depth); return [a + ' × ' + b, a * b]; },
+  (depth = 0) => { const d = depth ? r(3, Math.min(24, 8 + depth)) : pickOne([2, 3, 4, 5, 6, 8, 10]), n = r(1, d - 1); return [n + '/' + d, n / d]; },
+  () => { const p = pickOne([10, 20, 25, 30, 40, 50, 60, 75, 80, 90]), base = 20 * r(1, 15); return [p + '% of ' + base, p * base / 100]; }
 ];
+// Past level 4: products, fractions or percentages that are closer and closer together, against an answer clock.
 function nextGreater() {
-  const make = GREATER_MAKERS[gt.tier - 1];
-  let a, b;
-  do { a = make(); b = Math.random() < 0.3 && gt.tier > 1 ? GREATER_MAKERS[gt.tier - 2]() : make(); } while (Math.abs(a[1] - b[1]) < 1e-9 || a[0] === b[0]);
+  const depth = past(gt.tier, GREATER_MAKERS.length);
+  const make = depth ? pickOne(GREATER_MAKERS.slice(1)) : GREATER_MAKERS[gt.tier - 1];
+  const closeness = Math.max(0.06, 0.3 - 0.02 * depth); // biggest allowed gap, as a share of the bigger value
+  const gap = (x, y) => Math.abs(x[1] - y[1]) / Math.max(x[1], y[1]);
+  let a, b, best = null;
+  for (let tries = 0; tries < 400; tries++) {
+    a = make(depth); b = depth ? make(depth) : Math.random() < 0.3 && gt.tier > 1 ? GREATER_MAKERS[gt.tier - 2]() : make();
+    if (Math.abs(a[1] - b[1]) < 1e-9 || a[0] === b[0]) continue; // never equal
+    if (!best || gap(a, b) < gap(best[0], best[1])) best = [a, b]; // keep the closest pair found
+    if (!depth || gap(a, b) <= closeness) break;
+  }
+  [a, b] = best;
   gt.vals = [a[1], b[1]]; gt.locked = false;
+  if (depth) answerClock(gt, 'greaterBoard', clockMs(depth, 4, 0.12, 1.5), () => greaterPick(-1));
+  else stopAnswerClock(gt, 'greaterBoard');
   $('greaterBtns').children[0].textContent = a[0];
   $('greaterBtns').children[1].textContent = b[0];
   [...$('greaterBtns').children].forEach(x => x.classList.remove('ok', 'no'));
   setBoard('greaterBoard', null);
 }
+// side: 0 = left, 1 = right, -1 = the answer clock ran out
 function greaterPick(side) {
   if (!alive(gt) || gt.locked) return;
   gt.locked = true;
-  const ok = gt.vals[side] > gt.vals[1 - side], btns = $('greaterBtns').children;
+  stopAnswerClock(gt, 'greaterBoard');
+  const best = gt.vals[0] > gt.vals[1] ? 0 : 1, ok = side === best, btns = $('greaterBtns').children;
   if (ok) { right(gt, $('greaterBoard')); btns[side].classList.add('ok'); setBoard('greaterBoard', 'ok'); }
-  else { wrong(gt); btns[side].classList.add('no'); btns[1 - side].classList.add('ok'); setBoard('greaterBoard', 'no'); }
+  else { wrong(gt); if (side >= 0) btns[side].classList.add('no'); btns[best].classList.add('ok'); setBoard('greaterBoard', 'no'); }
   later(gt, ok ? 250 : 900, nextGreater);
 }
 registerGame({
@@ -33,7 +48,7 @@ registerGame({
     '<path d="M50 16l12 8-12 8" fill="none" stroke="#FFC83D" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>',
   html: '<div class="board" id="greaterBoard"><span class="prompt">Which is bigger?</span></div><div class="yn" id="greaterBtns"><button class="opt num"></button><button class="opt num"></button></div>',
   start(my) {
-    gt = makeRound('greater', GREATER_MAKERS.length, 4);
+    gt = makeRound('greater', MAX_LEVEL, 4);
     show('greater');
     roundHud(gt);
     nextGreater();
