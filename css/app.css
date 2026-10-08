@@ -180,6 +180,8 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .hunt-wrap{position:relative}
 .num-tile{font:800 24px var(--display);color:var(--ink)}
 .tiles.n5 .num-tile{font-size:20px;border-radius:14px}
+.tiles.n6{gap:6px}
+.tiles.n6 .num-tile{font-size:17px;border-radius:10px}
 .num-tile.found{background:var(--grad);color:#fff;opacity:.5;box-shadow:none;cursor:default}
 .q.seq{font-size:34px;overflow-wrap:anywhere}
 .slots,.letters{display:grid;grid-template-columns:repeat(var(--n,5),minmax(0,48px));justify-content:center;gap:6px}
@@ -228,7 +230,7 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 #arrowBtns .opt{display:grid;place-items:center}
 #arrowBtns .arrow{width:34px;height:34px}
 .path-moves .arrow{width:28px;height:28px}
-#arrowAsk.flip,#cAsk.flip{color:var(--bad)}
+#arrowAsk.flip,#cAsk.flip,#flashMsg.flip{color:var(--bad)}
 .bubble-field{height:380px;padding:0;overflow:hidden;touch-action:none}
 .bubble{position:absolute;border:0;border-radius:50%;padding:0;cursor:pointer;display:grid;place-items:center;
   background:radial-gradient(circle at 34% 28%, rgba(255,255,255,.6), transparent 38%), var(--grad);box-shadow:0 8px 16px -8px var(--d)}

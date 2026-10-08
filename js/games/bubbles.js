@@ -8,10 +8,15 @@ const BUBBLE_LEVELS = [
   { every: 420, life: 1050, bad: 0.35 },
   { every: 360, life: 900, bad: 0.4 }
 ];
+// Past level 5: faster, shorter-lived, smaller bubbles and more bad ones (never below a tappable 40px).
+function bubbleLevel(level) {
+  const d = past(level, BUBBLE_LEVELS.length), L = BUBBLE_LEVELS[Math.min(level, BUBBLE_LEVELS.length) - 1];
+  return d ? { every: Math.max(220, 360 - 15 * d), life: Math.max(550, 900 - 35 * d), bad: Math.min(0.55, 0.4 + 0.015 * d), min: Math.max(40, 54 - 2 * d) } : Object.assign({ min: 54 }, L);
+}
 function spawnBubble() {
   if (!alive(bp)) return;
-  const L = BUBBLE_LEVELS[bp.tier - 1], bad = Math.random() < L.bad, id = ++bp.next;
-  const size = r(54, 72), field = $('bubbleField');
+  const L = bubbleLevel(bp.tier), bad = Math.random() < L.bad, id = ++bp.next;
+  const size = r(L.min, L.min + 18), field = $('bubbleField');
   const x = r(0, Math.max(0, field.clientWidth - size)), y = r(0, Math.max(0, field.clientHeight - size));
   field.insertAdjacentHTML('beforeend', '<button class="bubble' + (bad ? ' bad' : '') + '" data-id="' + id + '" style="left:' + x + 'px;top:' + y + 'px;width:' + size + 'px;height:' + size + 'px" aria-label="' + (bad ? 'Bad bubble' : 'Good bubble') + '">' +
     (bad ? ICON.x : ICON.star) + '</button>');
@@ -27,7 +32,7 @@ function popBubble(btn) {
   const pts = 5 * bp.tier;
   bp.score += pts;
   beep(700 + Math.min(bp.streak, 12) * 25, 0.05);
-  if (bp.pops >= 8 && bp.tier < BUBBLE_LEVELS.length) { bp.tier++; bp.pops = 0; beep(990, 0.18); floatText($('bubbleWrap'), 'Level up!', 'lvl'); }
+  if (bp.pops >= 8 && bp.tier < MAX_LEVEL) { bp.tier++; bp.pops = 0; beep(990, 0.18); floatText($('bubbleWrap'), 'Level up!', 'lvl'); }
   bp.top = Math.max(bp.top, bp.tier);
   roundHud(bp);
 }
@@ -39,7 +44,7 @@ registerGame({
     '<circle cx="90" cy="30" r="10" fill="#fff" fill-opacity=".5"/><circle cx="30" cy="94" r="8" fill="#fff" fill-opacity=".4"/>',
   html: '<div class="hunt-wrap" id="bubbleWrap"><div class="bubble-field board" id="bubbleField"></div></div>',
   start(my) {
-    bp = makeRound('bubbles', BUBBLE_LEVELS.length, 99);
+    bp = makeRound('bubbles', MAX_LEVEL, 99);
     bp.pops = 0; bp.missed = 0; bp.next = 0;
     show('bubbles');
     $('bubbleField').innerHTML = '';

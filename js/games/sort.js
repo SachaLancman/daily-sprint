@@ -5,7 +5,7 @@ function newSortRule() {
   const byShape = sr.tier === 1 ? true : sr.tier === 2 ? false : Math.random() < 0.5;
   const pair = byShape ? shuffle(['circle', 'square', 'triangle', 'diamond']).slice(0, 2) : shuffle(Object.keys(SHAPE_COLORS)).slice(0, 2);
   sr.rule = { byShape, left: pair[0], right: pair[1] };
-  sr.ruleLeft = sr.tier >= 4 ? r(1, 3) : r(4, 6); // items until the rule may change
+  sr.ruleLeft = sr.tier >= 8 ? r(1, 2) : sr.tier >= 4 ? r(1, 3) : r(4, 6); // items until the rule may change
   const icon = v => byShape ? shapeTile(v, '#B8B4D4') : shapeTile('circle', v);
   $('sortBtns').children[0].innerHTML = '<span class="pic static">' + icon(pair[0]) + '</span>' + pair[0];
   $('sortBtns').children[1].innerHTML = pair[1] + '<span class="pic static">' + icon(pair[1]) + '</span>';
@@ -21,10 +21,15 @@ function nextSort() {
   $('sortItem').innerHTML = shapeTile(kind, color);
   $('sortItem').classList.remove('pop-in'); void $('sortItem').offsetWidth; $('sortItem').classList.add('pop-in');
   setBoard('sortBoard', null);
+  // Past level 4: an answer clock that keeps shortening.
+  const depth = past(sr.tier, 4);
+  if (depth) answerClock(sr, 'sortBoard', clockMs(depth, 2.2, 0.05, 0.75), () => sortPick(null)); else stopAnswerClock(sr, 'sortBoard');
 }
+// side is null when the answer clock runs out
 function sortPick(side) {
   if (!alive(sr) || sr.locked) return;
   sr.locked = true;
+  stopAnswerClock(sr, 'sortBoard');
   const ok = side === sr.answer, before = sr.tier;
   if (ok) { right(sr, $('sortBoard')); setBoard('sortBoard', 'ok'); } else { wrong(sr); setBoard('sortBoard', 'no'); }
   if (sr.tier !== before && sr.tier <= 2) newSortRule(); // levels 1 and 2 have fixed rules, so set the new one
@@ -39,7 +44,7 @@ registerGame({
   html: '<div class="board" id="sortBoard"><span class="status go" id="sortRule">Sort by SHAPE</span><div class="pic-big" id="sortItem"></div></div>' +
     '<div class="yn sort-btns" id="sortBtns"><button class="opt" data-s="left"></button><button class="opt" data-s="right"></button></div>',
   start(my) {
-    sr = makeRound('sort', 4, 5);
+    sr = makeRound('sort', MAX_LEVEL, 5);
     show('sort');
     roundHud(sr);
     newSortRule();

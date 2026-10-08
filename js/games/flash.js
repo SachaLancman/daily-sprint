@@ -7,23 +7,36 @@ const FLASH_POOLS = [
   ['apple', 'cherry', 'heart', 'star', 'moon', 'lemon', 'balloon'],
   ['apple', 'cherry', 'heart', 'mushroom', 'star', 'crown', 'moon', 'lemon', 'banana', 'bell']
 ];
+// fm.hist = pictures shown so far. Past level 4 there's an answer clock; from level 9 you compare with TWO pictures back.
 function flashShow(pic, msg) {
-  fm.prev = fm.cur; fm.cur = pic;
+  fm.hist.push(pic); fm.cur = pic;
   $('flashPic').innerHTML = picSvg(pic);
   $('flashPic').classList.remove('pop-in'); void $('flashPic').offsetWidth; $('flashPic').classList.add('pop-in');
   $('flashMsg').textContent = msg;
   setBoard('flashBoard', null);
 }
 function nextFlash() {
-  const pool = FLASH_POOLS[fm.tier - 1];
-  const pic = Math.random() < 0.4 ? fm.cur : pickOne(pool.filter(p => p !== fm.cur));
-  flashShow(pic, 'Same as the one before?');
+  const depth = past(fm.tier, FLASH_POOLS.length), pool = FLASH_POOLS[Math.min(fm.tier, FLASH_POOLS.length) - 1];
+  fm.back = depth >= 5 ? 2 : 1;
+  if (fm.hist.length < fm.back) { // not enough pictures seen yet to compare
+    flashShow(pickOne(pool), 'Remember this one too');
+    fm.locked = true;
+    return later(fm, 900, nextFlash);
+  }
+  const target = fm.hist[fm.hist.length - fm.back];
+  const pic = Math.random() < 0.4 ? target : pickOne(pool.filter(p => p !== target));
+  fm.answer = pic === target;
+  flashShow(pic, fm.back === 2 ? 'Same as TWO pictures ago?' : 'Same as the one before?');
+  $('flashMsg').classList.toggle('flip', fm.back === 2);
   fm.locked = false;
+  if (depth) answerClock(fm, 'flashBoard', clockMs(depth, 2.4, 0.05, 0.9), () => flashAnswer(null)); else stopAnswerClock(fm, 'flashBoard');
 }
+// same: true/false from the buttons, null when the answer clock runs out
 function flashAnswer(same) {
   if (!alive(fm) || fm.locked) return;
   fm.locked = true;
-  const ok = same === (fm.cur === fm.prev);
+  stopAnswerClock(fm, 'flashBoard');
+  const ok = same === fm.answer;
   if (ok) { right(fm, $('flashBoard')); setBoard('flashBoard', 'ok'); }
   else { wrong(fm); setBoard('flashBoard', 'no'); }
   later(fm, ok ? 220 : 650, nextFlash);
@@ -37,11 +50,11 @@ registerGame({
   html: '<div class="board" id="flashBoard"><span class="prompt" id="flashMsg">Remember this one</span><div class="pic-big" id="flashPic"></div></div>' +
     '<div class="yn" id="flashBtns"><button class="opt" data-a="0" aria-label="Different (left arrow)"></button><button class="opt" data-a="1" aria-label="Same (right arrow)"></button></div>',
   start(my) {
-    fm = makeRound('flash', FLASH_POOLS.length, 4);
-    fm.cur = null; fm.locked = true;
+    fm = makeRound('flash', MAX_LEVEL, 4);
+    fm.cur = null; fm.hist = []; fm.locked = true;
     show('flash');
     roundHud(fm);
-    flashShow(pickOne(FLASH_POOLS[fm.tier - 1]), 'Remember this one');
+    flashShow(pickOne(FLASH_POOLS[Math.min(fm.tier, FLASH_POOLS.length) - 1]), 'Remember this one');
     later(fm, 1000, nextFlash);
     startClock(fm);
   },
