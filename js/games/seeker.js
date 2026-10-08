@@ -7,14 +7,20 @@ const SEEK_LEVELS = [
   { n: 5, kinds: 4, colors: 4, targets: [3, 5] },
   { n: 6, kinds: 4, colors: 4, targets: [4, 6] }
 ];
+// Past level 4: up to a 7x7 grid, more targets, more look-alikes, and a time limit per grid.
+function seekLevel(level) {
+  if (level <= SEEK_LEVELS.length) return Object.assign({ near: 0.7 }, SEEK_LEVELS[level - 1]);
+  const d = past(level, SEEK_LEVELS.length);
+  return { n: Math.min(7, 6 + Math.floor(d / 4)), kinds: 4, colors: 4, targets: [Math.min(6, 4 + Math.floor(d / 3)), Math.min(9, 6 + Math.floor(d / 3))], near: Math.min(0.95, 0.7 + 0.03 * d) };
+}
 function nextSeek() {
-  const L = SEEK_LEVELS[sk.tier - 1], kinds = shuffle(SHAPE_KINDS.slice()).slice(0, L.kinds), colors = shuffle(Object.keys(SHAPE_COLORS)).slice(0, L.colors);
+  const L = seekLevel(sk.tier), depth = past(sk.tier, SEEK_LEVELS.length), kinds = shuffle(SHAPE_KINDS.slice()).slice(0, L.kinds), colors = shuffle(Object.keys(SHAPE_COLORS)).slice(0, L.colors);
   const want = { kind: kinds[0], color: colors[0] }, total = L.n * L.n, count = r(L.targets[0], L.targets[1]);
   const cells = [];
   for (let i = 0; i < count; i++) cells.push(want);
   while (cells.length < total) {
     // Mostly near-misses (same color or same shape), so you have to check both.
-    const c = Math.random() < 0.7
+    const c = Math.random() < L.near
       ? (Math.random() < 0.5 ? { kind: want.kind, color: pickOne(colors.slice(1)) } : { kind: pickOne(kinds.slice(1)), color: want.color })
       : { kind: pickOne(kinds), color: pickOne(colors) };
     if (c.kind !== want.kind || c.color !== want.color) cells.push(c);
@@ -25,6 +31,14 @@ function nextSeek() {
   $('seekGrid').classList.toggle('tight', L.n >= 5);
   $('seekGrid').innerHTML = sk.cells.map((c, i) => '<button class="pic" data-i="' + i + '" aria-label="' + c.color + ' ' + c.kind + '">' + shapeTile(c.kind, c.color) + '</button>').join('');
   $('seekLeft').textContent = count;
+  if (depth) answerClock(sk, 'seekWrap', clockMs(depth, 10, 0.3, 4), seekTimeout); else stopAnswerClock(sk, 'seekWrap');
+}
+function seekTimeout() {
+  if (!alive(sk) || sk.locked) return;
+  sk.locked = true;
+  [...$('seekGrid').children].forEach((b, i) => { const x = sk.cells[i]; if (x.kind === sk.want.kind && x.color === sk.want.color) b.classList.add('ok'); });
+  wrong(sk);
+  later(sk, 1100, nextSeek);
 }
 function seekTap(btn) {
   if (!alive(sk) || sk.locked || btn.classList.contains('ok')) return;
@@ -32,9 +46,10 @@ function seekTap(btn) {
   if (c.kind === sk.want.kind && c.color === sk.want.color) {
     btn.classList.add('ok'); beep(600 + (10 - sk.left) * 30, 0.05);
     sk.left--; $('seekLeft').textContent = sk.left;
-    if (!sk.left) { sk.locked = true; right(sk, $('seekWrap')); later(sk, 350, nextSeek); }
+    if (!sk.left) { sk.locked = true; stopAnswerClock(sk, 'seekWrap'); right(sk, $('seekWrap')); later(sk, 350, nextSeek); }
   } else {
     btn.classList.add('no'); sk.locked = true;
+    stopAnswerClock(sk, 'seekWrap');
     [...$('seekGrid').children].forEach((b, i) => { const x = sk.cells[i]; if (x.kind === sk.want.kind && x.color === sk.want.color) b.classList.add('ok'); });
     wrong(sk);
     later(sk, 1100, nextSeek);
@@ -50,7 +65,7 @@ registerGame({
   chips: '<span class="chip hot">Left <b id="seekLeft">0</b></span>',
   html: '<div class="ask" id="seekAsk"></div><div class="hunt-wrap" id="seekWrap"><div class="pic-grid" id="seekGrid"></div></div>',
   start(my) {
-    sk = makeRound('seeker', SEEK_LEVELS.length, 2);
+    sk = makeRound('seeker', MAX_LEVEL, 2);
     show('seeker');
     roundHud(sk);
     nextSeek();

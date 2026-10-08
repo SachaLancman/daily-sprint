@@ -224,10 +224,11 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .recall-num.hide{visibility:hidden}
 .arrow-row{display:flex;justify-content:center;gap:4px;color:var(--ink)}
 .arrow-row .arrow{width:52px;height:52px}
+.arrow-row.seven .arrow{width:40px;height:40px}
 #arrowBtns .opt{display:grid;place-items:center}
 #arrowBtns .arrow{width:34px;height:34px}
 .path-moves .arrow{width:28px;height:28px}
-#arrowAsk.flip{color:var(--bad)}
+#arrowAsk.flip,#cAsk.flip{color:var(--bad)}
 .bubble-field{height:380px;padding:0;overflow:hidden;touch-action:none}
 .bubble{position:absolute;border:0;border-radius:50%;padding:0;cursor:pointer;display:grid;place-items:center;
   background:radial-gradient(circle at 34% 28%, rgba(255,255,255,.6), transparent 38%), var(--grad);box-shadow:0 8px 16px -8px var(--d)}

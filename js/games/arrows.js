@@ -2,21 +2,28 @@
    Higher levels mislead more often, and at level 4 the question sometimes switches to the outer arrows. */
 let af = null;
 const ARROW_MISLEAD = [0.3, 0.5, 0.65, 0.65];
+// Past level 4: an answer clock, the "outer" question more often, and from level 10 seven arrows instead of five.
 function nextArrows() {
+  const depth = past(af.tier, 4);
   const mid = Math.random() < 0.5 ? 'left' : 'right', other = mid === 'left' ? 'right' : 'left';
-  const side = Math.random() < ARROW_MISLEAD[af.tier - 1] ? other : mid;
-  af.askOuter = af.tier >= 4 && Math.random() < 0.35;
+  const side = Math.random() < ARROW_MISLEAD[Math.min(af.tier, 4) - 1] ? other : mid;
+  af.askOuter = af.tier >= 4 && Math.random() < Math.min(0.5, 0.35 + 0.02 * depth);
   af.answer = af.askOuter ? side : mid;
-  $('arrowRow').innerHTML = [side, side, mid, side, side].map(d => arrowSvg(d)).join('');
-  $('arrowRow').setAttribute('aria-label', 'Arrows: ' + [side, side, mid, side, side].join(', '));
+  const flank = depth >= 6 ? 3 : 2, row = Array(flank).fill(side).concat(mid, Array(flank).fill(side));
+  $('arrowRow').innerHTML = row.map(d => arrowSvg(d)).join('');
+  $('arrowRow').classList.toggle('seven', flank === 3);
+  $('arrowRow').setAttribute('aria-label', 'Arrows: ' + row.join(', '));
   $('arrowAsk').textContent = af.askOuter ? 'Which way do the OUTER arrows point?' : 'Which way does the MIDDLE arrow point?';
   $('arrowAsk').classList.toggle('flip', af.askOuter);
   af.locked = false;
   setBoard('arrowBoard', null);
+  if (depth) answerClock(af, 'arrowBoard', clockMs(depth, 2.2, 0.05, 0.8), () => arrowPick(null)); else stopAnswerClock(af, 'arrowBoard');
 }
+// dir is null when the answer clock runs out
 function arrowPick(dir) {
   if (!alive(af) || af.locked) return;
   af.locked = true;
+  stopAnswerClock(af, 'arrowBoard');
   const ok = dir === af.answer;
   if (ok) { right(af, $('arrowBoard')); setBoard('arrowBoard', 'ok'); } else { wrong(af); setBoard('arrowBoard', 'no'); }
   later(af, ok ? 200 : 650, nextArrows);
@@ -30,7 +37,7 @@ registerGame({
   html: '<div class="board" id="arrowBoard"><span class="prompt" id="arrowAsk">Which way does the middle arrow point?</span><div class="arrow-row" id="arrowRow"></div></div>' +
     '<div class="yn" id="arrowBtns"><button class="opt" data-d="left" aria-label="Left">←</button><button class="opt" data-d="right" aria-label="Right">→</button></div>',
   start(my) {
-    af = makeRound('arrows', 4, 4);
+    af = makeRound('arrows', MAX_LEVEL, 4);
     show('arrows');
     roundHud(af);
     nextArrows();
