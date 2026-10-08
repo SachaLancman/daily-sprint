@@ -17,43 +17,47 @@ const BANK = [
 ].map(t => t.split(' ').map(p => p.split(':')));
 let w = null;
 function startWords(my) {
-  const lv = Math.min(BANK.length, Math.max(1, store.skill.words - 1));
+  const lv = Math.min(MAX_LEVEL, Math.max(1, store.skill.words - 1));
   w = { my, score: 0, tier: lv, top: lv, row: 0, streak: 0, correct: 0, total: 0, recent: [], answer: '', locked: false, t0: performance.now() };
   show('words');
   nextWord();
   requestAnimationFrame(wTick);
 }
 function wHud() { $('wScore').textContent = w.score; $('wLevel').textContent = w.tier; streakChip('wStreak', w.streak); }
+// Past level 4: the hardest words, more options to choose from, and an answer clock.
 function nextWord() {
-  const set = BANK[w.tier - 1];
+  const set = BANK[Math.min(w.tier, BANK.length) - 1], depth = past(w.tier, BANK.length), count = depth >= 4 ? 6 : depth ? 5 : 4;
   let p;
   do { p = set[r(0, set.length - 1)]; } while (w.recent.includes(p[0]));
   w.recent = w.recent.concat(p[0]).slice(-10); // skip the last 10 words shown, across all levels
   w.answer = p[1]; w.locked = false;
   const opts = [p[1]];
-  while (opts.length < 4) { const c = set[r(0, set.length - 1)][1]; if (!opts.includes(c)) opts.push(c); }
+  while (opts.length < count) { const c = set[r(0, set.length - 1)][1]; if (!opts.includes(c)) opts.push(c); }
   for (let i = opts.length - 1; i > 0; i--) { const j = r(0, i); [opts[i], opts[j]] = [opts[j], opts[i]]; }
   $('wWord').textContent = p[0];
   $('wBoard').className = 'board';
   $('opts').innerHTML = opts.map(o => '<button class="opt" data-o="' + o + '">' + o + '</button>').join('');
+  if (depth) answerClock(w, 'wBoard', clockMs(depth, 5, 0.15, 1.8), () => choose(null)); else stopAnswerClock(w, 'wBoard');
   wHud();
 }
+// btn is null when the answer clock runs out
 function choose(btn) {
   if (screen !== 'words' || !w || w.my !== run || w.locked) return;
   w.locked = true; w.total++;
-  const correct = btn.dataset.o === w.answer;
+  stopAnswerClock(w, 'wBoard');
+  const correct = !!btn && btn.dataset.o === w.answer;
   if (correct) {
     w.correct++; w.streak++; w.row++;
     w.score += 10 * w.tier;
     floatText($('wBoard'), '+' + 10 * w.tier);
-    if (w.row >= 3 && w.tier < BANK.length) { w.tier++; w.row = 0; beep(990, 0.18); floatText($('wBoard'), 'Level up!', 'lvl'); } else beep(660, 0.08);
+    if (w.row >= 3 && w.tier < MAX_LEVEL) { w.tier++; w.row = 0; beep(990, 0.18); floatText($('wBoard'), 'Level up!', 'lvl'); } else beep(660, 0.08);
     w.top = Math.max(w.top, w.tier);
     btn.classList.add('ok');
     $('wBoard').className = 'board ok';
   } else {
     w.streak = 0; w.row = 0;
     if (w.tier > 1) w.tier--;
-    btn.classList.add('no');
+    if (btn) btn.classList.add('no');
     const right = [...$('opts').children].find(b => b.dataset.o === w.answer);
     if (right) right.classList.add('ok');
     $('wBoard').className = 'board no';
@@ -69,7 +73,7 @@ function wTick() {
   timer('wBar', 'wTime', left);
   if (left <= 0) {
     beep(520, 0.4);
-    return finishGame(w.score, "Time's up", [['Correct', w.correct], ['Accuracy', (w.total ? Math.round(100 * w.correct / w.total) : 0) + '%'], ['Top level', w.top]], w.tier);
+    return finishGame(w.score, "Time's up", [['Correct', w.correct], ['Accuracy', (w.total ? Math.round(100 * w.correct / w.total) : 0) + '%'], ['Top level', w.top]], w.tier, w.top);
   }
   requestAnimationFrame(wTick);
 }

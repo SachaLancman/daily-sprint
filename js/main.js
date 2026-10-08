@@ -17,7 +17,7 @@ $('hGrid').addEventListener('click', e => { const b = e.target.closest('button')
 $('pOpts').addEventListener('click', e => { const b = e.target.closest('button'); if (b) patternChoose(b); });
 $('aLetters').addEventListener('click', e => { const b = e.target.closest('button'); if (b) pickLetter(Number(b.dataset.i)); });
 $('aUndo').addEventListener('click', undoLetter);
-$('aSkip').addEventListener('click', skipAnagram);
+$('aSkip').addEventListener('click', () => skipAnagram(false));
 $('endBoard').addEventListener('click', openBoard);
 $('boardBack').addEventListener('click', () => renderHome());
 $('profileBack').addEventListener('click', () => store.player && afterProfile === 'board' ? openBoard() : renderHome());

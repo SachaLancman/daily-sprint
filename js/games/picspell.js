@@ -22,25 +22,30 @@ function nextSpell() {
   let pic;
   do { pic = pickOne(SPELL_PICS); } while (ps.recent.includes(pic));
   ps.recent = ps.recent.concat(pic).slice(-8);
+  // Past level 3: only the subtle kinds of mistakes, 5 then 6 options, and an answer clock.
+  const depth = past(ps.tier, 3), count = depth >= 4 ? 6 : depth ? 5 : 4;
   const word = PICS[pic].word, opts = [word];
-  for (let tries = 0; opts.length < 4 && tries < 60; tries++) {
-    const level = tries < 30 ? ps.tier : r(1, 3); // fall back to other kinds of mistakes if needed
+  for (let tries = 0; opts.length < count && tries < 80; tries++) {
+    const level = tries >= 40 ? r(1, 3) : depth ? r(2, 3) : ps.tier; // fall back to other kinds of mistakes if needed
     const bad = misspell[level](word);
     if (bad !== word && bad.length >= 3 && !opts.includes(bad)) opts.push(bad);
   }
   ps.word = word; ps.locked = false;
+  if (depth) answerClock(ps, 'spellBoard', clockMs(depth, 4.5, 0.12, 1.8), () => spellChoose(null)); else stopAnswerClock(ps, 'spellBoard');
   $('spellPic').innerHTML = picSvg(pic);
   $('spellPic').classList.remove('pop-in'); void $('spellPic').offsetWidth; $('spellPic').classList.add('pop-in');
   $('spellOpts').innerHTML = shuffle(opts).map(o => '<button class="opt" data-o="' + o + '">' + o + '</button>').join('');
   setBoard('spellBoard', null);
 }
+// btn is null when the answer clock runs out
 function spellChoose(btn) {
   if (!alive(ps) || ps.locked) return;
   ps.locked = true;
-  const ok = btn.dataset.o === ps.word;
+  stopAnswerClock(ps, 'spellBoard');
+  const ok = !!btn && btn.dataset.o === ps.word;
   if (ok) { right(ps, $('spellBoard')); btn.classList.add('ok'); setBoard('spellBoard', 'ok'); }
   else {
-    wrong(ps); btn.classList.add('no'); setBoard('spellBoard', 'no');
+    wrong(ps); if (btn) btn.classList.add('no'); setBoard('spellBoard', 'no');
     [...$('spellOpts').children].forEach(b => { if (b.dataset.o === ps.word) b.classList.add('ok'); });
   }
   later(ps, ok ? 350 : 1200, nextSpell);
@@ -52,7 +57,7 @@ registerGame({
     '<g transform="rotate(5 80 94)"><rect x="46" y="80" width="68" height="28" rx="10" fill="#FFC83D"/><text x="80" y="100" text-anchor="middle" font-family="Bricolage Grotesque, system-ui, sans-serif" font-weight="800" font-size="16" fill="#17153A">abc</text></g>',
   html: '<div class="board" id="spellBoard"><span class="prompt">Which spelling is right?</span><div class="pic-big" id="spellPic"></div></div><div class="opts" id="spellOpts"></div>',
   start(my) {
-    ps = makeRound('picspell', 3);
+    ps = makeRound('picspell', MAX_LEVEL);
     ps.recent = [];
     show('picspell');
     roundHud(ps);

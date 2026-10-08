@@ -339,7 +339,7 @@ function answerClock(st, hostId, ms, onTimeout) {
   fill.style.transition = 'none'; fill.style.transform = 'scaleX(1)'; void fill.offsetWidth;
   fill.style.transition = 'transform ' + ms + 'ms linear'; fill.style.transform = 'scaleX(0)';
   const token = st.clock = (st.clock || 0) + 1;
-  later(st, ms, () => { if (st.clock === token && !st.locked) onTimeout(); });
+  later(st, ms, () => { if (st.clock === token) onTimeout(); }); // answering calls stopAnswerClock, which cancels this
 }
 function stopAnswerClock(st, hostId) {
   st.clock = (st.clock || 0) + 1;
