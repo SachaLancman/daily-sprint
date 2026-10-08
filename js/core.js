@@ -64,6 +64,15 @@ store.log = store.log || [];         // every finished game: { game, score, day 
 store.pending = store.pending || []; // results waiting to be sent online
 store.bestStreak = Math.max(store.bestStreak || 0, store.streak || 0);
 store.player = store.player || null; // { id, secret, name, country } once the profile is set
+// Activity calendar: games played per day, and the days the full daily session was finished. Kept forever (small).
+if (!store.days) {
+  // First time: rebuild what we can from the game history. A day with 4+ different games counts as a finished session.
+  store.days = {}; store.sessionDays = [];
+  const kinds = {};
+  store.log.forEach(e => { store.days[e.day] = (store.days[e.day] || 0) + 1; (kinds[e.day] = kinds[e.day] || new Set()).add(e.game); });
+  store.sessionDays = Object.keys(kinds).filter(d => kinds[d].size >= 4);
+  if (store.lastDay && !store.sessionDays.includes(store.lastDay)) store.sessionDays.push(store.lastDay);
+}
 function save() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} }
 function freshDay() { if (store.done.date !== today()) store.done = { date: today() }; }
 // Today's session: SESSION games picked from the date, so everyone gets the same picks on the same day.
@@ -157,7 +166,7 @@ let screen = 'home', run = 0, inSession = false, current = null;
 const NAV_SCREENS = ['home', 'library', 'board'];
 function show(id) {
   screen = id;
-  ['home', 'library', 'count', 'end', 'board', 'profile'].concat(GAMES.map(g => g.id)).forEach(x => { $(x).hidden = x !== id; });
+  ['home', 'library', 'count', 'end', 'board', 'profile', 'calendar'].concat(GAMES.map(g => g.id)).forEach(x => { $(x).hidden = x !== id; });
   const nav = NAV_SCREENS.includes(id);
   $('nav').hidden = !nav;
   document.body.classList.toggle('has-nav', nav);
@@ -242,7 +251,9 @@ function finishGame(score, label, stats, skill) {
     store.streak = store.lastDay === yesterday() ? store.streak + 1 : 1;
     store.lastDay = today();
     store.bestStreak = Math.max(store.bestStreak, store.streak);
+    if (!store.sessionDays.includes(today())) store.sessionDays.push(today());
   }
+  store.days[today()] = (store.days[today()] || 0) + 1;
   store.log = store.log.concat({ game: id, score, day: today() }).slice(-500);
   save();
   submitScore({ game: id, score, day: today() });

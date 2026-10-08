@@ -20,7 +20,7 @@
   <section class="screen" id="home">
     <div class="home-top">
       <div><p class="hello" id="hello">Hello</p><h1>Daily Sprint</h1></div>
-      <div class="pill" id="streakPill"><span id="flameSlot"></span><span><span id="streakNum">0</span> <small>days</small></span></div>
+      <button class="pill" id="streakPill"><span id="flameSlot"></span><span><span id="streakNum">0</span> <small>days</small></span></button>
     </div>
     <div class="hero">
       <div>
@@ -174,6 +174,28 @@
     </div>
   </section>
 
+  <section class="screen" id="calendar" hidden>
+    <div class="topbar">
+      <button class="icon-btn" id="calBack" aria-label="Back"></button>
+      <h1>Your activity</h1>
+    </div>
+    <div class="cal-stats" id="calStats"></div>
+    <div class="cal-card">
+      <div class="cal-head">
+        <button class="icon-btn" id="calPrev" aria-label="Previous month"></button>
+        <h2 id="calMonth">Month</h2>
+        <button class="icon-btn" id="calNext" aria-label="Next month"></button>
+      </div>
+      <div class="cal-grid" id="calGrid" role="grid"></div>
+      <div class="cal-legend">
+        <span><i class="cal-dot"></i>No games</span>
+        <span><i class="cal-dot played"></i>Played</span>
+        <span><i class="cal-dot complete"></i>Full session</span>
+      </div>
+    </div>
+    <p class="cal-month-note" id="calNote"></p>
+  </section>
+
   <section class="screen" id="board" hidden>
     <div class="topbar">
       <button class="icon-btn" id="boardBack" aria-label="Back"></button>
@@ -228,6 +250,7 @@
 <script src="js/games/flash.js"></script>
 <script src="js/games/balance.js"></script>
 <script src="js/leaderboard.js"></script>
+<script src="js/calendar.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>
