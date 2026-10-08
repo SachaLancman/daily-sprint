@@ -48,6 +48,7 @@ registerGame({
     bp.pops = 0; bp.missed = 0; bp.next = 0;
     show('bubbles');
     $('bubbleField').innerHTML = '';
+    setBoard('bubbleField', null); // clear a red "mistake" border left over from the last game
     roundHud(bp);
     later(bp, 300, spawnBubble);
     startClock(bp, st => [['Popped', st.correct], ['Missed', st.missed], ['Top level', st.top]]);

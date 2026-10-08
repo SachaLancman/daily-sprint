@@ -118,8 +118,11 @@
   function overflow(id) {
     const box = document.querySelector('main').getBoundingClientRect();
     // Pictures can be tilted on purpose (Odd One Out): measure their tiles, not the drawing's invisible corners.
-    const out = [...$(id).querySelectorAll('*')].filter(el => !el.closest('.float,.bubble,.pic svg,.mcard svg')).filter(el => { const b = el.getBoundingClientRect(); return b.width && (b.right > box.right + 1 || b.left < box.left - 1); });
-    return out.length ? out.length + ' element(s) spill off a phone screen' : null;
+    // A board that is shaking after a mistake (.board.no) moves sideways for a moment, which is fine.
+    const out = [...$(id).querySelectorAll('*')].filter(el => !el.closest('.float,.bubble,.pic svg,.mcard svg,.board.no')).filter(el => { const b = el.getBoundingClientRect(); return b.width && (b.right > box.right + 1 || b.left < box.left - 1); });
+    if (!out.length) return null;
+    const el = out[0], b = el.getBoundingClientRect(), name = el.id ? '#' + el.id : el.tagName.toLowerCase() + (el.classList.length ? '.' + [...el.classList].join('.') : '');
+    return out.length + ' element(s) spill off a phone screen (e.g. ' + name + ' by ' + Math.round(Math.max(b.right - box.right, box.left - b.left)) + 'px)';
   }
 
   async function testGame(g, levels, log) {
@@ -203,7 +206,8 @@
     if (localStorage.getItem(TEST_BACKUP) === null) localStorage.setItem(TEST_BACKUP, localStorage.getItem(KEY) ?? '__none__');
     const onlineBefore = { url: ONLINE.url, key: ONLINE.key };
     ONLINE.url = ''; ONLINE.key = ''; store.sound = false;
-    document.querySelector('main').style.maxWidth = PHONE_WIDTH + 'px';
+    // Lay the app out at exactly a small phone's width, whatever the size of this window.
+    Object.assign(document.querySelector('main').style, { width: PHONE_WIDTH + 'px', maxWidth: 'none' });
     let failed = 0, done = 0;
     const total = GAMES.length + 1;
     const add = (name, problems) => {
@@ -221,7 +225,7 @@
     if (errors.length) add('Page errors during the run', errors.slice(0, 8));
     bar.style.width = '100%';
     ONLINE.url = onlineBefore.url; ONLINE.key = onlineBefore.key;
-    document.querySelector('main').style.maxWidth = '';
+    Object.assign(document.querySelector('main').style, { width: '', maxWidth: '' });
     run++; show('home'); $('nav').hidden = true; document.body.classList.remove('has-nav');
     const ok = !failed;
     $('testNow').textContent = ok ? 'All tests passed ✓' : failed + ' test' + (failed > 1 ? 's' : '') + ' found problems ✗';
