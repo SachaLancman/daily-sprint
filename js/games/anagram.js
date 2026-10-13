@@ -33,7 +33,7 @@ function nextAnagram() {
   aHud();
 }
 function renderAnagram() {
-  $('aSlots').innerHTML = [...an.word].map((_, i) => '<span class="slot' + (i < an.picked.length ? ' full' : '') + '">' + (i < an.picked.length ? an.letters[an.picked[i]] : '') + '</span>').join('');
+  $('aSlots').innerHTML = [...an.word].map((_, i) => '<span class="slot' + (i < an.picked.length ? ' filled' : '') + '">' + (i < an.picked.length ? an.letters[an.picked[i]] : '') + '</span>').join('');
   $('aLetters').innerHTML = an.letters.map((ch, i) => '<button class="letter" data-i="' + i + '"' + (an.picked.includes(i) ? ' disabled' : '') + '>' + ch + '</button>').join('');
 }
 function pickLetter(i) {

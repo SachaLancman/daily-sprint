@@ -186,7 +186,7 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .q.seq{font-size:34px;overflow-wrap:anywhere}
 .slots,.letters{display:grid;grid-template-columns:repeat(var(--n,5),minmax(0,48px));justify-content:center;gap:6px}
 .slot{height:50px;border-bottom:3px solid var(--line);font:800 28px var(--display);text-transform:uppercase;display:grid;place-items:center}
-.slot.full{border-color:var(--d)}
+.slot.filled{border-color:var(--d)}
 .board.ok .slot{color:var(--good);border-color:var(--good)}
 .board.no .slot{color:var(--bad);border-color:var(--bad)}
 .letter{height:56px;font:800 26px var(--display);text-transform:uppercase;background:var(--surface);color:var(--ink);border:0;border-radius:14px;box-shadow:0 4px 0 var(--line);cursor:pointer;touch-action:manipulation;padding:0}

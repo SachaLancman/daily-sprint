@@ -144,6 +144,9 @@
           if (mode === 'gen') continue;
           const st = t.state(), before = { score: st.score, streak: st.streak };
           t[mode](); answers++;
+          // Nothing in a game may break out and cover the screen (a reused "full" class once did this to Unscramble's letters).
+          const loose = [...$(g.id).querySelectorAll('*')].filter(el => getComputedStyle(el).position === 'fixed');
+          if (loose.length) problems.push('level ' + L + ' (' + mode + '): ' + loose.length + ' element(s) cover the screen after answering (e.g. ' + (loose[0].className || loose[0].tagName) + ')');
           if (mode === 'solve' && !(st.score > before.score)) problems.push('level ' + L + ': correct answer did not score');
           if (mode === 'miss') { const m2 = t.missCheck ? t.missCheck(st) : st.streak === 0 ? null : 'mistake did not reset the streak'; if (m2) problems.push('level ' + L + ': ' + m2); }
         } catch (e) { problems.push('level ' + L + ' (' + mode + '): crashed: ' + e.message); }
