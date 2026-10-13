@@ -257,6 +257,46 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .badge.record{background:#fff;color:#17153A;display:inline-flex;align-items:center}
 .badge.record .medal{width:12px;height:12px;box-shadow:0 0 0 1.5px #17153A}
 
+/* Settings */
+.set-list{background:var(--surface);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
+.set-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 16px;border:0;border-bottom:1px solid var(--line);background:none;width:100%;text-align:left;color:var(--ink);font:inherit;text-decoration:none}
+.set-row:last-child{border-bottom:0}
+.set-row.col{flex-direction:column;align-items:stretch}
+.set-row b{display:block;font-weight:700}
+.set-row small{display:block;color:var(--muted);font-size:13px}
+.link-row{cursor:pointer}
+.link-row::after{content:"";flex:none;width:9px;height:9px;border-right:2.5px solid var(--muted);border-top:2.5px solid var(--muted);transform:rotate(45deg)}
+.set-row.danger b{color:var(--bad)}
+.switch{flex:none;width:52px;height:30px;border-radius:999px;border:0;background:var(--line);position:relative;cursor:pointer;padding:0}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.25);transition:transform .15s}
+.switch[aria-checked="true"]{background:var(--good)}
+.switch[aria-checked="true"]::after{transform:translateX(22px)}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--bg);border-radius:12px;padding:4px}
+.seg button{border:0;background:none;border-radius:9px;padding:9px 4px;font:700 14px var(--display);color:var(--muted);cursor:pointer}
+.seg button[aria-checked="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.set-foot{text-align:center;font-size:13px}
+
+/* First-time "How to play" on the countdown screen */
+.intro{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%}
+.intro-note{font-size:14px;max-width:340px}
+.intro .btn{max-width:320px}
+
+/* Welcome screens */
+#welcome{min-height:calc(100vh - 60px);justify-content:center;text-align:center;align-items:center}
+.welcome-slide{display:flex;flex-direction:column;align-items:center;gap:14px;max-width:360px}
+.welcome-slide h1{font-size:30px}
+.welcome-art{width:160px;height:160px;color:var(--ink)}
+.welcome-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%}
+.welcome-card{position:relative;overflow:hidden;background:var(--grad);border-radius:16px;aspect-ratio:1;color:#fff;display:flex;align-items:flex-end;padding:8px;font:800 13px var(--display)}
+.welcome-card .art{position:absolute;top:-4px;right:-8px;width:64px;height:64px;color:var(--d)}
+.welcome-card span{position:relative}
+.welcome-flame{width:120px;height:120px;border-radius:50%;background:var(--accent);color:#F2711C;display:grid;place-items:center;box-shadow:0 14px 30px -12px rgba(230,150,0,.8)}
+.welcome-flame svg{width:64px;height:64px}
+.welcome-dots{display:flex;gap:6px}
+.welcome-dots i{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.welcome-dots i.on{width:22px;border-radius:4px;background:var(--hero)}
+#welcomeNext{max-width:320px}
+
 /* Activity calendar */
 button.pill{border:0;cursor:pointer}
 .cal-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}

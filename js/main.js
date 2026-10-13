@@ -20,7 +20,7 @@ $('aUndo').addEventListener('click', undoLetter);
 $('aSkip').addEventListener('click', () => skipAnagram(false));
 $('endBoard').addEventListener('click', openBoard);
 $('boardBack').addEventListener('click', () => renderHome());
-$('profileBack').addEventListener('click', () => store.player && afterProfile === 'board' ? openBoard() : renderHome());
+$('profileBack').addEventListener('click', () => afterProfile === 'settings' ? openSettings() : store.player && afterProfile === 'board' ? openBoard() : renderHome());
 $('meBtn').addEventListener('click', () => openProfile('board'));
 $('profileSave').addEventListener('click', saveProfile);
 $('nameInput').addEventListener('keydown', e => { if (e.key === 'Enter') saveProfile(); });
@@ -37,7 +37,6 @@ $('sessionBtn').addEventListener('click', () => { const g = nextUndone(); if (g)
 $('nextBtn').addEventListener('click', () => { const n = $('nextBtn').dataset.next; if (n) launch(n); else renderHome(); });
 $('againBtn').addEventListener('click', () => { inSession = false; launch(current.id); });
 $('homeBtn').addEventListener('click', () => renderHome());
-$('soundBtn').addEventListener('click', () => { store.sound = !store.sound; save(); renderHome(); beep(660, 0.1); });
 document.querySelectorAll('.quit').forEach(b => b.addEventListener('click', () => { run++; renderHome(); }));
 document.addEventListener('keydown', e => {
   if (KEYS[screen]) return KEYS[screen](e);
@@ -51,6 +50,7 @@ document.addEventListener('keydown', e => {
   else if (e.key === 'Enter') { e.preventDefault(); press('enter'); }
 });
 renderHome();
+if (!TEST_MODE) maybeWelcome();
 flushScores();
 // test.html opens the app as index.html?test, which loads the automatic tests.
 if (TEST_MODE) { const t = document.createElement('script'); t.src = 'js/tests.js'; document.body.appendChild(t); }

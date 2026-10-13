@@ -20,8 +20,12 @@
   <section class="screen" id="home">
     <div class="home-top">
       <div><p class="hello" id="hello">Hello</p><h1>Daily Sprint</h1></div>
-      <button class="pill" id="streakPill"><span id="flameSlot"></span><span><span id="streakNum">0</span> <small>days</small></span></button>
+      <div class="top-actions">
+        <button class="pill" id="streakPill"><span id="flameSlot"></span><span><span id="streakNum">0</span> <small>days</small></span></button>
+        <button class="icon-btn" id="settingsBtn" aria-label="Settings"></button>
+      </div>
     </div>
+    <div class="freeze-note" id="freezeNote" hidden></div>
     <div class="hero">
       <div>
         <h2 id="sessionTitle">Today's session</h2>
@@ -33,7 +37,33 @@
     <div class="sec-head"><h2>Today's games</h2><p>New picks every day</p></div>
     <ul class="cards" id="games"></ul>
     <button class="toggle more" id="moreBtn">See all games</button>
-    <div class="foot"><button class="toggle" id="soundBtn">Sound on</button></div>
+  </section>
+
+  <section class="screen" id="welcome" hidden>
+    <div class="welcome-slide" id="welcomeSlide"></div>
+    <div class="welcome-dots" id="welcomeDots" aria-hidden="true"></div>
+    <button class="btn" id="welcomeNext">Next</button>
+    <button class="link" id="welcomeSkip">Skip</button>
+  </section>
+
+  <section class="screen" id="brain" hidden></section>
+
+  <section class="screen" id="settings" hidden>
+    <div class="topbar"><button class="icon-btn" id="settingsBack" aria-label="Back"></button><h1>Settings</h1></div>
+    <div class="set-list">
+      <div class="set-row"><div><b>Sound</b><small>Beeps and chimes while playing</small></div><button class="switch" role="switch" id="setSound"></button></div>
+      <div class="set-row" id="vibrateRow"><div><b>Vibration</b><small>A short buzz on mistakes and level-ups</small></div><button class="switch" role="switch" id="setVibrate"></button></div>
+      <div class="set-row"><div><b>Color-blind friendly shapes</b><small>Adds the color's first letter inside shapes</small></div><button class="switch" role="switch" id="setCb"></button></div>
+      <div class="set-row col"><div><b>Theme</b><small>Light, dark, or follow your phone</small></div>
+        <div class="seg" id="setTheme" role="radiogroup" aria-label="Theme"><button data-v="auto">Automatic</button><button data-v="light">Light</button><button data-v="dark">Dark</button></div></div>
+    </div>
+    <div class="set-list">
+      <button class="set-row link-row" id="setProfile"><div><b>Leaderboard profile</b><small id="setProfileNote">Nickname and country</small></div></button>
+      <button class="set-row link-row" id="setIntros"><div><b>Show game instructions again</b><small>Each game explains itself next time you open it</small></div></button>
+      <a class="set-row link-row" href="privacy.html"><div><b>Privacy policy</b><small>What the app stores and shares</small></div></a>
+    </div>
+    <div class="set-list"><button class="set-row link-row danger" id="setReset"><div><b>Reset all progress</b><small>Deletes your levels, scores, streak and calendar on this device</small></div></button></div>
+    <p class="set-foot">Daily Sprint · made with care · all games and art are original</p>
   </section>
 
   <section class="screen" id="library" hidden>
@@ -49,6 +79,11 @@
       <span class="kicker" id="countName">Math Sprint</span>
       <div class="count" id="countNum">3</div>
       <p id="countHint"></p>
+      <div class="intro" id="countIntro" hidden>
+        <p class="intro-note">Levels adapt to you: answer well to climb, a mistake takes you down a step. Your best level earns Bronze, Silver, Gold and Diamond ranks.</p>
+        <button class="btn white" id="countGo">Got it, start!</button>
+        <button class="link" id="countBack">Not now</button>
+      </div>
     </div>
   </section>
 
@@ -262,6 +297,8 @@
 <script src="js/games/path.js"></script>
 <script src="js/leaderboard.js"></script>
 <script src="js/calendar.js"></script>
+<script src="js/settings.js"></script>
+<script src="js/welcome.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

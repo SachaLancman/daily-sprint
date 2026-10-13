@@ -12,8 +12,10 @@ self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
 
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
+  // For the app's own files, skip the browser's short-term cache so a published update shows up immediately.
+  const own = new URL(e.request.url).origin === self.location.origin;
   e.respondWith(
-    fetch(e.request)
+    (own ? fetch(e.request.url, { cache: 'no-cache' }) : fetch(e.request))
       .then(res => {
         const copy = res.clone();
         caches.open(CACHE).then(c => c.put(e.request, copy));

@@ -134,7 +134,7 @@ function saveProfile() {
   if (isOnline() && !store.pending.length) store.pending = store.log.slice(-20).filter(e => e.day >= weekKey(today())); // share this week's results
   save();
   flushScores();
-  afterProfile === 'board' ? openBoard() : renderHome();
+  afterProfile === 'board' ? openBoard() : afterProfile === 'settings' ? openSettings() : renderHome();
 }
 async function deleteData() {
   if (!confirm('Delete your nickname, country and leaderboard results? Your game levels and best scores stay.')) return;

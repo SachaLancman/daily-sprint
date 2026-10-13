@@ -13,6 +13,11 @@ const ICON = {
   grid: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>',
   trophy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7M10 17h4"/></svg>',
   back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+  snow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7M9 4l3 2 3-2M9 20l3-2 3 2"/></svg>',
+  share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>',
+  user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>',
+  medal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="15" r="6"/><path d="M8.5 10L5 3h5l2 4M15.5 10L19 3h-5l-2 4M12 12.5l.9 1.8 2 .3-1.4 1.4.3 2-1.8-1-1.8 1 .3-2-1.4-1.4 2-.3z"/></svg>',
   soundOff: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg>'
 };
 /* Big illustrations (120x120) for the game cards and countdown. White shapes; currentColor is the game's dark color. */
@@ -77,6 +82,12 @@ store.player = store.player || null; // { id, secret, name, country } once the p
 // Activity calendar: games played per day, and the days the full daily session was finished. Kept forever (small).
 // Highest level ever reached per game (for mastery ranks). Older saves start from the remembered level.
 store.peak = store.peak || Object.fromEntries(Object.entries(store.skill).filter(([, v]) => v > 1)); // level 1 is just the default
+store.seen = store.seen || {};       // games whose "How to play" intro was shown
+store.badges = store.badges || {};   // achievement id -> day earned
+store.frozenDays = store.frozenDays || []; // days saved by a streak freeze
+// Theme from Settings: 'light' or 'dark' forces it, otherwise follow the phone.
+function applyTheme() { if (store.theme === 'light' || store.theme === 'dark') document.documentElement.dataset.theme = store.theme; else delete document.documentElement.dataset.theme; }
+applyTheme();
 if (!store.days) {
   // First time: rebuild what we can from the game history. A day with 4+ different games counts as a finished session.
   store.days = {}; store.sessionDays = [];
@@ -116,8 +127,11 @@ function spark(id) {
   return '<div class="spark" aria-hidden="true">' + h.map(v => '<i style="height:' + Math.max(3, Math.round(16 * v / max)) + 'px"></i>').join('') + '</div>';
 }
 
+// Vibration on phones that support it (Settings can turn it off). Mistakes buzz once, level-ups twice.
+function buzz(pattern) { if (store.vibrate !== false && navigator.vibrate) try { navigator.vibrate(pattern); } catch (e) {} }
 let ac = null;
 function beep(freq, dur) {
+  if (freq <= 200) buzz(70); else if (freq >= 980) buzz([25, 40, 25]); // the "wrong" and "level up" sounds
   if (!store.sound) return;
   try {
     ac = ac || new (window.AudioContext || window.webkitAudioContext)();
@@ -178,7 +192,7 @@ let screen = 'home', run = 0, inSession = false, current = null;
 const NAV_SCREENS = ['home', 'library', 'board'];
 function show(id) {
   screen = id;
-  ['home', 'library', 'countdown', 'end', 'board', 'profile', 'calendar'].concat(GAMES.map(g => g.id)).forEach(x => { $(x).hidden = x !== id; });
+  ['home', 'library', 'countdown', 'end', 'board', 'profile', 'calendar', 'welcome', 'settings', 'brain'].concat(GAMES.map(g => g.id)).forEach(x => { $(x).hidden = x !== id; });
   const nav = NAV_SCREENS.includes(id);
   $('nav').hidden = !nav;
   document.body.classList.toggle('has-nav', nav);
@@ -229,7 +243,6 @@ function renderHome() {
   if (left) $('sessionBtn').innerHTML = ICON.play + (left === SESSION ? "Start today's session" : 'Continue: ' + nextUndone().name);
   $('games').innerHTML = picks.map(g => cardHtml(g, true)).join('');
   $('moreBtn').innerHTML = ICON.grid + 'See all ' + GAMES.length + ' games';
-  $('soundBtn').innerHTML = (store.sound ? ICON.soundOn : ICON.soundOff) + 'Sound ' + (store.sound ? 'on' : 'off');
   show('home');
 }
 
@@ -244,6 +257,17 @@ async function launch(id) {
   document.querySelectorAll('.bar').forEach(b => b.classList.remove('low'));
   document.querySelectorAll('.hud-time').forEach(t => t.classList.remove('low'));
   show('countdown');
+  // First time playing this game: show "How to play" and wait for Start (skipped by the automatic tests).
+  const intro = !store.seen[id] && !TEST_MODE;
+  $('countIntro').hidden = !intro; $('countNum').hidden = intro;
+  $('countName').textContent = intro ? 'How to play · ' + current.name : current.name;
+  if (intro) {
+    const go = await new Promise(res => { $('countGo').onclick = () => res(true); $('countBack').onclick = () => res(false); });
+    if (my !== run) return;
+    if (!go) return renderHome();
+    store.seen[id] = true; save();
+    $('countIntro').hidden = true; $('countNum').hidden = false; $('countName').textContent = current.name;
+  }
   for (let n = 3; n >= 1; n--) {
     const el = $('countNum');
     el.textContent = n; el.classList.remove('count'); void el.offsetWidth; el.classList.add('count');

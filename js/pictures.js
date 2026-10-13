@@ -51,7 +51,9 @@ function drawShape(kind, color, x, y, s) {
     triangle: '<path d="M' + x + ' ' + (y - h) + 'L' + (x + h) + ' ' + (y + h * 0.8) + 'H' + (x - h) + 'z"/>',
     diamond: '<path d="M' + x + ' ' + (y - h) + 'L' + (x + h) + ' ' + y + 'L' + x + ' ' + (y + h) + 'L' + (x - h) + ' ' + y + 'z"/>'
   }[kind];
-  return '<g fill="' + c + '" stroke="' + INK + '" stroke-width="' + Math.max(2, s * 0.07) + '" stroke-linejoin="round">' + body + '</g>';
+  // Color-blind friendly mode (Settings): write the color's first letter inside the shape.
+  const letter = store.cb && SHAPE_COLORS[color] ? '<text x="' + x + '" y="' + (y + (kind === 'triangle' ? h * 0.25 : 0)) + '" text-anchor="middle" dominant-baseline="central" font-family="Bricolage Grotesque, system-ui, sans-serif" font-weight="800" font-size="' + s * 0.42 + '" fill="' + (color === 'yellow' ? INK : '#fff') + '" stroke="none">' + color[0].toUpperCase() + '</text>' : '';
+  return '<g fill="' + c + '" stroke="' + INK + '" stroke-width="' + Math.max(2, s * 0.07) + '" stroke-linejoin="round">' + body + letter + '</g>';
 }
 // Drawn arrows (text arrows like ← → come from different fallback fonts and don't match). dir: up, down, left, right.
 const ARROW_TURN = { right: 0, down: 90, left: 180, up: 270 };
