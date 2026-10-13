@@ -222,9 +222,21 @@ function ringSvg() {
   return todaysGames().map((g, i) => '<circle class="g-' + g.id + (store.done[g.id] ? ' on' : '') + '" cx="44" cy="44" r="' + R + '" stroke-dasharray="' + (seg - gap).toFixed(1) + ' ' + C.toFixed(1) +
     '" stroke-dashoffset="' + (-(i * seg) - gap / 2).toFixed(1) + '" transform="rotate(-90 44 44)"/>').join('');
 }
+// Days ago as 'YYYY-MM-DD', and the weekly streak freeze (one missed day per week is forgiven).
+const daysAgo = n => { const d = new Date(); d.setDate(d.getDate() - n); return dayKey(d); };
+const freezeReady = () => store.freezeWeek !== weekKey(today());
+const sessionDone = () => todaysGames().every(g => store.done[g.id]);
+// The streak shown right now: still alive if you played yesterday, or the day before with a freeze ready to save it.
+function liveStreak() {
+  if (store.lastDay === today() || store.lastDay === yesterday()) return store.streak;
+  return store.lastDay === daysAgo(2) && freezeReady() ? store.streak : 0;
+}
 function renderHome() {
   freshDay();
-  const live = store.lastDay === today() || store.lastDay === yesterday(), streak = live ? store.streak : 0;
+  const streak = liveStreak();
+  const saveable = store.lastDay === daysAgo(2) && freezeReady() && store.streak > 0;
+  $('freezeNote').hidden = !saveable;
+  $('freezeNote').innerHTML = ICON.snow + 'You missed yesterday, but your weekly streak freeze will save your ' + store.streak + '-day streak if you finish today\'s session.';
   const h = new Date().getHours(), hello = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
   $('hello').textContent = hello + ' · ' + new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
   $('flameSlot').innerHTML = ICON.flame;
@@ -236,6 +248,7 @@ function renderHome() {
   $('ring').innerHTML = ringSvg();
   $('ringNum').innerHTML = left === 0 ? ICON.check.replace('<svg', '<svg width="34" height="34"') : done + '/' + SESSION;
   $('sessionBtn').hidden = left === 0;
+  $('homeShare').hidden = left !== 0;
   $('sessionTitle').textContent = left === 0 ? 'Done for today!' : "Today's session";
   $('sessionNote').textContent = left === 0 ? 'Come back tomorrow for new games and to keep your streak going.'
     : left === SESSION ? NUMBER_WORDS[SESSION] + ' quick games, picked fresh today. Finish all ' + NUMBER_WORDS[SESSION].toLowerCase() + ' to keep your streak.'
@@ -291,18 +304,22 @@ function finishGame(score, label, stats, skill, top = skill) {
   freshDay();
   store.done[id] = true;
   if (!nextUndone() && store.lastDay !== today()) {
-    store.streak = store.lastDay === yesterday() ? store.streak + 1 : 1;
+    if (store.lastDay === yesterday()) store.streak++;
+    else if (store.lastDay === daysAgo(2) && freezeReady()) { // one missed day, saved by this week's streak freeze
+      store.streak++; store.freezeWeek = weekKey(today()); store.frozenDays.push(yesterday());
+    } else store.streak = 1;
     store.lastDay = today();
     store.bestStreak = Math.max(store.bestStreak, store.streak);
     if (!store.sessionDays.includes(today())) store.sessionDays.push(today());
   }
-  store.days[today()] = (store.days[today()] || 0) + 1;
-  store.log = store.log.concat({ game: id, score, day: today() }).slice(-500);
-  save();
-  submitScore({ game: id, score, day: today() });
   const celebrate = isBest && score > 0;
   // Stars: 3 for a new best, 2 for at least 70% of your best, 1 for any points.
   const stars = celebrate ? 3 : score >= 0.7 * prev && score > 0 ? 2 : score > 0 ? 1 : 0;
+  store.days[today()] = (store.days[today()] || 0) + 1;
+  store.log = store.log.concat({ game: id, score, day: today(), stars }).slice(-500);
+  const newBadges = checkBadges();
+  save();
+  submitScore({ game: id, score, day: today() });
   $('endLabel').textContent = label;
   $('stars').innerHTML = [0, 1, 2].map(i => ICON.star.replace('<svg', '<svg class="' + (i < stars ? 'on' : '') + '"')).join('');
   $('endBadge').hidden = !celebrate;
@@ -317,8 +334,10 @@ function finishGame(score, label, stats, skill, top = skill) {
   $('nextBtn').innerHTML = nxt ? ICON.play + 'Next: ' + nxt.name : 'Back to home';
   $('nextBtn').dataset.next = nxt ? nxt.id : '';
   $('homeBtn').hidden = !nxt;
+  $('endBadges').innerHTML = newBadges.map(b => '<span class="badge record">' + badgeIcon(b) + 'Badge: ' + b.name + '</span>').join('');
+  $('endShare').hidden = !!nxt || !sessionDone(); // share once today's session is complete
   show('end');
-  if (celebrate || !$('endRecord').hidden) {
+  if (celebrate || !$('endRecord').hidden || newBadges.length) {
     setTimeout(() => { beep(784, 0.12); setTimeout(() => beep(1047, 0.2), 120); }, 450);
     setTimeout(confetti, 300);
   }

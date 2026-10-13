@@ -33,6 +33,7 @@
       </div>
       <div class="ring" aria-hidden="true"><svg viewBox="0 0 88 88" id="ring"></svg><b><span id="ringNum">0/4</span></b></div>
       <button class="btn white" id="sessionBtn">Start today's session</button>
+      <button class="btn glass" id="homeShare" hidden>Share</button>
     </div>
     <div class="sec-head"><h2>Today's games</h2><p>New picks every day</p></div>
     <ul class="cards" id="games"></ul>
@@ -201,8 +202,10 @@
       <p id="endNote">points</p>
       <span class="badge" id="endBadge" hidden>New best!</span>
       <span class="badge record" id="endRecord" hidden></span>
+      <div class="end-badges" id="endBadges"></div>
       <div class="end-stats" id="endStats"></div>
       <div class="end-btns">
+        <button class="btn" id="endShare" hidden>Share</button>
         <button class="btn white" id="nextBtn">Back to home</button>
         <button class="btn glass" id="againBtn">Play again</button>
         <button class="link" id="homeBtn" hidden>Back to home</button>
@@ -299,6 +302,8 @@
 <script src="js/calendar.js"></script>
 <script src="js/settings.js"></script>
 <script src="js/welcome.js"></script>
+<script src="js/badges.js"></script>
+<script src="js/share.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

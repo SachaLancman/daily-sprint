@@ -12,11 +12,11 @@ function longestRun(days) {
   return best;
 }
 function renderCalendar() {
-  const live = store.lastDay === today() || store.lastDay === yesterday();
+  const live = liveStreak();
   const played = Object.keys(store.days), games = Object.values(store.days).reduce((a, b) => a + b, 0);
   const best = Math.max(store.bestStreak || 0, longestRun(store.sessionDays));
   $('calStats').innerHTML = [
-    [ICON.flame, live ? store.streak : 0, 'Current streak'],
+    [ICON.flame, live, 'Current streak'],
     ['', best, 'Best streak'],
     ['', played.length, 'Days played'],
     ['', games, 'Games played']
@@ -32,17 +32,19 @@ function renderCalendar() {
   for (let d = 1; d <= days; d++) {
     const key = dayKey(new Date(y, mo, d)), n = store.days[key] || 0, full = store.sessionDays.includes(key);
     monthGames += n; if (full) monthSessions++;
-    const cls = full ? 'complete' : n ? 'played' : '', shade = full ? '' : n ? ' style="--a:' + Math.min(1, 0.3 + n * 0.15) + '"' : '';
+    const frozen = !full && store.frozenDays.includes(key); // a missed day saved by a streak freeze
+    const cls = full ? 'complete' : frozen ? 'frozen' : n ? 'played' : '', shade = full || frozen ? '' : n ? ' style="--a:' + Math.min(1, 0.3 + n * 0.15) + '"' : '';
     const label = new Date(y, mo, d).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }) + ': ' +
-      (full ? 'full session, ' : '') + (n ? n + ' game' + (n > 1 ? 's' : '') : 'no games');
+      (full ? 'full session, ' : frozen ? 'saved by a streak freeze, ' : '') + (n ? n + ' game' + (n > 1 ? 's' : '') : 'no games');
     cells += '<span class="cal-day ' + cls + (key === t ? ' today' : '') + (key > t ? ' future' : '') + '"' + shade + ' role="gridcell" aria-label="' + label + '" title="' + label + '">' +
-      (full ? ICON.flame : d) + '</span>';
+      (full ? ICON.flame : frozen ? ICON.snow : d) + '</span>';
   }
   $('calGrid').innerHTML = cells;
   $('calNext').disabled = y > new Date().getFullYear() || (y === new Date().getFullYear() && mo >= new Date().getMonth());
   $('calNote').textContent = monthGames
     ? 'This month: ' + monthGames + ' game' + (monthGames > 1 ? 's' : '') + ' played, ' + monthSessions + ' full session' + (monthSessions === 1 ? '' : 's') + '.'
     : 'No games played this month.';
+  $('calNote').textContent += freezeReady() ? ' Your streak freeze is ready this week.' : ' Your streak freeze was used this week; a new one arrives on Monday.';
 }
 function openCalendar() {
   run++;

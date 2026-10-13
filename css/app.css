@@ -257,6 +257,19 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .badge.record{background:#fff;color:#17153A;display:inline-flex;align-items:center}
 .badge.record .medal{width:12px;height:12px;box-shadow:0 0 0 1.5px #17153A}
 
+/* Streak freeze, badges, sharing */
+.freeze-note{display:flex;gap:10px;align-items:flex-start;background:color-mix(in srgb, #56C8FA 22%, var(--surface));color:var(--ink);border-radius:16px;padding:12px 14px;font-size:14px}
+.freeze-note svg{flex:none;width:20px;height:20px;color:#0B63A8}
+.cal-day.frozen{background:color-mix(in srgb, #56C8FA 35%, var(--surface));color:#0B63A8}
+.cal-day.frozen svg{width:18px;height:18px}
+.badge-dot{flex:none;display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;margin-right:6px;color:#fff;vertical-align:middle}
+.badge-dot svg{width:13px;height:13px}
+.end-badges{display:flex;flex-direction:column;align-items:center;gap:8px}
+.end-badges:empty{display:none}
+#homeShare{grid-column:1/-1}
+#toast{position:fixed;left:50%;bottom:calc(110px + env(safe-area-inset-bottom));transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font:700 14px var(--display);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:60;max-width:90vw;text-align:center}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+
 /* Settings */
 .set-list{background:var(--surface);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
 .set-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 16px;border:0;border-bottom:1px solid var(--line);background:none;width:100%;text-align:left;color:var(--ink);font:inherit;text-decoration:none}
