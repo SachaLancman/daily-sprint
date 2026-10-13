@@ -4,8 +4,13 @@ A personal brain-training web app in the spirit of apps like Elevate, heading fo
 
 ## Current state
 - Open `index.html` in a browser to play. No build step, no dependencies except Google Fonts. Plain `<script>` tags (not modules) so it also works when opened as a file.
-- Bottom menu with three tabs: **Today** (home), **Games** (library of all 24 games, grouped and filterable by skill), **Ranks** (leaderboard).
-- Home: greeting, streak badge (tap it for the activity calendar), "Today's session" card with a progress ring, and today's 4 game cards.
+- Bottom menu with four tabs: **Today** (home), **Games** (library of all 24 games, grouped and filterable by skill), **Ranks** (leaderboard), **You** (brain profile: skill-level bars, points-per-week chart with table view, stats, ranks, badges).
+- Home: greeting, streak badge (tap it for the activity calendar), settings gear, "Today's session" card with a progress ring (+ "Share today's result" once done), and today's 4 game cards.
+- New players see 3 welcome screens once (`js/welcome.js`); each game shows a "How to play" step before its first countdown (`store.seen`; skipped in test mode).
+- Settings (`js/settings.js`): sound, vibration (`buzz()`, triggered from `beep()` for wrong/level-up sounds), color-blind letters inside shapes (`store.cb`, in `drawShape`), theme auto/light/dark (`store.theme`, `applyTheme()`), profile, show instructions again, privacy, reset progress.
+- Streak freeze: one missed day per week is forgiven (`freezeReady()`, `store.freezeWeek`, `store.frozenDays`; `liveStreak()` is the streak to display). Calendar marks saved days with a snowflake.
+- 15 achievement badges (`js/badges.js`, `BADGES`, `store.badges`), checked in `finishGame` and celebrated on the results screen.
+- Share today's result as text (`js/share.js`, Wordle-style, share sheet or clipboard). Log entries store `stars`.
 - Daily session: 4 of the 24 games, picked from the date (same for everyone on a given day), always 4 different skills, never the same set two days running (`todaysGames()`). Finishing all 4 keeps the streak.
 - Activity calendar: month view of days played / full sessions, plus current streak, best streak, days and games played (`store.days`, `store.sessionDays`).
 - 24 games, 4 per skill. All 60 seconds except Memory Grid (3 lives). 🖼 = uses the picture library.
@@ -33,7 +38,8 @@ A personal brain-training web app in the spirit of apps like Elevate, heading fo
 - `css/app.css`: all styles. Game colors for the first 8 games are here (`.g-<id>`); newer games pass their colors to `registerGame`.
 - `js/core.js`: storage, helpers, home, library, daily rotation, countdown (`launch`), results (`finishGame`), and the **shared game engine**.
 - `js/pictures.js`: 30 original sticker drawings (`PICS`, `picSvg`) and colored shapes (`drawShape`, `shapeTile`).
-- `js/games/<id>.js`: one file per game. `js/leaderboard.js`, `js/calendar.js`, `js/main.js` (wiring and start-up).
+- `js/games/<id>.js`: one file per game. `js/leaderboard.js`, `js/calendar.js`, `js/settings.js`, `js/welcome.js`, `js/badges.js`, `js/share.js`, `js/brain.js`, `js/main.js` (wiring and start-up). Script order: core → pictures → games → leaderboard → calendar → settings → welcome → badges → share → brain → main.
+- A new screen needs a `<section>` in index.html and its id in the list inside `show()`; add it to `NAV_SCREENS` if the bottom menu should show.
 - **Adding a game** (see any newer file, e.g. `js/games/greater.js`): call `registerGame({ id, name, skill, hint, art, colors: [light, dark], html, start, key })`. It creates the screen with a standard header (ids `<id>Time`, `<id>Bar`, `<id>Score`, `<id>Level`, `<id>Streak`). In `start`, use `makeRound(id, MAX_LEVEL, upAfter)`; give the game a `xxxLevel(level)` function that returns hand-made settings for early levels and formula-based ones after (`past(level, top)` = how far beyond); then then `right(st, host)` / `wrong(st)`, `later(st, ms, fn)` for timers, `startClock(st)` for the 60 seconds. Add a `<script>` tag in `index.html` and the id to `max_score()` in `supabase/schema.sql`. Dark color must give white text 4.5:1 contrast.
 - HTML ids must be unique across the whole page: a game's id becomes its screen's id, and screens like `countdown`, `board` (leaderboard), `end`, `home` are taken. `registerGame` now throws if an id is already used. Tests must also check that game parts are *visible*, not just generated.
 - All scripts share one global scope: never reuse a top-level name (a clash silently replaces the earlier one). Check with a duplicate-name scan after adding files.
@@ -72,7 +78,9 @@ A personal brain-training web app in the spirit of apps like Elevate, heading fo
 - The folder uses git. After each change is tested, commit it with a short plain-English message so it can be undone later.
 
 ## Ideas for next steps
-- Follow `LAUNCH.md`: GitHub Pages, Supabase, Play Store.
+- Follow `LAUNCH.md`: Supabase (worldwide leaderboard), Play Store.
+- French version (UI + French content for the 4 Language games).
+- Daily reminders (notifications need a server or the Android wrapper).
 - Grow toward 8 games per skill, starting with the skills the owner enjoys most.
 - Tune expert-level speeds and answer clocks from real playtesting (they are formula guesses).
 - More content per game (Spot the Error sentences, Unscramble words, more pictures).

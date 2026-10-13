@@ -257,6 +257,48 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .badge.record{background:#fff;color:#17153A;display:inline-flex;align-items:center}
 .badge.record .medal{width:12px;height:12px;box-shadow:0 0 0 1.5px #17153A}
 
+/* Brain profile ("You" tab). One chart color (--chart); text stays in ink colors. */
+:root{--chart:#4B2FC0}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--chart:#9C8CFF}}
+:root[data-theme="dark"]{--chart:#9C8CFF}
+.brain-hero{display:grid;grid-template-columns:1fr 1fr;gap:10px;background:var(--hero);color:#fff;border-radius:24px;padding:18px;box-shadow:var(--shadow)}
+.brain-hero small{display:block;font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;opacity:.8}
+.brain-hero b{font:800 24px var(--display)}
+.brain-card{background:var(--surface);border-radius:20px;padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px}
+.brain-card p{font-size:13px;margin-top:-6px}
+.skill-bars{display:flex;flex-direction:column;gap:10px}
+.sb-row{display:grid;grid-template-columns:78px 1fr 84px;align-items:center;gap:10px}
+.sb-name{font-weight:700;font-size:14px}
+.sb-track{height:14px;background:var(--bg);border-radius:0 4px 4px 0}
+.sb-track i{display:block;height:100%;background:var(--chart);border-radius:0 4px 4px 0}
+.sb-val{font:500 13px var(--mono);color:var(--muted);text-align:right}
+.wk-wrap{position:relative}
+.wk-chart{width:100%;height:auto;overflow:visible}
+.wk-col{fill:var(--chart)}
+.wk-grid{stroke:var(--line);stroke-width:1}
+.wk-base{stroke:var(--muted);stroke-width:1}
+.wk-tick{font:500 9px var(--mono);fill:var(--muted)}
+.wk-cap{font:700 10px var(--display);fill:var(--ink)}
+.wk-hit{cursor:pointer}
+.wk-tip{position:absolute;top:-6px;right:0;background:var(--ink);color:var(--bg);font:700 12px var(--display);padding:5px 10px;border-radius:8px}
+.wk-table summary{cursor:pointer;color:var(--muted);font-size:13px}
+.wk-table table{width:100%;border-collapse:collapse;margin-top:6px;font-size:13px}
+.wk-table th,.wk-table td{text-align:left;padding:4px 0;border-bottom:1px solid var(--line)}
+.wk-table td:last-child,.wk-table th:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.rank-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center}
+.rank-row div{display:flex;flex-direction:column;align-items:center;gap:2px}
+.rank-row .medal{width:18px;height:18px;margin:0;box-shadow:0 0 0 2px var(--surface),0 0 0 3px var(--line)}
+.rank-row b{font:800 20px var(--display)}
+.rank-row span{font:500 11px var(--mono);text-transform:uppercase;color:var(--muted)}
+.badge-grid{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.badge-grid li{display:flex;align-items:center;gap:6px}
+.badge-grid .badge-dot{width:34px;height:34px}
+.badge-grid .badge-dot svg{width:18px;height:18px}
+.badge-grid b{display:block;font-size:15px}
+.badge-grid small{color:var(--muted);font-size:13px}
+.badge-grid li.locked .badge-dot{background:var(--line)!important;color:var(--muted)}
+.badge-grid li.locked b{color:var(--muted)}
+
 /* Streak freeze, badges, sharing */
 .freeze-note{display:flex;gap:10px;align-items:flex-start;background:color-mix(in srgb, #56C8FA 22%, var(--surface));color:var(--ink);border-radius:16px;padding:12px 14px;font-size:14px}
 .freeze-note svg{flex:none;width:20px;height:20px;color:#0B63A8}

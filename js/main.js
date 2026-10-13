@@ -2,10 +2,10 @@
 document.querySelectorAll('.x').forEach(b => { b.innerHTML = ICON.x; });
 $('boardBack').innerHTML = ICON.back;
 $('profileBack').innerHTML = ICON.back;
-[...$('nav').children].forEach(b => { b.insertAdjacentHTML('afterbegin', ICON[{ home: 'home', library: 'grid', board: 'trophy' }[b.dataset.nav]]); });
+[...$('nav').children].forEach(b => { b.insertAdjacentHTML('afterbegin', ICON[{ home: 'home', library: 'grid', board: 'trophy', brain: 'user' }[b.dataset.nav]]); });
 $('nav').addEventListener('click', e => {
   const b = e.target.closest('button');
-  if (b) ({ home: () => renderHome(), library: openLibrary, board: openBoard })[b.dataset.nav]();
+  if (b) ({ home: () => renderHome(), library: openLibrary, board: openBoard, brain: openBrain })[b.dataset.nav]();
 });
 $('moreBtn').addEventListener('click', openLibrary);
 $('libraryCards').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { inSession = false; launch(b.dataset.g); } });

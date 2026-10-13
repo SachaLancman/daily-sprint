@@ -191,6 +191,19 @@
     // Calendar, library, leaderboard
     try { openCalendar(); $('calGrid').children.length > 28 ? pass('Activity calendar opens') : fail('Calendar', 'month not drawn'); } catch (e) { fail('Calendar', 'crashed: ' + e.message); }
     try { openLibrary(); document.querySelectorAll('#libraryCards .card').length === GAMES.length ? pass('Games library lists all ' + GAMES.length + ' games') : fail('Library', 'missing games'); } catch (e) { fail('Library', 'crashed: ' + e.message); }
+    // Newer screens and features
+    const overflowAt = id => { const box = document.querySelector('main').getBoundingClientRect(); return [...$(id).querySelectorAll('*')].some(el => { const b = el.getBoundingClientRect(); return b.width && b.right > box.right + 1; }); };
+    try { openSettings(); overflowAt('settings') ? fail('Settings', 'spills off a phone screen') : pass('Settings screen opens'); } catch (e) { fail('Settings', 'crashed: ' + e.message); }
+    try { openBrain(); $('brain').querySelector('.skill-bars') && !overflowAt('brain') ? pass('"You" tab (brain profile) shows skills, weekly chart and badges') : fail('"You" tab', 'missing parts or spills off a phone screen'); } catch (e) { fail('"You" tab', 'crashed: ' + e.message); }
+    try { const t = shareText(); t.includes(APP_URL) && t.split('\n').length >= 3 ? pass('Share text is built') : fail('Share', 'text incomplete: ' + t); } catch (e) { fail('Share', 'crashed: ' + e.message); }
+    try { Array.isArray(checkBadges()) && BADGES.length >= 10 ? pass('Badges are checked') : fail('Badges', 'not working'); } catch (e) { fail('Badges', 'crashed: ' + e.message); }
+    try {
+      // Streak freeze: a 5-day streak with one missed day survives once per week
+      Object.assign(store, { streak: 5, lastDay: daysAgo(2), freezeWeek: '', done: { date: '' } });
+      const alive = liveStreak();
+      inSession = true; for (const g of todaysGames()) { current = g; finishGame(10, "Time's up", [['a', 1], ['b', 2], ['c', 3]], 1, 1); } inSession = false;
+      alive === 5 && store.streak === 6 && store.frozenDays.includes(yesterday()) ? pass('Streak freeze saves one missed day') : fail('Streak freeze', 'streak ' + alive + ' → ' + store.streak);
+    } catch (e) { fail('Streak freeze', 'crashed: ' + e.message); }
     try {
       store.player = { id: 'test', secret: 'test', name: 'Tester', country: 'FR' };
       openBoard();
