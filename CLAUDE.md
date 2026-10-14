@@ -11,7 +11,7 @@ A personal brain-training web app in the spirit of apps like Elevate, heading fo
 - Streak freeze: one missed day per week is forgiven (`freezeReady()`, `store.freezeWeek`, `store.frozenDays`; `liveStreak()` is the streak to display). Calendar marks saved days with a snowflake.
 - 15 achievement badges (`js/badges.js`, `BADGES`, `store.badges`), checked in `finishGame` and celebrated on the results screen.
 - Share today's result as text (`js/share.js`, Wordle-style, share sheet or clipboard). Log entries store `stars`.
-- Daily session: 4 of the 24 games, picked from the date (same for everyone on a given day), always 4 different skills, never the same set two days running (`todaysGames()`). Finishing all 4 keeps the streak.
+- Daily session: 4 of the 24 games, picked from the date (same for everyone on a given day), always 4 different skills, never the same set two days running (`todaysGames()`). Finishing all 4 keeps the streak and is celebrated on that results screen (`#endSession` badge "Daily session complete! N-day streak", confetti, 4-note fanfare).
 - Activity calendar: month view of days played / full sessions, plus current streak, best streak, days and games played (`store.days`, `store.sessionDays`).
 - 24 games, 4 per skill. All 60 seconds except Memory Grid (3 lives). 🖼 = uses the picture library.
 
@@ -20,9 +20,10 @@ A personal brain-training web app in the spirit of apps like Elevate, heading fo
 | Math | math: Math Sprint · count: Quick Count 🖼 · target: Target Total · greater: Greater Than |
 | Memory | memory: Memory Grid · pairs: Picture Pairs 🖼 · newpic: Spot the New 🖼 · recall: Number Recall |
 | Language | words: Word Match · spot: Spot the Error · anagram: Unscramble · picspell: Picture Spell 🖼 |
-| Focus | colors: Color Clash · oddone: Odd One Out 🖼 · arrows: Arrow Focus · seeker: Shape Seeker |
+| Focus | colors: Color Clash · twins: Find the Twins 🖼 · arrows: Arrow Focus · seeker: Shape Seeker |
 | Speed | hunt: Number Hunt · flash: Flash Match 🖼 · bubbles: Bubble Pop · sort: Sort Rush |
 | Logic | pattern: Next in Line · balance: Balance · matrix: Missing Piece · path: Follow the Arrows |
+- Find the Twins (replaced Odd One Out on 2026-10-14): all pictures differ except one identical pair; deeper levels add look-alikes (same picture recolored with `hue-rotate` or mirrored; `TWIN_NO_TINT` lists mostly-white pictures that never get recolored). Picture Spell uses every picture whose word has 5+ letters (53) and avoids the last 20.
 
 - Results screen: 1-3 stars, count-up score, confetti on a new best or a new level record / rank.
 - Open-ended difficulty: every game has hand-made early levels, then formulas keep raising difficulty up to `MAX_LEVEL` (30): bigger numbers/grids, subtler differences, faster pace, and an **answer clock** (`answerClock` / `stopAnswerClock`, a shrinking bar; running out counts as a miss). Some games add twists at depth (Color Clash "NOT" question, Spot the Error "No mistake", Flash Match 2-back, Number Hunt shuffles/count-down, Follow the Arrows ×2 steps). Human limits are capped (e.g. grids ≤ 7×7, Number Recall ≤ 18 digits, bubbles ≥ 40px).
@@ -37,7 +38,7 @@ A personal brain-training web app in the spirit of apps like Elevate, heading fo
 - `index.html`: the fixed screens (home, library, countdown, results, calendar, leaderboard, profile) and the first 8 games' markup. Script order matters: core → pictures → games → leaderboard → calendar → main.
 - `css/app.css`: all styles. Game colors for the first 8 games are here (`.g-<id>`); newer games pass their colors to `registerGame`.
 - `js/core.js`: storage, helpers, home, library, daily rotation, countdown (`launch`), results (`finishGame`), and the **shared game engine**.
-- `js/pictures.js`: 30 original sticker drawings (`PICS`, `picSvg`) and colored shapes (`drawShape`, `shapeTile`).
+- `js/pictures.js`: 68 original sticker drawings (`asym` = looks different mirrored) (`PICS`, `picSvg`) and colored shapes (`drawShape`, `shapeTile`).
 - `js/games/<id>.js`: one file per game. `js/leaderboard.js`, `js/calendar.js`, `js/settings.js`, `js/badges.js`, `js/share.js`, `js/brain.js`, `js/main.js` (wiring and start-up). Script order: core → pictures → games → leaderboard → calendar → settings → badges → share → brain → main.
 - A new screen needs a `<section>` in index.html and its id in the list inside `show()`; add it to `NAV_SCREENS` if the bottom menu should show.
 - **Adding a game** (see any newer file, e.g. `js/games/greater.js`): call `registerGame({ id, name, skill, hint, art, colors: [light, dark], html, start, key })`. It creates the screen with a standard header (ids `<id>Time`, `<id>Bar`, `<id>Score`, `<id>Level`, `<id>Streak`). In `start`, use `makeRound(id, MAX_LEVEL, upAfter)`; give the game a `xxxLevel(level)` function that returns hand-made settings for early levels and formula-based ones after (`past(level, top)` = how far beyond); then then `right(st, host)` / `wrong(st)`, `later(st, ms, fn)` for timers, `startClock(st)` for the 60 seconds. Add a `<script>` tag in `index.html` and the id to `max_score()` in `supabase/schema.sql`. Dark color must give white text 4.5:1 contrast.

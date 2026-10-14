@@ -307,7 +307,8 @@ function finishGame(score, label, stats, skill, top = skill) {
   store.hist[id] = store.hist[id].concat(score).slice(-12);
   freshDay();
   store.done[id] = true;
-  if (!nextUndone() && store.lastDay !== today()) {
+  const sessionNow = !nextUndone() && store.lastDay !== today(); // this game just completed today's 4
+  if (sessionNow) {
     if (store.lastDay === yesterday()) store.streak++;
     else if (store.lastDay === daysAgo(2) && freezeReady()) { // one missed day, saved by this week's streak freeze
       store.streak++; store.freezeWeek = weekKey(today()); store.frozenDays.push(yesterday());
@@ -340,8 +341,13 @@ function finishGame(score, label, stats, skill, top = skill) {
   $('homeBtn').hidden = !nxt;
   $('endBadges').innerHTML = newBadges.map(b => '<span class="badge record">' + badgeIcon(b) + 'Badge: ' + b.name + '</span>').join('');
   $('endShare').hidden = !!nxt || !sessionDone(); // share once today's session is complete
+  $('endSession').hidden = !sessionNow;
+  $('endSession').innerHTML = ICON.flame + 'Daily session complete! ' + store.streak + '-day streak';
   show('end');
-  if (celebrate || !$('endRecord').hidden || newBadges.length) {
+  if (sessionNow) { // a little fanfare (C E G C) and confetti
+    [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => beep(f, 0.16), 450 + i * 110));
+    setTimeout(confetti, 300);
+  } else if (celebrate || !$('endRecord').hidden || newBadges.length) {
     setTimeout(() => { beep(784, 0.12); setTimeout(() => beep(1047, 0.2), 120); }, 450);
     setTimeout(confetti, 300);
   }

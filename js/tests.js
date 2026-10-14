@@ -56,9 +56,13 @@
     picspell: { state: () => ps, gen: L => { ps.tier = L; ps.locked = false; nextSpell(); },
       check: () => kids('spellOpts').filter(b => b.dataset.o === ps.word).length !== 1 ? 'correct spelling missing or repeated' : null,
       solve: () => spellChoose(btnWith('spellOpts', 'o', ps.word)), miss: () => spellChoose(kids('spellOpts').find(b => b.dataset.o !== ps.word)) },
-    oddone: { state: () => oo, gen: L => { oo.tier = L; oo.locked = false; nextOdd(); },
-      check: () => !kids('oddGrid')[oo.odd].querySelector('svg').getAttribute('style') ? 'odd picture is not different' : null,
-      solve: () => oddTap(kids('oddGrid')[oo.odd]), miss: () => oddTap(kids('oddGrid')[oo.odd === 0 ? 1 : 0]) },
+    twins: { state: () => tw, gen: L => { tw.tier = L; nextTwins(); },
+      check: () => { // exactly one pair of identical pictures, and it is the twins
+        const keys = kids('twinGrid').map(b => b.innerHTML), c = {}; keys.forEach(k => c[k] = (c[k] || 0) + 1);
+        const dup = Object.keys(c).filter(k => c[k] > 1);
+        return dup.length !== 1 || c[dup[0]] !== 2 ? 'grid must have exactly one identical pair' : tw.twins.length !== 2 || keys[tw.twins[0]] !== dup[0] ? 'twins marked wrongly' : null;
+      },
+      solve: () => tw.twins.forEach(i => twinTap(kids('twinGrid')[i])), miss: () => twinTap(kids('twinGrid').find((b, i) => !tw.twins.includes(i))) },
     flash: { state: () => fm, gen: L => { fm.tier = L; fm.hist = ['apple', 'star', 'fish']; fm.locked = false; nextFlash(); },
       check: () => typeof fm.answer !== 'boolean' ? 'no answer' : null, solve: () => flashAnswer(fm.answer), miss: () => flashAnswer(!fm.answer) },
     balance: { state: () => bl, gen: L => { bl.tier = L; bl.locked = false; nextBalance(); },
@@ -117,7 +121,7 @@
   }
   function overflow(id) {
     const box = document.querySelector('main').getBoundingClientRect();
-    // Pictures can be tilted on purpose (Odd One Out): measure their tiles, not the drawing's invisible corners.
+    // Pictures can be mirrored or changed on purpose (Find the Twins): measure their tiles, not the drawing's invisible corners.
     // A board that is shaking after a mistake (.board.no) moves sideways for a moment, which is fine.
     const out = [...$(id).querySelectorAll('*')].filter(el => !el.closest('.float,.bubble,.pic svg,.mcard svg,.board.no')).filter(el => { const b = el.getBoundingClientRect(); return b.width && (b.right > box.right + 1 || b.left < box.left - 1); });
     if (!out.length) return null;
@@ -186,7 +190,7 @@
     inSession = true;
     for (const g of picks) { current = g; finishGame(10, "Time's up", [['a', 1], ['b', 2], ['c', 3]], 1, 1); }
     inSession = false; renderHome();
-    store.streak === 1 && $('sessionTitle').textContent.startsWith('Done') && store.sessionDays.includes(today())
+    store.streak === 1 && $('sessionTitle').textContent.startsWith('Done') && store.sessionDays.includes(today()) && !$('endSession').hidden
       ? pass('Finishing the session updates the streak and calendar') : fail('Session', 'streak/calendar not updated after finishing all games');
     // Calendar, library, leaderboard
     try { openCalendar(); $('calGrid').children.length > 28 ? pass('Activity calendar opens') : fail('Calendar', 'month not drawn'); } catch (e) { fail('Calendar', 'crashed: ' + e.message); }

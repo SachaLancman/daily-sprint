@@ -21,7 +21,7 @@ const misspell = {
 function nextSpell() {
   let pic;
   do { pic = pickOne(SPELL_PICS); } while (ps.recent.includes(pic));
-  ps.recent = ps.recent.concat(pic).slice(-8);
+  ps.recent = ps.recent.concat(pic).slice(-20);
   // Past level 3: only the subtle kinds of mistakes, 5 then 6 options, and an answer clock.
   const depth = past(ps.tier, 3), count = depth >= 4 ? 6 : depth ? 5 : 4;
   const word = PICS[pic].word, opts = [word];

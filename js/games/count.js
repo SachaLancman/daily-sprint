@@ -13,7 +13,7 @@ function countLevel(level) {
   const b = past(level, COUNT_LEVELS.length);
   return { kinds: 3, min: 5 + Math.floor(b / 3), max: Math.min(14, 11 + Math.floor(b / 2)), others: 6, ms: Math.max(800, 1900 - 70 * b) };
 }
-const COUNT_PICS = ['apple', 'cherry', 'star', 'heart', 'fish', 'leaf', 'balloon', 'mushroom', 'lemon', 'bell', 'kite', 'cupcake'];
+const COUNT_PICS = ['apple', 'cherry', 'star', 'heart', 'fish', 'leaf', 'balloon', 'mushroom', 'lemon', 'bell', 'kite', 'cupcake', 'donut', 'cookie', 'ladybug', 'gift', 'orange', 'octopus'];
 function nextCount() {
   const L = countLevel(qc.tier), kinds = samplePics(L.kinds, COUNT_PICS), target = kinds[0];
   const n = r(L.min, L.max), items = Array(n).fill(target);

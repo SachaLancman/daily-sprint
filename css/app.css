@@ -255,6 +255,8 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .qbar i{display:block;height:100%;background:var(--grad);transform-origin:left}
 .medal{display:inline-block;width:9px;height:9px;border-radius:50%;margin:0 4px 1px 0;vertical-align:middle;box-shadow:0 0 0 1.5px rgba(255,255,255,.8)}
 .badge.record{background:#fff;color:#17153A;display:inline-flex;align-items:center}
+.badge.session{display:inline-flex;align-items:center;gap:6px}
+.badge.session svg{width:18px;height:18px}
 .badge.record .medal{width:12px;height:12px;box-shadow:0 0 0 1.5px #17153A}
 
 /* Atelier Sacha opening (js/splash.js). Same look in light and dark mode. Font: Fredoka (rounded, playful).
