@@ -50,7 +50,6 @@ document.addEventListener('keydown', e => {
   else if (e.key === 'Enter') { e.preventDefault(); press('enter'); }
 });
 renderHome();
-if (!TEST_MODE) maybeWelcome();
 flushScores();
 // test.html opens the app as index.html?test, which loads the automatic tests.
 if (TEST_MODE) { const t = document.createElement('script'); t.src = 'js/tests.js'; document.body.appendChild(t); }

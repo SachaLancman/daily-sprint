@@ -336,21 +336,6 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .intro-note{font-size:14px;max-width:340px}
 .intro .btn{max-width:320px}
 
-/* Welcome screens */
-#welcome{min-height:calc(100vh - 60px);justify-content:center;text-align:center;align-items:center}
-.welcome-slide{display:flex;flex-direction:column;align-items:center;gap:14px;max-width:360px}
-.welcome-slide h1{font-size:30px}
-.welcome-art{width:160px;height:160px;color:var(--ink)}
-.welcome-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%}
-.welcome-card{position:relative;overflow:hidden;background:var(--grad);border-radius:16px;aspect-ratio:1;color:#fff;display:flex;align-items:flex-end;padding:8px;font:800 13px var(--display)}
-.welcome-card .art{position:absolute;top:-4px;right:-8px;width:64px;height:64px;color:var(--d)}
-.welcome-card span{position:relative}
-.welcome-flame{width:120px;height:120px;border-radius:50%;background:var(--accent);color:#F2711C;display:grid;place-items:center;box-shadow:0 14px 30px -12px rgba(230,150,0,.8)}
-.welcome-flame svg{width:64px;height:64px}
-.welcome-dots{display:flex;gap:6px}
-.welcome-dots i{width:8px;height:8px;border-radius:50%;background:var(--line)}
-.welcome-dots i.on{width:22px;border-radius:4px;background:var(--hero)}
-#welcomeNext{max-width:320px}
 
 /* Activity calendar */
 button.pill{border:0;cursor:pointer}

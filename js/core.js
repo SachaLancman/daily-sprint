@@ -128,7 +128,11 @@ function spark(id) {
 }
 
 // Vibration on phones that support it (Settings can turn it off). Mistakes buzz once, level-ups twice.
-function buzz(pattern) { if (store.vibrate !== false && navigator.vibrate) try { navigator.vibrate(pattern); } catch (e) {} }
+// Browsers only allow vibration after the person has tapped the page, so don't even try before that.
+function buzz(pattern) {
+  const tapped = !navigator.userActivation || navigator.userActivation.hasBeenActive;
+  if (store.vibrate !== false && navigator.vibrate && tapped) try { navigator.vibrate(pattern); } catch (e) {}
+}
 let ac = null;
 function beep(freq, dur) {
   if (freq <= 200) buzz(70); else if (freq >= 980) buzz([25, 40, 25]); // the "wrong" and "level up" sounds
@@ -192,7 +196,7 @@ let screen = 'home', run = 0, inSession = false, current = null;
 const NAV_SCREENS = ['home', 'library', 'board', 'brain'];
 function show(id) {
   screen = id;
-  ['home', 'library', 'countdown', 'end', 'board', 'profile', 'calendar', 'welcome', 'settings', 'brain'].concat(GAMES.map(g => g.id)).forEach(x => { $(x).hidden = x !== id; });
+  ['home', 'library', 'countdown', 'end', 'board', 'profile', 'calendar', 'settings', 'brain'].concat(GAMES.map(g => g.id)).forEach(x => { $(x).hidden = x !== id; });
   const nav = NAV_SCREENS.includes(id);
   $('nav').hidden = !nav;
   document.body.classList.toggle('has-nav', nav);
