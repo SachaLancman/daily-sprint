@@ -257,6 +257,27 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .badge.record{background:#fff;color:#17153A;display:inline-flex;align-items:center}
 .badge.record .medal{width:12px;height:12px;box-shadow:0 0 0 1.5px #17153A}
 
+/* Atelier Sacha opening (js/splash.js). Same look in light and dark mode. */
+#splash{position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:radial-gradient(circle at 50% 42%, #2E2470 0%, #120F2E 72%);transition:opacity .3s ease-out;cursor:pointer}
+#splash.out{opacity:0;pointer-events:none}
+.sp-logo{display:flex;flex-direction:column;align-items:center;gap:16px}
+.sp-mark{width:112px;height:112px;filter:drop-shadow(0 14px 30px rgba(123,92,255,.55))}
+.sp-word{display:flex;flex-direction:column;align-items:center;color:#fff}
+.sp-kicker{font:500 13px var(--mono);letter-spacing:.42em;margin-right:-.42em;text-transform:uppercase;opacity:.75}
+.sp-name{font:800 46px/1.05 var(--display);letter-spacing:-.02em}
+.sp-spark{transform-box:fill-box;transform-origin:center}
+@media (prefers-reduced-motion: no-preference){
+  .sp-mark{animation:spPop .55s cubic-bezier(.2,1.6,.4,1) both}
+  .sp-a{stroke-dasharray:160;stroke-dashoffset:160;animation:spDraw .45s .25s ease-out forwards}
+  .sp-spark{animation:spTwinkle .6s .55s cubic-bezier(.2,1.6,.4,1) both}
+  .sp-kicker,.sp-name{animation:spUp .45s cubic-bezier(.2,.8,.2,1) both}
+  .sp-kicker{animation-delay:.6s} .sp-name{animation-delay:.72s}
+  @keyframes spPop{from{transform:scale(.3) rotate(-12deg);opacity:0}}
+  @keyframes spDraw{to{stroke-dashoffset:0}}
+  @keyframes spTwinkle{from{transform:scale(0) rotate(-120deg)}}
+  @keyframes spUp{from{transform:translateY(14px);opacity:0}}
+}
+
 /* Brain profile ("You" tab). One chart color (--chart); text stays in ink colors. */
 :root{--chart:#4B2FC0}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--chart:#9C8CFF}}

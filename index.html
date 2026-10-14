@@ -16,6 +16,19 @@
 <style id="gameColors">/* filled in by registerGame() for games that bring their own colors */</style>
 </head>
 <body>
+<!-- Studio opening (about 2 seconds, once per fresh start, tap to skip). Logic in js/splash.js. -->
+<div id="splash" role="img" aria-label="Atelier Sacha">
+  <div class="sp-logo">
+    <svg class="sp-mark" viewBox="0 0 120 120" aria-hidden="true">
+      <defs><linearGradient id="spGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7B5CFF"/><stop offset="1" stop-color="#4B2FC0"/></linearGradient></defs>
+      <rect x="10" y="10" width="100" height="100" rx="28" fill="url(#spGrad)"/>
+      <path class="sp-a" d="M36 88L60 30l24 58M45 68h30" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+      <path class="sp-spark" d="M88 20l3.5 8.5L100 32l-8.5 3.5L88 44l-3.5-8.5L76 32l8.5-3.5z" fill="#FFC83D"/>
+    </svg>
+    <div class="sp-word"><span class="sp-kicker">Atelier</span><span class="sp-name">Sacha</span></div>
+  </div>
+</div>
+<script src="js/splash.js"></script>
 <main>
   <section class="screen" id="home">
     <div class="home-top">
@@ -57,7 +70,7 @@
       <a class="set-row link-row" href="privacy.html"><div><b>Privacy policy</b><small>What the app stores and shares</small></div></a>
     </div>
     <div class="set-list"><button class="set-row link-row danger" id="setReset"><div><b>Reset all progress</b><small>Deletes your levels, scores, streak and calendar on this device</small></div></button></div>
-    <p class="set-foot">Daily Sprint · made with care · all games and art are original</p>
+    <p class="set-foot">Daily Sprint · by Atelier Sacha · all games and art are original</p>
   </section>
 
   <section class="screen" id="library" hidden>
