@@ -268,8 +268,10 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .sp-spark{transform-box:fill-box;transform-origin:center}
 @media (prefers-reduced-motion: no-preference){
   .sp-mark{animation:spPop .55s cubic-bezier(.2,1.6,.4,1) both}
-  .sp-a{stroke-dasharray:160;stroke-dashoffset:160;animation:spDraw .45s .25s ease-out forwards}
-  .sp-spark{animation:spTwinkle .6s .55s cubic-bezier(.2,1.6,.4,1) both}
+  .sp-house{stroke-dasharray:300;stroke-dashoffset:300;animation:spDraw .6s .2s ease-out forwards}
+  .sp-window{transform-box:fill-box;transform-origin:center;animation:spLight .4s .7s ease-out both}
+  @keyframes spLight{from{opacity:0;transform:scale(.4)}}
+  .sp-spark{animation:spTwinkle .6s .85s cubic-bezier(.2,1.6,.4,1) both}
   .sp-kicker,.sp-name{animation:spUp .45s cubic-bezier(.2,.8,.2,1) both}
   .sp-kicker{animation-delay:.6s} .sp-name{animation-delay:.72s}
   @keyframes spPop{from{transform:scale(.3) rotate(-12deg);opacity:0}}
