@@ -257,28 +257,39 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .badge.record{background:#fff;color:#17153A;display:inline-flex;align-items:center}
 .badge.record .medal{width:12px;height:12px;box-shadow:0 0 0 1.5px #17153A}
 
-/* Atelier Sacha opening (js/splash.js). Same look in light and dark mode. */
-#splash{position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:radial-gradient(circle at 50% 42%, #2E2470 0%, #120F2E 72%);transition:opacity .3s ease-out;cursor:pointer}
-#splash.out{opacity:0;pointer-events:none}
-.sp-logo{display:flex;flex-direction:column;align-items:center;gap:16px}
+/* Atelier Sacha opening (js/splash.js). Same look in light and dark mode. Font: Fredoka (rounded, playful).
+   In: the tile drops and bounces, the workshop draws itself, the window flickers on, the spark pops,
+   the letters hop in one by one. Out: a "boing", the logo spins away, the background closes like a cartoon iris. */
+#splash{position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:radial-gradient(circle at 50% 42%, #2E2470 0%, #120F2E 72%);cursor:pointer;clip-path:circle(150% at 50% 42%)}
+#splash.out{pointer-events:none}
+.sp-logo{display:flex;flex-direction:column;align-items:center;gap:14px}
 .sp-mark{width:112px;height:112px;filter:drop-shadow(0 14px 30px rgba(123,92,255,.55))}
-.sp-word{display:flex;flex-direction:column;align-items:center;color:#fff}
-.sp-kicker{font:500 13px var(--mono);letter-spacing:.42em;margin-right:-.42em;text-transform:uppercase;opacity:.75}
-.sp-name{font:800 46px/1.05 var(--display);letter-spacing:-.02em}
-.sp-spark{transform-box:fill-box;transform-origin:center}
+.sp-word{display:flex;flex-direction:column;align-items:center;color:#fff;font-family:Fredoka,var(--display)}
+.sp-kicker{font-weight:500;font-size:15px;letter-spacing:.38em;margin-right:-.38em;text-transform:uppercase;color:#FFC83D}
+.sp-name{display:flex;font-weight:700;font-size:54px;line-height:1;letter-spacing:.01em}
+.sp-name i{font-style:normal;display:inline-block}
+.sp-spark,.sp-window{transform-box:fill-box;transform-origin:center}
 @media (prefers-reduced-motion: no-preference){
-  .sp-mark{animation:spPop .55s cubic-bezier(.2,1.6,.4,1) both}
-  .sp-house{stroke-dasharray:300;stroke-dashoffset:300;animation:spDraw .6s .2s ease-out forwards}
-  .sp-window{transform-box:fill-box;transform-origin:center;animation:spLight .4s .7s ease-out both}
-  @keyframes spLight{from{opacity:0;transform:scale(.4)}}
-  .sp-spark{animation:spTwinkle .6s .85s cubic-bezier(.2,1.6,.4,1) both}
-  .sp-kicker,.sp-name{animation:spUp .45s cubic-bezier(.2,.8,.2,1) both}
-  .sp-kicker{animation-delay:.6s} .sp-name{animation-delay:.72s}
-  @keyframes spPop{from{transform:scale(.3) rotate(-12deg);opacity:0}}
+  .sp-mark{animation:spDrop .6s cubic-bezier(.3,1.5,.5,1) both}
+  .sp-house{stroke-dasharray:300;stroke-dashoffset:300;animation:spDraw .55s .35s ease-out forwards}
+  .sp-window{animation:spFlicker .45s .8s steps(1,end) both}
+  .sp-spark{animation:spTwinkle .55s 1s cubic-bezier(.2,1.8,.4,1) both}
+  .sp-kicker{animation:spUp .4s .55s cubic-bezier(.2,1.4,.4,1) both}
+  .sp-name i{animation:spHop .5s cubic-bezier(.3,1.8,.5,1) both}
+  .sp-name i:nth-child(1){animation-delay:.7s} .sp-name i:nth-child(2){animation-delay:.78s} .sp-name i:nth-child(3){animation-delay:.86s}
+  .sp-name i:nth-child(4){animation-delay:.94s} .sp-name i:nth-child(5){animation-delay:1.02s}
+  #splash.out{animation:spIris .45s .12s cubic-bezier(.6,0,.8,.2) forwards}
+  #splash.out .sp-logo{animation:spAway .42s cubic-bezier(.5,-0.5,.8,.3) forwards}
+  @keyframes spDrop{0%{transform:translateY(-70vh) scale(.9)}60%{transform:translateY(0) scale(1.12,.86)}78%{transform:translateY(-10px) scale(.95,1.06)}100%{transform:none}}
   @keyframes spDraw{to{stroke-dashoffset:0}}
-  @keyframes spTwinkle{from{transform:scale(0) rotate(-120deg)}}
-  @keyframes spUp{from{transform:translateY(14px);opacity:0}}
+  @keyframes spFlicker{0%{opacity:0}25%{opacity:1}45%{opacity:.15}65%{opacity:1}80%{opacity:.4}100%{opacity:1}}
+  @keyframes spTwinkle{from{transform:scale(0) rotate(-160deg)}}
+  @keyframes spUp{from{transform:translateY(12px) scale(.6);opacity:0}}
+  @keyframes spHop{0%{transform:translateY(26px) scale(.4) rotate(-12deg);opacity:0}60%{transform:translateY(-10px) scale(1.12) rotate(6deg);opacity:1}100%{transform:none}}
+  @keyframes spAway{0%{transform:none}30%{transform:translateY(-14px) scale(1.12)}100%{transform:translateY(10px) scale(0) rotate(200deg);opacity:0}}
+  @keyframes spIris{to{clip-path:circle(0% at 50% 42%)}}
 }
+@media (prefers-reduced-motion: reduce){ #splash{transition:opacity .3s} #splash.out{opacity:0} }
 
 /* Brain profile ("You" tab). One chart color (--chart); text stays in ink colors. */
 :root{--chart:#4B2FC0}

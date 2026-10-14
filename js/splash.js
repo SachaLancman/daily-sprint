@@ -26,8 +26,8 @@
     } catch (e) {}
   }
   let closed = false;
-  const close = () => { if (closed) return; closed = true; el.classList.add('out'); setTimeout(() => el.remove(), 320); };
-  setTimeout(chime, reduced ? 0 : 380);
-  setTimeout(close, reduced ? 1200 : 1750); // + 0.3s fade = about 2 seconds
+  const close = () => { if (closed) return; closed = true; el.classList.add('out'); setTimeout(() => el.remove(), reduced ? 320 : 620); };
+  setTimeout(chime, reduced ? 0 : 800); // as the window lights up
+  setTimeout(close, reduced ? 1200 : 1550); // + the playful exit = about 2 seconds
   el.addEventListener('pointerdown', close);
 })();
