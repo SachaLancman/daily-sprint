@@ -44,9 +44,16 @@
     anagram: { state: () => an, gen: L => { an.tier = L; an.locked = false; nextAnagram(); },
       check: () => an.letters.join('') === an.word ? 'letters not scrambled' : null,
       solve: () => { for (const ch of an.word) typeLetter(ch); }, miss: () => skipAnagram(false) },
-    count: { state: () => qc, genOnly: true, gen: L => { qc.tier = L; nextCount(); },
-      check: () => $('countField').children.length > 30 ? 'too many pictures' : qc.answer < 1 ? 'nothing to count' : null,
-      play: async () => { await wait(countLevel(qc.tier).ms + 150); const b = kids('countOpts').find(x => Number(x.dataset.o) === qc.answer); if (!b) return 'answer not offered'; countChoose(b); return qc.score > 0 ? null : 'correct answer not scored'; } },
+    defense: { state: () => df, gen: L => { df.tier = L; defSetup(); defSpawn(); defSpawn(); },
+      check: () => { // four different numbers on the buttons, every monster's answer among them, and every sum worked out right
+        const pad = kids('defPad').map(b => Number(b.dataset.v)), live = df.mons.filter(m => !m.dying);
+        if (new Set(pad).size !== 4 || pad.some(v => !Number.isInteger(v) || v < 0)) return 'answer buttons wrong: ' + pad;
+        const calc = text => { const t = text.split(' '); let v = t[1] === '×' ? t[0] * t[2] : t[1] === '−' ? t[0] - t[2] : +t[0] + +t[2]; if (t[4]) v += +t[4]; return v; };
+        const bad = live.find(m => !pad.includes(m.ans) || calc(m.text) !== m.ans);
+        return bad ? 'monster ' + bad.text + ' = ' + bad.ans + ' not answerable' : null;
+      },
+      solve: () => defTap(kids('defPad').find(b => df.mons.some(m => !m.dying && m.ans === Number(b.dataset.v)))),
+      miss: () => defTap(kids('defPad').find(b => !df.mons.some(m => !m.dying && m.ans === Number(b.dataset.v)))) },
     pairs: { state: () => pp, gen: L => { pp.tier = L; newPairsBoard(); },
       check: () => { const c = {}; pp.cards.forEach(x => c[x] = (c[x] || 0) + 1); return Object.values(c).some(v => v !== 2) ? 'cards not in pairs' : null; },
       solve: () => { flipCard(0); flipCard(pp.cards.indexOf(pp.cards[0], 1)); }, miss: () => { flipCard(0); flipCard(pp.cards.findIndex(c => c !== pp.cards[0])); } },
@@ -114,7 +121,7 @@
   const framesRun = () => new Promise(res => { let done = false; requestAnimationFrame(() => { done = true; res(true); }); setTimeout(() => { if (!done) res(false); }, 300); });
   const startDirect = id => { run++; current = GAMES.find(g => g.id === id); show(id); STARTERS[id](run); };
   // Parts of a game screen that are allowed to be empty right after it starts
-  const EMPTY_OK = { count: ['countOpts'] };
+  const EMPTY_OK = {};
   function screenProblems(id) {
     const sec = $(id);
     if (screen !== id || sec.hidden) return 'game screen not shown (showing "' + screen + '")';

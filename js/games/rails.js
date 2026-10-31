@@ -97,7 +97,7 @@ function railDeliver(cart, i) {
 }
 function railTick(now) {
   if (!alive(rs)) return;
-  const dt = rs.last ? Math.min(0.05, (now - rs.last) / 1000) : 0, L = railLevel(rs.tier);
+  const dt = rs.last ? Math.max(0, Math.min(0.05, (now - rs.last) / 1000)) : 0, L = railLevel(rs.tier);
   rs.last = now;
   rs.spawnIn -= dt * 1000;
   if (rs.spawnIn <= 0 && rs.carts.length < L.max && !rs.carts.some(c => c.y < 40)) { railSpawn(); rs.spawnIn = L.every; }

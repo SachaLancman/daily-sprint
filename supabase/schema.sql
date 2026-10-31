@@ -41,7 +41,7 @@ create or replace function max_score(p_game text) returns int language sql immut
   select case p_game
     when 'math' then 6000 when 'memory' then 5000 when 'words' then 4000 when 'spot' then 2000
     when 'colors' then 4000 when 'hunt' then 4000 when 'pattern' then 3000 when 'anagram' then 2500
-    when 'target' then 4000 when 'greater' then 4000 when 'count' then 3000
+    when 'target' then 4000 when 'greater' then 4000 when 'defense' then 20000
     when 'pairs' then 4000 when 'newpic' then 4000 when 'recall' then 4000
     when 'picspell' then 3000
     when 'rails' then 4000 when 'arrows' then 4000 when 'seeker' then 4000
