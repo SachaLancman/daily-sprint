@@ -120,7 +120,7 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .end-btns{display:flex;flex-direction:column;gap:10px;width:100%;margin-top:6px}
 
 /* In-game header: the game's gradient, with quit, name, timer and chips. */
-.hud{background:var(--grad);color:#fff;border-radius:24px;padding:12px 14px 14px;display:flex;flex-direction:column;gap:12px;box-shadow:0 14px 28px -16px var(--d)}
+.hud{position:relative;background:var(--grad);color:#fff;border-radius:24px;padding:12px 14px 14px;display:flex;flex-direction:column;gap:12px;box-shadow:0 14px 28px -16px var(--d)}
 .hud-row{display:flex;align-items:center;gap:12px}
 .x{flex:none;width:42px;height:42px;border-radius:50%;border:0;background:rgba(255,255,255,.2);color:#fff;display:grid;place-items:center;cursor:pointer}
 .x svg{width:18px;height:18px}
@@ -171,6 +171,11 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .word-btn s{opacity:.7;margin-right:6px}
 .none-btn{align-self:center;font-size:16px;padding:7px 16px;border:2px dashed var(--line);box-shadow:none}
 #fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:20}
+/* Game feel: sparks, the streak banner and bigger points on a hot streak (see juiceRight in core.js) */
+#juice{position:fixed;inset:0;pointer-events:none;z-index:19;overflow:hidden}
+#juice i{position:absolute;width:8px;height:8px;border-radius:50%;transform:translate(-50%,-50%)}
+.float.hot{font-size:32px}
+.float.combo{top:auto;bottom:-16px;z-index:2;font-size:17px;background:var(--ink);color:var(--bg);padding:6px 14px;border-radius:999px}
 
 /* New games */
 .stroop{font-size:52px;letter-spacing:.02em;text-transform:uppercase;transition:background .15s}
@@ -250,10 +255,8 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
   .rail-board .switch .arrow{transition:transform .22s cubic-bezier(.34,1.56,.64,1)}
   .rail-board .switch.flip .knob{animation:railSnap .22s cubic-bezier(.34,1.56,.64,1)}
   .rail-board .station.pop rect{animation:railPop .38s cubic-bezier(.34,1.56,.64,1)}
-  .rail-board.shake{animation:railShake .32s ease-out}
   @keyframes railSnap{from{transform:scale(.8)}}
   @keyframes railPop{from{transform:scale(1.15,.75)}}
-  @keyframes railShake{20%{transform:translateX(-7px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(1px)}}
 }
 .bubble-field{height:380px;padding:0;overflow:hidden;touch-action:none}
 .bubble{position:absolute;border:0;border-radius:50%;padding:0;cursor:pointer;display:grid;place-items:center;
@@ -493,8 +496,6 @@ a.link{color:var(--muted)}
   .badge{animation:pop .5s .7s cubic-bezier(.2,1.6,.4,1) backwards}
   .float{animation:floatUp .9s ease-out forwards}
   @keyframes floatUp{from{opacity:1;transform:translate(-50%,6px) scale(.8)}20%{opacity:1;transform:translate(-50%,-4px) scale(1.1)}to{opacity:0;transform:translate(-50%,-34px)}}
-  .board.no{animation:shake .3s}
-  @keyframes shake{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
   .tile{transition:background .12s,transform .12s,box-shadow .12s}
   .tile.lit{transform:scale(1.05)}
   .chip.hot{animation:pulse 1s ease-in-out infinite}

@@ -25,10 +25,11 @@ function spawnBubble() {
 }
 function popBubble(btn) {
   if (!alive(bp)) return;
-  const bad = btn.classList.contains('bad');
+  const bad = btn.classList.contains('bad'), box = btn.getBoundingClientRect();
   btn.remove();
   if (bad) { wrong(bp); bp.pops = 0; setBoard('bubbleField', 'no'); later(bp, 300, () => setBoard('bubbleField', null)); return; }
   bp.pops++; bp.correct++; bp.total++; bp.streak++;
+  juiceBurst(box.left + box.width / 2, box.top + box.height / 2, 6); // the bubble bursts into sparks
   const pts = 5 * bp.tier;
   bp.score += pts;
   beep(700 + Math.min(bp.streak, 12) * 25, 0.05);

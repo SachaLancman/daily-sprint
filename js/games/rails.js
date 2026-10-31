@@ -1,7 +1,7 @@
 /* Rail Switch (Focus): colored carts roll down a branching track. Tap the switches so each cart reaches the station of its color.
    Levels add stations (2, 4, then 8), faster carts and more carts at once.
    Feedback in three sizes (game-feel): a switch snaps over with an overshoot (small), a right delivery makes the
-   station bounce with a burst of sparks (medium), a wrong one shakes the board (large). */
+   station bounce with a burst of sparks (medium); the shared engine shakes the board on a wrong one (large). */
 let rs = null;
 const RAIL_COLORS = [['#E5484D', 'R'], ['#3B6FF5', 'B'], ['#FFC83D', 'Y'], ['#18A058', 'G'], ['#8E5BD8', 'V'], ['#FF8A2B', 'O'], ['#FF6FA8', 'P'], ['#1FC9B6', 'T']];
 const RAIL_W = 328, RAIL_TOP = 64, RAIL_BOTTOM = 372;
@@ -92,7 +92,6 @@ function railDeliver(cart, i) {
   } else {
     wrong(rs);
     if (st) { st.classList.add('miss'); later(rs, 500, () => st.classList.remove('miss')); }
-    setBoard('railWrap', null); $('railWrap').classList.remove('shake'); void $('railWrap').offsetWidth; $('railWrap').classList.add('shake');
   }
   if (railLevel(rs.tier).depth !== depth) later(rs, 450, railBuild); // more (or fewer) stations: lay a new track
 }
@@ -122,12 +121,11 @@ registerGame({
     '<circle cx="60" cy="34" r="10" fill="#fff"/><path d="M57 29l6 5-6 5" fill="none" stroke="#1E6B52" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" transform="rotate(50 60 34)"/>' +
     '<rect x="16" y="92" width="28" height="18" rx="6" fill="#FFC83D"/><rect x="76" y="92" width="28" height="18" rx="6" fill="#E5484D"/>' +
     '<rect x="68" y="44" width="24" height="18" rx="6" fill="#E5484D" stroke="#fff" stroke-width="3" transform="rotate(50 80 53)"/>',
-  html: '<div class="hunt-wrap board rail-board" id="railWrap"><svg id="railBoard" viewBox="0 0 ' + RAIL_W + ' 420" aria-label="Rail track"></svg></div>',
+  html: '<div class="hunt-wrap board rail-board" id="railWrap" data-fx="own"><svg id="railBoard" viewBox="0 0 ' + RAIL_W + ' 420" aria-label="Rail track"></svg></div>',
   start(my) {
     rs = makeRound('rails', MAX_LEVEL);
     rs.lastColors = [-1, -1];
     show('rails');
-    $('railWrap').classList.remove('shake');
     roundHud(rs);
     railBuild();
     requestAnimationFrame(railTick);

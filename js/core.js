@@ -135,7 +135,7 @@ function buzz(pattern) {
 }
 let ac = null;
 function beep(freq, dur) {
-  if (freq <= 200) buzz(70); else if (freq >= 980) buzz([25, 40, 25]); // the "wrong" and "level up" sounds
+  if (freq <= 200) { buzz(70); juiceWrong(); } else if (freq >= 980) buzz([25, 40, 25]); // the "wrong" and "level up" sounds
   if (!store.sound) return;
   try {
     ac = ac || new (window.AudioContext || window.webkitAudioContext)();
@@ -153,6 +153,66 @@ function floatText(host, text, cls) {
   el.className = 'float' + (cls ? ' ' + cls : ''); el.textContent = text;
   host.appendChild(el);
   setTimeout(() => el.remove(), 900);
+  if (cls === 'lvl') juiceLevel(host); else if (text[0] === '+') juiceRight(host);
+}
+
+/* Game feel (following the game-feel skill): quick feedback that always returns to rest, sized by importance.
+   Every game already shows "+points" on a right answer and plays the low "wrong" sound on a mistake,
+   so the hooks in floatText() and beep() give all 24 games the same feel:
+   - small: the thing you tapped pops
+   - medium: a right answer bursts a few sparks; a mistake gives the board a short shake
+   - large: every 5 in a row gets a banner and a chord; a level-up flashes the header
+   Nothing moves when the phone asks for reduced motion, and Settings can turn the shake off.
+   A game that draws its own effects marks its board with data-fx="own" (Rail Switch). */
+let lastTap = { t: 0, x: 0, y: 0, el: null }, juiceRow = 0;
+document.addEventListener('pointerdown', e => { lastTap = { t: performance.now(), x: e.clientX, y: e.clientY, el: e.target.closest('button, .pic, .bubble') }; }, true);
+document.body.insertAdjacentHTML('beforeend', '<div id="juice" aria-hidden="true"></div>');
+const SPARK_COLORS = ['#FFC83D', '#5B82FF', '#1FC9B6', '#FF6FA8', '#A57BFF'];
+function juiceBurst(x, y, n = 8) {
+  if (reduced || $('juice').children.length > 60) return; // never pile up (animations pause in a hidden tab)
+  for (let k = 0; k < n; k++) {
+    const s = document.createElement('i'), a = Math.PI * 2 * (k / n) + Math.random() * 0.5, d = 26 + Math.random() * 22;
+    s.style.cssText = 'left:' + x + 'px;top:' + y + 'px;background:' + SPARK_COLORS[k % SPARK_COLORS.length];
+    $('juice').appendChild(s);
+    const done = () => s.remove();
+    setTimeout(done, 800); // a backup in case the animation never gets to finish
+    if (!s.animate) continue;
+    s.animate([{ transform: 'translate(-50%,-50%) scale(1)', opacity: 1 }, { transform: 'translate(calc(-50% + ' + Math.cos(a) * d + 'px), calc(-50% + ' + Math.sin(a) * d + 'px)) scale(.3)', opacity: 0 }],
+      { duration: 420 + Math.random() * 120, easing: 'cubic-bezier(.22,1,.36,1)' }).onfinish = done;
+  }
+}
+// Adds a short movement on top of whatever transform the element already has (rotated tiles stay rotated).
+function juiceMove(el, frames, ms, easing) {
+  if (reduced || !el || !el.animate) return;
+  try { el.animate(frames, { duration: ms, easing, composite: 'add' }); } catch (e) { el.animate(frames, { duration: ms, easing }); }
+}
+function juiceRight(host) {
+  juiceRow++;
+  if (juiceRow >= 5 && juiceRow % 5 === 0) { // a streak milestone: banner and a rising chord
+    const el = document.createElement('span');
+    el.className = 'float combo'; el.textContent = juiceRow + ' in a row';
+    const hud = host.closest('section') && host.closest('section').querySelector('.hud');
+    (hud || host).appendChild(el); setTimeout(() => el.remove(), 1100); // under the header, so it never covers the question
+    [784, 1047, 1319].forEach((f, k) => setTimeout(() => beep(f, 0.12), 90 + k * 70));
+  }
+  if (host.dataset.fx === 'own') return;
+  const tapped = lastTap.el && performance.now() - lastTap.t < 600 && host.contains(lastTap.el);
+  if (tapped) juiceMove(lastTap.el, [{ transform: 'scale(.92)' }, { transform: 'scale(1.06)', offset: .55 }, { transform: 'none' }], 260, 'cubic-bezier(.34,1.56,.64,1)');
+  const b = host.getBoundingClientRect();
+  juiceBurst(tapped ? lastTap.x : b.left + b.width / 2, tapped ? lastTap.y : b.top + 48, juiceRow >= 5 ? 12 : 8);
+}
+function juiceWrong() {
+  juiceRow = 0;
+  if (store.shake === false || !screen || !$(screen) || !$(screen).querySelector('.hud')) return; // only inside a game
+  const board = $(screen).querySelector('.hunt-wrap, .board, .pic-grid, .tiles') || $(screen);
+  juiceMove(board, [{ transform: 'translateX(0)' }, { transform: 'translateX(-8px)' }, { transform: 'translateX(6px)' }, { transform: 'translateX(-4px)' }, { transform: 'translateX(2px)' }, { transform: 'translateX(0)' }], 320, 'ease-out');
+}
+function juiceLevel(host) {
+  const sec = host.closest('section'), hud = sec && sec.querySelector('.hud');
+  if (!hud) return;
+  juiceMove(hud, [{ filter: 'brightness(1.4) saturate(1.2)' }, { filter: 'none' }], 450, 'ease-out');
+  const lvl = hud.querySelectorAll('.chip')[1];
+  if (lvl) juiceMove(lvl, [{ transform: 'scale(1.35)' }, { transform: 'none' }], 380, 'cubic-bezier(.34,1.56,.64,1)');
 }
 function streakChip(id, n) {
   const el = $(id);
@@ -195,7 +255,7 @@ function confetti() {
 let screen = 'home', run = 0, inSession = false, current = null;
 const NAV_SCREENS = ['home', 'library', 'board', 'brain'];
 function show(id) {
-  screen = id;
+  screen = id; juiceRow = 0; // a new screen starts a new run of right answers
   ['home', 'library', 'countdown', 'end', 'board', 'profile', 'calendar', 'settings', 'brain'].concat(GAMES.map(g => g.id)).forEach(x => { $(x).hidden = x !== id; });
   const nav = NAV_SCREENS.includes(id);
   $('nav').hidden = !nav;
@@ -366,6 +426,9 @@ function timer(bar, time, left) {
   $(bar).style.transform = 'scaleX(' + (left / ROUND) + ')';
   $(bar).parentNode.classList.toggle('low', left <= 10);
   $(time).classList.toggle('low', left <= 10);
+  // A soft tick each second of the last ten
+  const sec = Math.ceil(left);
+  if (sec <= 10 && sec > 0 && $(time).dataset.tick !== String(sec)) { $(time).dataset.tick = sec; beep(sec <= 3 ? 880 : 740, 0.03); }
 }
 // A game file calls registerGame({ id, name, skill, hint, art, colors: [light, dark], html, start, key }).
 // `html` is the game screen's content; it gets its own <section>, header and color class automatically.
@@ -429,8 +492,9 @@ function roundHud(st) {
 function right(st, host, pts = 10 * st.tier) {
   st.correct++; st.total++; st.streak++; st.row++;
   st.score += pts;
-  floatText(host, '+' + pts);
-  if (st.row >= st.upAfter && st.tier < st.maxTier) { st.tier++; st.row = 0; beep(990, 0.18); floatText(host, 'Level up!', 'lvl'); } else beep(660, 0.08);
+  floatText(host, '+' + pts, st.streak >= 5 ? 'hot' : '');
+  // The note climbs with the streak, so a good run sounds like one
+  if (st.row >= st.upAfter && st.tier < st.maxTier) { st.tier++; st.row = 0; beep(990, 0.18); floatText(host, 'Level up!', 'lvl'); } else beep(620 + Math.min(st.streak, 12) * 25, 0.08);
   st.top = Math.max(st.top, st.tier);
   roundHud(st);
 }
