@@ -56,13 +56,16 @@
     picspell: { state: () => ps, gen: L => { ps.tier = L; ps.locked = false; nextSpell(); },
       check: () => kids('spellOpts').filter(b => b.dataset.o === ps.word).length !== 1 ? 'correct spelling missing or repeated' : null,
       solve: () => spellChoose(btnWith('spellOpts', 'o', ps.word)), miss: () => spellChoose(kids('spellOpts').find(b => b.dataset.o !== ps.word)) },
-    twins: { state: () => tw, gen: L => { tw.tier = L; nextTwins(); },
-      check: () => { // exactly one pair of identical pictures, and it is the twins
-        const keys = kids('twinGrid').map(b => b.innerHTML), c = {}; keys.forEach(k => c[k] = (c[k] || 0) + 1);
-        const dup = Object.keys(c).filter(k => c[k] > 1);
-        return dup.length !== 1 || c[dup[0]] !== 2 ? 'grid must have exactly one identical pair' : tw.twins.length !== 2 || keys[tw.twins[0]] !== dup[0] ? 'twins marked wrongly' : null;
+    rails: { state: () => rs, gen: L => { rs.tier = L; railBuild(); },
+      check: () => { // the right number of switches and stations, every switch big enough to tap, and aiming really reaches each station
+        const d = rs.depth, b = $('railBoard');
+        if (b.querySelectorAll('.switch').length !== 2 ** d - 1 || b.querySelectorAll('.station').length !== 2 ** d) return 'track size wrong';
+        if ([...b.querySelectorAll('.switch .hit')].some(h => h.getBoundingClientRect().width < 40)) return 'switch too small to tap';
+        for (let s = 0; s < 2 ** d; s++) { railAim(s); if (railFollow() !== s) return 'switches cannot reach station ' + s; }
+        return null;
       },
-      solve: () => tw.twins.forEach(i => twinTap(kids('twinGrid')[i])), miss: () => twinTap(kids('twinGrid').find((b, i) => !tw.twins.includes(i))) },
+      solve: () => { const c = railSpawn(); railAim(c.c); railDeliver(c, railFollow()); },
+      miss: () => { const c = railSpawn(); railDeliver(c, (c.c + 1) % 2 ** rs.depth); } },
     flash: { state: () => fm, gen: L => { fm.tier = L; fm.hist = ['apple', 'star', 'fish']; fm.locked = false; nextFlash(); },
       check: () => typeof fm.answer !== 'boolean' ? 'no answer' : null, solve: () => flashAnswer(fm.answer), miss: () => flashAnswer(!fm.answer) },
     balance: { state: () => bl, gen: L => { bl.tier = L; bl.locked = false; nextBalance(); },
@@ -121,7 +124,7 @@
   }
   function overflow(id) {
     const box = document.querySelector('main').getBoundingClientRect();
-    // Pictures can be mirrored or changed on purpose (Find the Twins): measure their tiles, not the drawing's invisible corners.
+    // Pictures can poke out of their box on purpose: measure their tiles, not the drawing's invisible corners.
     // A board that is shaking after a mistake (.board.no) moves sideways for a moment, which is fine.
     const out = [...$(id).querySelectorAll('*')].filter(el => !el.closest('.float,.bubble,.pic svg,.mcard svg,.board.no')).filter(el => { const b = el.getBoundingClientRect(); return b.width && (b.right > box.right + 1 || b.left < box.left - 1); });
     if (!out.length) return null;

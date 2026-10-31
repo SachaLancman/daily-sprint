@@ -234,6 +234,27 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .path-moves .times{position:absolute;right:-4px;bottom:-6px;font:800 12px var(--display);background:var(--accent);color:var(--on-accent);border-radius:999px;padding:1px 5px}
 .path-moves.hide .times{visibility:hidden}
 #arrowAsk.flip,#cAsk.flip,#flashMsg.flip{color:var(--bad)}
+/* Rail Switch */
+.rail-board{padding:8px;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.rail-board svg{display:block;width:100%;height:auto;overflow:visible}
+.rail-board .track{stroke:var(--line);stroke-width:10;stroke-linecap:round;transition:stroke .15s}
+.rail-board .track.on{stroke:var(--muted)}
+.rail-board .switch{cursor:pointer}
+.rail-board .switch .hit{fill:transparent}
+.rail-board .switch .knob{fill:var(--surface);stroke:var(--ink);stroke-width:2.5;transform-box:fill-box;transform-origin:center}
+.rail-board .switch .arrow{fill:none;stroke:var(--ink);stroke-width:3;stroke-linecap:round;stroke-linejoin:round;transform-box:view-box;transform-origin:0 0}
+.rail-board .cart rect,.rail-board .station rect{stroke:#2B2350;stroke-width:3}
+.rail-board .station rect{transform-box:fill-box;transform-origin:50% 100%}
+.rail-board .station.miss rect{stroke:var(--bad);stroke-width:5}
+@media (prefers-reduced-motion: no-preference){
+  .rail-board .switch .arrow{transition:transform .22s cubic-bezier(.34,1.56,.64,1)}
+  .rail-board .switch.flip .knob{animation:railSnap .22s cubic-bezier(.34,1.56,.64,1)}
+  .rail-board .station.pop rect{animation:railPop .38s cubic-bezier(.34,1.56,.64,1)}
+  .rail-board.shake{animation:railShake .32s ease-out}
+  @keyframes railSnap{from{transform:scale(.8)}}
+  @keyframes railPop{from{transform:scale(1.15,.75)}}
+  @keyframes railShake{20%{transform:translateX(-7px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(1px)}}
+}
 .bubble-field{height:380px;padding:0;overflow:hidden;touch-action:none}
 .bubble{position:absolute;border:0;border-radius:50%;padding:0;cursor:pointer;display:grid;place-items:center;
   background:radial-gradient(circle at 34% 28%, rgba(255,255,255,.6), transparent 38%), var(--grad);box-shadow:0 8px 16px -8px var(--d)}

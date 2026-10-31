@@ -20,10 +20,10 @@ A personal brain-training web app in the spirit of apps like Elevate, heading fo
 | Math | math: Math Sprint · count: Quick Count 🖼 · target: Target Total · greater: Greater Than |
 | Memory | memory: Memory Grid · pairs: Picture Pairs 🖼 · newpic: Spot the New 🖼 · recall: Number Recall |
 | Language | words: Word Match · spot: Spot the Error · anagram: Unscramble · picspell: Picture Spell 🖼 |
-| Focus | colors: Color Clash · twins: Find the Twins 🖼 · arrows: Arrow Focus · seeker: Shape Seeker |
+| Focus | colors: Color Clash · rails: Rail Switch · arrows: Arrow Focus · seeker: Shape Seeker |
 | Speed | hunt: Number Hunt · flash: Flash Match 🖼 · bubbles: Bubble Pop · sort: Sort Rush |
 | Logic | pattern: Next in Line · balance: Balance · matrix: Missing Piece · path: Follow the Arrows |
-- Find the Twins (replaced Odd One Out on 2026-10-14): all pictures differ except one identical pair; deeper levels add look-alikes (same picture recolored with `hue-rotate` or mirrored; `TWIN_NO_TINT` lists mostly-white pictures that never get recolored). Picture Spell uses every picture whose word has 5+ letters (53) and avoids the last 20.
+- Rail Switch (replaced Find the Twins on 2026-10-31, which had replaced Odd One Out): colored carts roll down a branching track (2, 4, then 8 stations); tap switches to route each cart to its color. SVG + requestAnimationFrame (`railTick`); feedback in three sizes following the installed `game-feel` skill (switch snap, station pop + sparks, board shake on a miss). The owner dislikes Picture Spell, Quick Count and Flash Match too: candidates to replace with more game-like games (ideas: Number Drop, Pipe Flow, Shop Run, Word Tower, Pop-up). Picture Spell uses every picture whose word has 5+ letters (53) and avoids the last 20.
 
 - Results screen: 1-3 stars, count-up score, confetti on a new best or a new level record / rank.
 - Open-ended difficulty: every game has hand-made early levels, then formulas keep raising difficulty up to `MAX_LEVEL` (30): bigger numbers/grids, subtler differences, faster pace, and an **answer clock** (`answerClock` / `stopAnswerClock`, a shrinking bar; running out counts as a miss). Some games add twists at depth (Color Clash "NOT" question, Spot the Error "No mistake", Flash Match 2-back, Number Hunt shuffles/count-down, Follow the Arrows ×2 steps). Human limits are capped (e.g. grids ≤ 7×7, Number Recall ≤ 18 digits, bubbles ≥ 40px).

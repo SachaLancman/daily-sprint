@@ -1,6 +1,6 @@
 /* Picture library: original sticker-style drawings used by the picture games.
    Each drawing is SVG content for a 100x100 box. `word` is the name used by Picture Spell,
-   `asym` marks drawings that look different when mirrored (Find the Twins uses that for mirrored look-alikes). */
+   `asym` marks drawings that look different when mirrored (no game uses it right now). */
 const INK = '#2B2350';
 const PICS = {
   apple: { word: 'apple', asym: true, svg: '<path d="M50 30c-8-8-30-6-30 18 0 20 14 36 24 36 3 0 4-2 6-2s3 2 6 2c10 0 24-16 24-36 0-24-22-26-30-18z" fill="#E5484D"/><path d="M50 30c0-8 2-14 6-18" fill="none"/><path d="M54 22c6-8 16-8 20-4-4 6-14 8-20 4z" fill="#3DBE6B"/>' },
