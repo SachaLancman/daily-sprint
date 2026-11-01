@@ -4,7 +4,7 @@
    station bounce with a burst of sparks (medium); the shared engine shakes the board on a wrong one (large). */
 let rs = null;
 const RAIL_COLORS = [['#E5484D', 'R'], ['#3B6FF5', 'B'], ['#FFC83D', 'Y'], ['#18A058', 'G'], ['#8E5BD8', 'V'], ['#FF8A2B', 'O'], ['#FF6FA8', 'P'], ['#1FC9B6', 'T']];
-const RAIL_W = 328, RAIL_TOP = 64, RAIL_BOTTOM = 372;
+const RAIL_W = 328, RAIL_TOP = 150, RAIL_BOTTOM = 372; // a long straight run in from the top gives time to set the first switch
 const RAIL_LEVELS = [
   { depth: 1, speed: 70, every: 3600, max: 1 },
   { depth: 2, speed: 75, every: 3400, max: 1 },

@@ -33,6 +33,7 @@ function fishNewWord() {
 const fishSwimming = () => wf.fish.filter(f => !f.caught && !f.flee);
 function fishLetter() {
   const L = fishLevel(wf.tier), need = wf.word[wf.pos];
+  if (!need) return 'ABCDEFGHIJKLMNOPRSTUVWY'[r(0, 22)]; // the word is done and the next one is coming: any letter
   if (!fishSwimming().some(f => f.letter === need)) return need; // the next letter is always somewhere in the pond
   if (Math.random() > L.decoy) return wf.word[r(wf.pos, wf.word.length - 1)];
   const alike = FISH_LOOKALIKE[need];

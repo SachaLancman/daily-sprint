@@ -59,6 +59,8 @@
         const lv = fishLevel(L), n = wf.word.length;
         if (!/^[A-Z]+$/.test(wf.word) || $('fishSlots').children.length !== n) return 'word or slots wrong: ' + wf.word;
         if (n < lv.len[0] - 1 || n > lv.len[1]) return 'word length ' + n + ' does not fit level ' + L;
+        const pos = wf.pos; wf.pos = n; const between = fishLetter(); wf.pos = pos; // a fish arriving between two words still gets a real letter
+        if (!/^[A-Z]$/.test(between) || fishSwimming().some(f => !/^[A-Z]$/.test(f.letter))) return 'a fish has no letter';
         return fishSwimming().some(f => f.letter === wf.word[0]) ? null : 'first letter not in the pond';
       },
       solve: () => { for (const ch of wf.word) { const f = fishSwimming().find(x => x.letter === ch) || fishSpawn(ch); fishCatch(f); } },
@@ -220,7 +222,8 @@
     const st = t.state();
     if (st && st.t0) {
       if (await framesRun()) {
-        st.t0 -= 61000; await wait(400);
+        st.t0 -= 61000;
+        for (let k = 0; k < 30 && screen !== 'end'; k++) await wait(100); // a slow or partly hidden window may draw only a few frames a second
         if (screen !== 'end') problems.push('game did not end when time ran out'); else if ($('finalScore').textContent === '') problems.push('results screen empty');
       } else note = ' (end-of-game check skipped: keep the tab visible)';
     }
