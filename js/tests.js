@@ -79,8 +79,14 @@
       },
       solve: () => { const c = railSpawn(); railAim(c.c); railDeliver(c, railFollow()); },
       miss: () => { const c = railSpawn(); railDeliver(c, (c.c + 1) % 2 ** rs.depth); } },
-    flash: { state: () => fm, gen: L => { fm.tier = L; fm.hist = ['apple', 'star', 'fish']; fm.locked = false; nextFlash(); },
-      check: () => typeof fm.answer !== 'boolean' ? 'no answer' : null, solve: () => flashAnswer(fm.answer), miss: () => flashAnswer(!fm.answer) },
+    cups: { state: () => cs, gen: L => { cs.tier = L; cupsPlan(); cs.phase = 'pick'; },
+      check: L => { // the round fits the level, and following the cups by hand ends where the game says the ball is
+        const lv = cupLevel(L), at = [...Array(cs.n).keys()], ballCup = at[cs.ball];
+        if (cs.n !== lv.n || cs.swaps.length !== lv.swaps || cs.swaps.some(([a, b]) => a === b || a < 0 || b >= cs.n)) return 'round does not fit level ' + L;
+        cs.swaps.forEach(([a, b]) => { [at[a], at[b]] = [at[b], at[a]]; });
+        return at.indexOf(ballCup) === cs.answer ? null : 'ball is not where the game thinks';
+      },
+      solve: () => cupsPick(cs.answer), miss: () => cupsPick((cs.answer + 1) % cs.n) },
     balance: { state: () => bl, gen: L => { bl.tier = L; bl.locked = false; nextBalance(); },
       check: () => !Number.isInteger(bl.ans) || bl.ans < 1 ? 'bad answer' : !btnWith('balOpts', 'o', bl.ans) ? 'answer not offered' : null,
       solve: () => balanceChoose(btnWith('balOpts', 'o', bl.ans)), miss: () => balanceChoose(kids('balOpts').find(b => Number(b.dataset.o) !== bl.ans)) },

@@ -251,6 +251,11 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .fish-slot{flex:1;max-width:32px;height:40px;border-radius:8px;background:var(--surface);box-shadow:inset 0 0 0 2px var(--line);display:grid;place-items:center;font:800 20px var(--display);color:var(--ink)}
 .fish-slot.on{background:var(--accent);color:var(--on-accent);box-shadow:none}
 
+/* Cup Shuffle (3D) */
+.cup-stage{width:100%;aspect-ratio:1/0.9;border-radius:22px;overflow:hidden;background:#1A1530;box-shadow:var(--shadow)}
+.cup-stage canvas{display:block;width:100%;height:100%;touch-action:none}
+.cup-note{margin:12px 0 0;text-align:center;font:700 17px var(--display);color:var(--muted);min-height:24px}
+
 /* Rail Switch */
 .rail-board{padding:8px;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none}
 .rail-board svg{display:block;width:100%;height:auto;overflow:visible}
