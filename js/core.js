@@ -42,7 +42,9 @@ const GAMES = [
       '<circle cx="80" cy="40" r="26" fill="none" stroke="#fff" stroke-width="4" stroke-dasharray="6 6"/></g>' },
   { id: 'pattern', name: 'Next in Line', skill: 'Logic', hint: 'Find the rule in the numbers and pick what comes next. 60 seconds.',
     art: [[24, 46, .5, 2], [54, 46, .75, 4], [84, 46, 1, 6]].map(([x, y, o, n]) => '<circle cx="' + x + '" cy="' + y + '" r="14" fill="#fff" fill-opacity="' + o + '"/><text x="' + x + '" y="' + (y + 7) + '" text-anchor="middle" font-family="Bricolage Grotesque, system-ui, sans-serif" font-weight="800" font-size="18" fill="currentColor">' + n + '</text>').join('') +
-      '<path d="M30 70q30 18 60 0" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 8"/><g transform="rotate(8 92 92)"><rect x="72" y="74" width="40" height="36" rx="11" fill="#FFC83D"/><text x="92" y="101" text-anchor="middle" font-family="Bricolage Grotesque, system-ui, sans-serif" font-weight="800" font-size="24" fill="#17153A">?</text></g>' }
+      '<path d="M30 70q30 18 60 0" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 8"/><g transform="rotate(8 92 92)"><rect x="72" y="74" width="40" height="36" rx="11" fill="#FFC83D"/><text x="92" y="101" text-anchor="middle" font-family="Bricolage Grotesque, system-ui, sans-serif" font-weight="800" font-size="24" fill="#17153A">?</text></g>' },
+  { id: 'anagram', name: 'Unscramble', skill: 'Language', hint: 'Tap the letters in the right order to make a word. 60 seconds.',
+    art: [[14, 40, -12, 'W', 1], [44, 22, 8, 'O', .6], [70, 50, -6, 'R', 1], [40, 70, 14, 'D', .6]].map(([x, y, a, ch, o]) => '<g transform="rotate(' + a + ' ' + (x + 17) + ' ' + (y + 17) + ')"><rect x="' + x + '" y="' + y + '" width="34" height="34" rx="9" fill="#fff" fill-opacity="' + o + '"/><text x="' + (x + 17) + '" y="' + (y + 25) + '" text-anchor="middle" font-family="Bricolage Grotesque, system-ui, sans-serif" font-weight="800" font-size="20" fill="currentColor">' + ch + '</text></g>').join('') }
 ];
 const SESSION = 4; // games in the daily session
 const SKILLS = [...new Set(GAMES.map(g => g.skill))];

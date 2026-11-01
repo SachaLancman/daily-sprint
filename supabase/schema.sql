@@ -40,13 +40,13 @@ revoke all on players, scores from anon, authenticated;
 create or replace function max_score(p_game text) returns int language sql immutable as $$
   select case p_game
     when 'math' then 6000 when 'memory' then 5000 when 'words' then 4000 when 'spot' then 2000
-    when 'colors' then 4000 when 'hunt' then 4000 when 'pattern' then 3000 when 'dice' then 12000
-    when 'target' then 4000 when 'towers' then 6000 when 'defense' then 20000
-    when 'pairs' then 4000 when 'darkpath' then 12000 when 'recall' then 4000
+    when 'colors' then 4000 when 'hunt' then 4000 when 'pattern' then 3000 when 'dice' then 12000 when 'anagram' then 2500
+    when 'target' then 4000 when 'towers' then 6000 when 'greater' then 4000 when 'defense' then 20000
+    when 'pairs' then 4000 when 'darkpath' then 12000 when 'newpic' then 4000 when 'recall' then 4000
     when 'fishing' then 15000
     when 'rails' then 4000 when 'arrows' then 4000 when 'seeker' then 4000
-    when 'bubbles' then 5000 when 'hop' then 6000 when 'cups' then 6000
-    when 'balance' then 3000 when 'spin' then 6000 when 'path' then 3000
+    when 'bubbles' then 5000 when 'hop' then 6000 when 'sort' then 4000 when 'cups' then 6000
+    when 'balance' then 3000 when 'spin' then 6000 when 'matrix' then 3000 when 'path' then 3000
     else 0 end;
 $$;
 

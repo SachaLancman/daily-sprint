@@ -15,6 +15,9 @@ $('cButtons').children[1].innerHTML = ICON.check + 'Yes';
 $('cButtons').addEventListener('click', e => { const b = e.target.closest('button'); if (b) colorAnswer(b.dataset.a === '1'); });
 $('hGrid').addEventListener('click', e => { const b = e.target.closest('button'); if (b) huntTap(b); });
 $('pOpts').addEventListener('click', e => { const b = e.target.closest('button'); if (b) patternChoose(b); });
+$('aLetters').addEventListener('click', e => { const b = e.target.closest('button'); if (b) pickLetter(Number(b.dataset.i)); });
+$('aUndo').addEventListener('click', undoLetter);
+$('aSkip').addEventListener('click', () => skipAnagram(false));
 $('endBoard').addEventListener('click', openBoard);
 $('boardBack').addEventListener('click', () => renderHome());
 $('profileBack').addEventListener('click', () => afterProfile === 'settings' ? openSettings() : store.player && afterProfile === 'board' ? openBoard() : renderHome());
@@ -40,6 +43,7 @@ document.addEventListener('keydown', e => {
   if (screen === 'words' && e.key >= '1' && e.key <= '4') { const b = $('opts').children[Number(e.key) - 1]; if (b) choose(b); return; }
   if (screen === 'pattern' && e.key >= '1' && e.key <= '4') { const b = $('pOpts').children[Number(e.key) - 1]; if (b) patternChoose(b); return; }
   if (screen === 'colors') { if (e.key === 'ArrowLeft' || e.key === 'n') colorAnswer(false); else if (e.key === 'ArrowRight' || e.key === 'y') colorAnswer(true); return; }
+  if (screen === 'anagram') { if (e.key === 'Backspace') undoLetter(); else if (/^[a-z]$/i.test(e.key)) typeLetter(e.key.toLowerCase()); return; }
   if (screen !== 'math') return;
   if (e.key >= '0' && e.key <= '9') press(e.key);
   else if (e.key === 'Backspace') press('back');

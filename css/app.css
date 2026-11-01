@@ -30,7 +30,8 @@ body{margin:0}
 .g-colors{--l:#FF7EB3;--d:#C2185B}
 .g-hunt{--l:#FFC447;--d:#A65504}
 .g-pattern{--l:#86DE5E;--d:#2E7D32}
-.g-math,.g-memory,.g-words,.g-spot,.g-colors,.g-hunt,.g-pattern{--grad:linear-gradient(200deg,var(--l) 0%,var(--d) 72%)}
+.g-anagram{--l:#56C8FA;--d:#0B63A8}
+.g-math,.g-memory,.g-words,.g-spot,.g-colors,.g-hunt,.g-pattern,.g-anagram{--grad:linear-gradient(200deg,var(--l) 0%,var(--d) 72%)}
 
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--display);font-size:16px;line-height:1.45;
@@ -236,6 +237,14 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .def-canvas{display:block;width:100%;height:auto;aspect-ratio:328/380;border-radius:22px;box-shadow:var(--shadow);background:#DDF2FF;touch-action:none}
 .def-pad{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
 .def-pad .opt{font-size:22px;padding:14px 4px;font-variant-numeric:tabular-nums;min-height:56px}
+
+/* Unscramble */
+.slots,.letters{display:grid;grid-template-columns:repeat(var(--n,5),minmax(0,48px));justify-content:center;gap:6px}
+.slot{height:50px;border-bottom:3px solid var(--line);font:800 28px var(--display);text-transform:uppercase;display:grid;place-items:center}
+.slot.filled{border-color:var(--d)}
+.board.ok .slot{color:var(--good);border-color:var(--good)}
+.board.no .slot{color:var(--bad);border-color:var(--bad)}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
 /* Word Fishing */
 .fish-clue{display:flex;align-items:center;gap:12px;margin-bottom:12px}

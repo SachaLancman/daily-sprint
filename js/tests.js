@@ -133,6 +133,22 @@
       check: L => { const sums = tw3.towers.map(towerSum), best = Math.max(...sums);
         return tw3.towers.length !== towerLevel(L).towers ? 'wrong number of towers' : sums.filter(s => s === best).length !== 1 || sums[tw3.answer] !== best ? 'no single biggest tower' : null; },
       solve: () => towerPick(tw3.answer), miss: () => towerPick((tw3.answer + 1) % tw3.towers.length) },
+    anagram: { state: () => an, gen: L => { an.tier = L; an.locked = false; nextAnagram(); },
+      check: () => an.letters.join('') === an.word ? 'letters not scrambled' : null,
+      solve: () => { for (const ch of an.word) typeLetter(ch); }, miss: () => skipAnagram(false) },
+    newpic: { state: () => sn, gen: L => { sn.set = samplePics(2); while (sn.set.length < Math.min(30, L + 2)) newpicAdd(); },
+      check: () => new Set(sn.set).size !== sn.set.length || sn.set.some(p => !PICS[p]) ? 'bad picture group' : null,
+      solve: () => newpicTap(btnWith('newpicGrid', 'p', sn.fresh)), miss: () => newpicTap(kids('newpicGrid').find(b => b.dataset.p !== sn.fresh)) },
+    greater: { state: () => gt, gen: L => { gt.tier = L; gt.locked = false; nextGreater(); },
+      check: () => gt.vals[0] === gt.vals[1] ? 'values are equal' : null,
+      solve: () => greaterPick(gt.vals[0] > gt.vals[1] ? 0 : 1), miss: () => greaterPick(gt.vals[0] > gt.vals[1] ? 1 : 0) },
+    sort: { state: () => sr, gen: L => { sr.tier = L; sr.locked = false; newSortRule(); nextSort(); },
+      check: () => !['left', 'right'].includes(sr.answer) ? 'no answer' : null,
+      solve: () => sortPick(sr.answer), miss: () => sortPick(sr.answer === 'left' ? 'right' : 'left') },
+    matrix: { state: () => mx, gen: L => { mx.tier = L; mx.locked = false; nextMatrix(); },
+      check: () => mx.opts.filter(o => sameCell(o, mx.answer)).length !== 1 ? 'answer not unique' : null,
+      solve: () => matrixPick(kids('matrixOpts')[mx.opts.findIndex(o => sameCell(o, mx.answer))]),
+      miss: () => matrixPick(kids('matrixOpts')[mx.opts.findIndex(o => !sameCell(o, mx.answer))]) },
     path: { state: () => fa, gen: L => { fa.tier = L; fa.locked = false; nextPath(); },
       check: () => {
         const n = pathLevel(fa.tier).n, start = kids('pathGrid').findIndex(b => b.classList.contains('start')), d = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };

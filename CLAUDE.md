@@ -13,16 +13,16 @@ A personal brain-training web app in the spirit of apps like Elevate, heading fo
 - Share today's result as text (`js/share.js`, Wordle-style, share sheet or clipboard). Log entries store `stars`.
 - Daily session: 4 of the 24 games, picked from the date (same for everyone on a given day), always 4 different skills, never the same set two days running (`todaysGames()`). Finishing all 4 keeps the streak and is celebrated on that results screen (`#endSession` badge "Daily session complete! N-day streak", confetti, 4-note fanfare).
 - Activity calendar: month view of days played / full sessions, plus current streak, best streak, days and games played (`store.days`, `store.sessionDays`).
-- 24 games, 4 per skill. All 60 seconds except Memory Grid (3 lives). 🖼 = uses the picture library.
+- 29 games for now (2026-10-31): the 6 skills have 4 or 5 each. The owner asked to keep the 5 older games next to the 3D games that were meant to replace them, and will say later which to remove: Unscramble (anagram), Spot the New (newpic), Greater Than (greater), Sort Rush (sort), Missing Piece (matrix). All 60 seconds except Memory Grid (3 lives). 🖼 = uses the picture library.
 
 | Skill | id: Name |
 |---|---|
-| Math | math: Math Sprint · defense: Number Defense · target: Target Total · towers: Block Towers (3D) |
-| Memory | memory: Memory Grid · pairs: Picture Pairs 🖼 · darkpath: Dark Path (3D) · recall: Number Recall |
-| Language | words: Word Match · spot: Spot the Error · dice: Letter Dice (3D) · fishing: Word Fishing 🖼 |
+| Math | math: Math Sprint · defense: Number Defense · target: Target Total · greater: Greater Than · towers: Block Towers (3D) |
+| Memory | memory: Memory Grid · pairs: Picture Pairs 🖼 · newpic: Spot the New 🖼 · darkpath: Dark Path (3D) · recall: Number Recall |
+| Language | words: Word Match · spot: Spot the Error · anagram: Unscramble · dice: Letter Dice (3D) · fishing: Word Fishing 🖼 |
 | Focus | colors: Color Clash · rails: Rail Switch · arrows: Arrow Focus · seeker: Shape Seeker |
-| Speed | hunt: Number Hunt · cups: Cup Shuffle (3D) · bubbles: Bubble Pop · hop: Sky Hop (3D) |
-| Logic | pattern: Next in Line · balance: Balance · spin: Shape Spin (3D) · path: Follow the Arrows |
+| Speed | hunt: Number Hunt · cups: Cup Shuffle (3D) · bubbles: Bubble Pop · hop: Sky Hop (3D) · sort: Sort Rush |
+| Logic | pattern: Next in Line · balance: Balance · spin: Shape Spin (3D) · matrix: Missing Piece · path: Follow the Arrows |
 - Rail Switch (replaced Find the Twins on 2026-10-31, which had replaced Odd One Out): colored carts roll down a branching track (2, 4, then 8 stations); tap switches to route each cart to its color. SVG + requestAnimationFrame (`railTick`); feedback in three sizes following the installed `game-feel` skill (switch snap, station pop + sparks, board shake on a miss).- Number Defense (replaced Quick Count on 2026-10-31): the first "real game". Monsters carrying sums march toward a castle; tap the answer to zap them with lightning; a crowned boss with a two-step sum every 10 monsters from level 4. Plain canvas + its own loop (`defTick`, no engine, to keep the app dependency-free); characters, castle and effects drawn in code; the meadow background `img/defense-bg.jpg` was painted with Kie GPT Image 2 (6 credits) and the game falls back to a code-drawn scene without it. Game feel: drop-in bounce, waddle and blink, hit-stop on zaps, white flash, confetti burst, trauma screen shake, wall flash.
 - Word Fishing (replaced Picture Spell on 2026-10-31): a sticker picture is the clue; fish carrying letters swim across a pond; tap them in order to spell the word (wrong fish bolt away). The next needed letter always joins the pond within a moment (`fishLetter`, `missing` in `fishTick`); decoys include look-alike letters (`FISH_LOOKALIKE`), never 3 of one letter. Canvas like Number Defense; pond background `img/fishing-bg.jpg` from Kie GPT Image 2.
 - **3D games** (2026-10-31), all with three.js: Cup Shuffle (replaced Flash Match), Shape Spin (replaced Missing Piece), Sky Hop (replaced Sort Rush), Letter Dice (replaced Unscramble, same one-answer word list), Dark Path (replaced Spot the New), Block Towers (replaced Greater Than). The owner disliked the old picture games, which are all gone.
