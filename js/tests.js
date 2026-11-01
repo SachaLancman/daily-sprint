@@ -41,9 +41,6 @@
     pattern: { state: () => pt, gen: L => { pt.tier = L; pt.locked = false; pt.text = ''; nextPattern(); },
       check: () => !Number.isInteger(pt.ans) || pt.ans < 0 ? 'bad answer' : !kids('pOpts').some(b => Number(b.dataset.o) === pt.ans) ? 'answer not offered' : null,
       solve: () => patternChoose(kids('pOpts').find(b => Number(b.dataset.o) === pt.ans)), miss: () => patternChoose(kids('pOpts').find(b => Number(b.dataset.o) !== pt.ans)) },
-    anagram: { state: () => an, gen: L => { an.tier = L; an.locked = false; nextAnagram(); },
-      check: () => an.letters.join('') === an.word ? 'letters not scrambled' : null,
-      solve: () => { for (const ch of an.word) typeLetter(ch); }, miss: () => skipAnagram(false) },
     defense: { state: () => df, gen: L => { df.tier = L; defSetup(); defSpawn(); defSpawn(); },
       check: () => { // four different numbers on the buttons, every monster's answer among them, and every sum worked out right
         const pad = kids('defPad').map(b => Number(b.dataset.v)), live = df.mons.filter(m => !m.dying);
@@ -57,9 +54,6 @@
     pairs: { state: () => pp, gen: L => { pp.tier = L; newPairsBoard(); },
       check: () => { const c = {}; pp.cards.forEach(x => c[x] = (c[x] || 0) + 1); return Object.values(c).some(v => v !== 2) ? 'cards not in pairs' : null; },
       solve: () => { flipCard(0); flipCard(pp.cards.indexOf(pp.cards[0], 1)); }, miss: () => { flipCard(0); flipCard(pp.cards.findIndex(c => c !== pp.cards[0])); } },
-    newpic: { state: () => sn, gen: L => { sn.set = samplePics(2); while (sn.set.length < Math.min(30, L + 2)) newpicAdd(); },
-      check: () => new Set(sn.set).size !== sn.set.length || sn.set.some(p => !PICS[p]) ? 'bad picture group' : null,
-      solve: () => newpicTap(btnWith('newpicGrid', 'p', sn.fresh)), miss: () => newpicTap(kids('newpicGrid').find(b => b.dataset.p !== sn.fresh)) },
     fishing: { state: () => wf, gen: L => { wf.tier = L; fishSetup(); fishNewWord(); for (let n = 0; n < 4; n++) fishSpawn(); },
       check: L => { // a real word with one slot per letter, its length fits the level, and its next letter is swimming in the pond
         const lv = fishLevel(L), n = wf.word.length;
@@ -94,9 +88,6 @@
       check: () => findCombo(tt.nums, tt.pick, tt.goal, true) ? null : 'no solution',
       solve: () => findCombo(tt.nums, tt.pick, tt.goal, true).forEach(i => targetTap(kids('targetGrid')[i])),
       miss: () => (findCombo(tt.nums, tt.pick, tt.goal, false) || []).forEach(i => targetTap(kids('targetGrid')[i])) },
-    greater: { state: () => gt, gen: L => { gt.tier = L; gt.locked = false; nextGreater(); },
-      check: () => gt.vals[0] === gt.vals[1] ? 'values are equal' : null,
-      solve: () => greaterPick(gt.vals[0] > gt.vals[1] ? 0 : 1), miss: () => greaterPick(gt.vals[0] > gt.vals[1] ? 1 : 0) },
     recall: { state: () => nr, gen: L => { nr.len = Math.min(18, L + 2); nextRecall(); nr.locked = false; },
       check: () => nr.num.length !== nr.len ? 'number length wrong' : null,
       solve: () => { for (const ch of nr.num) recallPress(ch); }, miss: () => { for (let i = 0; i < nr.len; i++) recallPress(nr.num[0] === '1' ? '2' : '1'); } },
@@ -111,13 +102,37 @@
       check: L => { const b = bubbleLevel(L); return b.every > 0 && b.life > 0 && b.min >= 40 && b.bad < 1 ? null : 'bad bubble settings'; },
       solve: () => { let g; for (let i = 0; i < 40 && !g; i++) { spawnBubble(); g = $('bubbleField').querySelector('.bubble:not(.bad)'); } if (g) popBubble(g); },
       miss: () => { let b; for (let i = 0; i < 40 && !b; i++) { spawnBubble(); b = $('bubbleField').querySelector('.bubble.bad'); } if (b) popBubble(b); } },
-    sort: { state: () => sr, gen: L => { sr.tier = L; sr.locked = false; newSortRule(); nextSort(); },
-      check: () => !['left', 'right'].includes(sr.answer) ? 'no answer' : null,
-      solve: () => sortPick(sr.answer), miss: () => sortPick(sr.answer === 'left' ? 'right' : 'left') },
-    matrix: { state: () => mx, gen: L => { mx.tier = L; mx.locked = false; nextMatrix(); },
-      check: () => mx.opts.filter(o => sameCell(o, mx.answer)).length !== 1 ? 'answer not unique' : null,
-      solve: () => matrixPick(kids('matrixOpts')[mx.opts.findIndex(o => sameCell(o, mx.answer))]),
-      miss: () => matrixPick(kids('matrixOpts')[mx.opts.findIndex(o => !sameCell(o, mx.answer))]) },
+    spin: { state: () => sp3, gen: L => { sp3.tier = L; spinPlan(); sp3.phase = 'pick'; },
+      check: L => { // the right number of options, exactly one is the same shape turned, and no two options are the same shape
+        const lv = spinLevel(L), t = spinCanon(sp3.target), canons = sp3.opts.map(o => spinCanon(o.cells));
+        if (sp3.opts.length !== lv.opts || sp3.target.length !== lv.k) return 'round does not fit level ' + L;
+        if (canons.filter(c => c === t).length !== 1 || canons[sp3.answer] !== t) return 'not exactly one matching shape';
+        return new Set(canons).size === canons.length ? null : 'two options are the same shape';
+      },
+      solve: () => spinPick(sp3.answer), miss: () => spinPick((sp3.answer + 1) % sp3.opts.length) },
+    hop: { state: () => hs, gen: L => { hs.tier = L; hopPlan(); hs.phase = 'pick'; },
+      check: L => hs.opts.length !== hopLevel(L).n ? 'wrong number of platforms' : hs.opts.filter(o => hopMatch(hs.rule, o)).length !== 1 || !hopMatch(hs.rule, hs.opts[hs.answer]) ? 'not exactly one platform matches the rule' : null,
+      solve: () => hopPick(hs.answer), miss: () => hopPick((hs.answer + 1) % hs.opts.length) },
+    dice: { state: () => dc, gen: L => { dc.tier = L; dicePlan(); dc.phase = 'pick'; },
+      check: L => { // every letter of the word is on a die, plus the level's decoys, and the dice are scrambled
+        const left = dc.dice.slice(); for (const ch of dc.word) { const i = left.indexOf(ch); if (i < 0) return 'letter ' + ch + ' missing'; left.splice(i, 1); }
+        return left.length !== diceLevel(L).decoys ? 'wrong number of decoys' : dc.dice.join('').startsWith(dc.word) ? 'dice not scrambled' : null;
+      },
+      solve: () => { const used = []; for (const ch of dc.word) { const i = dc.dice.findIndex((c, k) => c === ch && !used.includes(k)); used.push(i); dicePick(i); } },
+      miss: () => { const order = [...dc.word].reverse().join('') === dc.word ? [...dc.word.slice(1), dc.word[0]] : [...dc.word].reverse(), used = [];
+        for (const ch of order) { const i = dc.dice.findIndex((c, k) => c === ch && !used.includes(k)); used.push(i); dicePick(i); } } },
+    darkpath: { state: () => dp, gen: L => { dp.tier = L; dpPlan(); dp.phase = 'walk'; },
+      check: L => { // one step at a time (never down, never twice), the right length, inside the board
+        const lv = dpLevel(L), n = dp.n, p = dp.path;
+        if (n !== lv.n || p.length !== lv.len + 1 || new Set(p).size !== p.length || p.some(i => i < 0 || i >= n * n)) return 'path does not fit level ' + L;
+        for (let k = 1; k < p.length; k++) { const a = p[k - 1], b = p[k], dr = Math.floor(b / n) - Math.floor(a / n), dc2 = b % n - a % n; if (!(dr === -1 && dc2 === 0 || dr === 0 && Math.abs(dc2) === 1)) return 'path jumps between tiles'; }
+        return Math.floor(p[0] / n) === n - 1 ? null : 'path does not start on the bottom row';
+      },
+      solve: () => dp.path.slice(1).forEach(i => dpTap(i)), miss: () => dpTap([...Array(dp.n * dp.n).keys()].find(i => !dp.path.includes(i))) },
+    towers: { state: () => tw3, gen: L => { tw3.tier = L; towerPlan(); tw3.phase = 'pick'; },
+      check: L => { const sums = tw3.towers.map(towerSum), best = Math.max(...sums);
+        return tw3.towers.length !== towerLevel(L).towers ? 'wrong number of towers' : sums.filter(s => s === best).length !== 1 || sums[tw3.answer] !== best ? 'no single biggest tower' : null; },
+      solve: () => towerPick(tw3.answer), miss: () => towerPick((tw3.answer + 1) % tw3.towers.length) },
     path: { state: () => fa, gen: L => { fa.tier = L; fa.locked = false; nextPath(); },
       check: () => {
         const n = pathLevel(fa.tier).n, start = kids('pathGrid').findIndex(b => b.classList.contains('start')), d = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };

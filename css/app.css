@@ -30,8 +30,7 @@ body{margin:0}
 .g-colors{--l:#FF7EB3;--d:#C2185B}
 .g-hunt{--l:#FFC447;--d:#A65504}
 .g-pattern{--l:#86DE5E;--d:#2E7D32}
-.g-anagram{--l:#56C8FA;--d:#0B63A8}
-.g-math,.g-memory,.g-words,.g-spot,.g-colors,.g-hunt,.g-pattern,.g-anagram{--grad:linear-gradient(200deg,var(--l) 0%,var(--d) 72%)}
+.g-math,.g-memory,.g-words,.g-spot,.g-colors,.g-hunt,.g-pattern{--grad:linear-gradient(200deg,var(--l) 0%,var(--d) 72%)}
 
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--display);font-size:16px;line-height:1.45;
@@ -189,15 +188,9 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .tiles.n6 .num-tile{font-size:17px;border-radius:10px}
 .num-tile.found{background:var(--grad);color:#fff;opacity:.5;box-shadow:none;cursor:default}
 .q.seq{font-size:34px;overflow-wrap:anywhere}
-.slots,.letters{display:grid;grid-template-columns:repeat(var(--n,5),minmax(0,48px));justify-content:center;gap:6px}
-.slot{height:50px;border-bottom:3px solid var(--line);font:800 28px var(--display);text-transform:uppercase;display:grid;place-items:center}
-.slot.filled{border-color:var(--d)}
-.board.ok .slot{color:var(--good);border-color:var(--good)}
-.board.no .slot{color:var(--bad);border-color:var(--bad)}
 .letter{height:56px;font:800 26px var(--display);text-transform:uppercase;background:var(--surface);color:var(--ink);border:0;border-radius:14px;box-shadow:0 4px 0 var(--line);cursor:pointer;touch-action:manipulation;padding:0}
 .letter:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
 .letter:disabled{opacity:.25;box-shadow:none;transform:translateY(3px);cursor:default}
-.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
 /* Picture games. Pictures always sit on a light "sticker" background, in dark mode too. */
 .pic{aspect-ratio:1;display:grid;place-items:center;background:#FBFAFF;border:0;border-radius:18px;padding:10%;box-shadow:0 4px 0 var(--line);cursor:pointer;touch-action:manipulation}
@@ -251,10 +244,15 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .fish-slot{flex:1;max-width:32px;height:40px;border-radius:8px;background:var(--surface);box-shadow:inset 0 0 0 2px var(--line);display:grid;place-items:center;font:800 20px var(--display);color:var(--ink)}
 .fish-slot.on{background:var(--accent);color:var(--on-accent);box-shadow:none}
 
-/* Cup Shuffle (3D) */
-.cup-stage{width:100%;aspect-ratio:1/0.9;border-radius:22px;overflow:hidden;background:#1A1530;box-shadow:var(--shadow)}
-.cup-stage canvas{display:block;width:100%;height:100%;touch-action:none}
-.cup-note{margin:12px 0 0;text-align:center;font:700 17px var(--display);color:var(--muted);min-height:24px}
+/* The 3D games: one stage and one note line each (see js/three3d.js) */
+.stage3d{width:100%;aspect-ratio:1/0.9;border-radius:22px;overflow:hidden;background:#1A1530;box-shadow:var(--shadow)}
+.stage3d canvas{display:block;width:100%;height:100%;touch-action:none}
+.note3d{margin:12px 0 0;text-align:center;font:700 17px var(--display);color:var(--muted);min-height:24px}
+.stage3d.tall{aspect-ratio:1/1.12}
+.hop-rule{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 0 12px;font:800 20px var(--display);min-height:44px}
+.hop-rule .pic{width:40px;padding:4px;border-radius:10px;box-shadow:none}
+.hop-rule b{text-transform:capitalize}
+.dice-slots{justify-content:center;margin-bottom:12px;cursor:pointer}
 
 /* Rail Switch */
 .rail-board{padding:8px;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none}

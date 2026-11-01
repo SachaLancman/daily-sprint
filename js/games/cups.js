@@ -40,25 +40,12 @@ function cupsPick(slot) {
   later(cs, ok ? 1000 : 1500, () => { if (cs.round === my) cupsRound(); });
 }
 
-/* ---------- 3D scene ---------- */
-function cupsLoad() {
-  if (window.THREE) return Promise.resolve();
-  return cupsLoad.p = cupsLoad.p || new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'js/vendor/three.min.js'; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
-}
+
+/* ---------- 3D scene (uses the shared toolkit in js/three3d.js) ---------- */
 function cupsBuild() {
-  const T = THREE, renderer = new T.WebGLRenderer({ antialias: true });
-  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
-  renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
-  renderer.outputColorSpace = T.SRGBColorSpace;
-  const scene = new T.Scene(); scene.background = new T.Color('#1A1530');
-  scene.fog = new T.Fog('#1A1530', 14, 26);
-  const camera = new T.PerspectiveCamera(32, 1, 0.1, 60);
-  // Lights: a warm spotlight over the table, a soft sky light and a cool fill from the front
-  scene.add(new T.HemisphereLight('#FFF4E0', '#20183F', 0.9));
-  const spot = new T.SpotLight('#FFF1D6', 260, 0, 0.62, 0.55, 2);
-  spot.position.set(0, 9, 3); spot.castShadow = true; spot.shadow.mapSize.set(1024, 1024); spot.shadow.bias = -0.0004;
-  scene.add(spot); scene.add(spot.target);
-  const fill = new T.DirectionalLight('#9DB6FF', 0.7); fill.position.set(-4, 3, 6); scene.add(fill);
+  const T = THREE, scene = new T.Scene(), camera = new T.PerspectiveCamera(32, 1, 0.1, 60);
+  scene.background = new T.Color('#1A1530'); scene.fog = new T.Fog('#1A1530', 14, 26);
+  lights3D(scene);
   // The table: green felt with a wooden edge
   const felt = new T.Mesh(new T.CylinderGeometry(6, 6, 0.3, 72), new T.MeshStandardMaterial({ color: '#1F7A5A', roughness: 0.95 }));
   felt.position.y = -0.15; felt.receiveShadow = true; scene.add(felt);
@@ -73,19 +60,12 @@ function cupsBuild() {
   for (let i = 0; i < 5; i++) {
     const g = new T.Group(), body = new T.Mesh(cupGeo, red), band = new T.Mesh(bandGeo, white), rim = new T.Mesh(rimGeo, white);
     band.position.y = 0.42; rim.rotation.x = Math.PI / 2; rim.position.y = 0.03;
-    [body, band, rim].forEach(m => { m.castShadow = true; m.receiveShadow = true; m.userData.cup = g; g.add(m); });
+    [body, band, rim].forEach(m => { m.castShadow = true; m.receiveShadow = true; g.add(m); });
     scene.add(g); cups.push(g);
   }
   const ball = new T.Mesh(new T.SphereGeometry(0.27, 40, 20), new T.MeshPhysicalMaterial({ color: '#FFC83D', roughness: 0.22, clearcoat: 1, clearcoatRoughness: 0.1 }));
   ball.castShadow = true; scene.add(ball);
-  cupScene = { renderer, scene, camera, cups, ball, ray: new T.Raycaster(), at: [], ready: 0, t0: performance.now() };
-  renderer.domElement.addEventListener('pointerdown', cupsTap);
-}
-function cupsSize() {
-  const host = $('cupStage'), w = host.clientWidth || 328, h = host.clientHeight || 344;
-  cupScene.renderer.setSize(w, h, false);
-  cupScene.camera.aspect = w / h; cupScene.camera.updateProjectionMatrix();
-  if (cupScene.renderer.domElement.parentNode !== host) host.appendChild(cupScene.renderer.domElement);
+  cupScene = { scene, camera, cups, ball, at: [], ready: 0, t0: performance.now() };
 }
 const cupX = i => (i - (cs.n - 1) / 2) * 1.5;
 // How far back the camera sits so every cup (and a swap passing in front) fits across the screen
@@ -93,28 +73,7 @@ function cupCamDist() {
   const cam = cupScene.camera, half = (cs.n - 1) / 2 * 1.5 + 1.1, hfov = 2 * Math.atan(Math.tan(cam.fov * Math.PI / 360) * cam.aspect);
   return Math.max(6.5, half / Math.tan(hfov / 2) / 1.2);
 }
-const cupEase = k => 0.5 - 0.5 * Math.cos(Math.PI * k);
-const cupBack = k => { const c = 1.70158, m = k - 1; return 1 + (c + 1) * m * m * m + c * m * m; };
-// Animate over ms; resolves early (with false) if the game was left or a new round started
-function cupAnim(ms, my, step) {
-  return new Promise(res => {
-    const t0 = performance.now();
-    const f = now => {
-      if (!alive(cs) || cs.round !== my) return res(false);
-      const k = Math.min(1, (now - t0) / ms); step(k);
-      if (k < 1) requestAnimationFrame(f); else res(true);
-    };
-    requestAnimationFrame(f);
-  });
-}
-function cupsLoop() {
-  if (!alive(cs) || !cupScene) return;
-  const S = cupScene, t = (performance.now() - S.t0) / 1000, d = cupCamDist();
-  S.camera.position.set(Math.sin(t * 0.5) * 0.18, d * 0.66, d); // a slow, gentle sway so the scene feels alive
-  S.camera.lookAt(0, 0.35, 0);
-  S.renderer.render(S.scene, S.camera);
-  requestAnimationFrame(cupsLoop);
-}
+const cupAnim = (ms, my, step) => anim3D(cs, my, ms, step);
 async function cupsRound() {
   if (!alive(cs)) return;
   cupsPlan();
@@ -126,10 +85,10 @@ async function cupsRound() {
   S.ball.position.set(cupX(cs.ball), 0.27, 0);
   cupNote('Watch the ball');
   // Show the ball: its cup lifts, waits, and drops back down with a little squash
-  if (!await cupAnim(380, my, k => { ballCup.position.y = 1.5 * cupBack(k); ballCup.rotation.z = -0.15 * Math.sin(Math.PI * k); })) return;
-  await new Promise(res => setTimeout(res, 650));
+  if (!await cupAnim(380, my, k => { ballCup.position.y = 1.5 * ease3D.back(k); ballCup.rotation.z = -0.15 * Math.sin(Math.PI * k); })) return;
+  await wait3D(650);
   if (!await cupAnim(260, my, k => { ballCup.position.y = 1.5 * (1 - k * k); })) return;
-  if (!await cupAnim(140, my, k => { ballCup.scale.set(1 + 0.1 * Math.sin(Math.PI * k), 1 - 0.12 * Math.sin(Math.PI * k), 1 + 0.1 * Math.sin(Math.PI * k)); })) return;
+  if (!await cupAnim(140, my, k => { const s = Math.sin(Math.PI * k); ballCup.scale.set(1 + 0.1 * s, 1 - 0.12 * s, 1 + 0.1 * s); })) return;
   // Shuffle: each pair swaps along arcs, one cup passing in front of the other; the ball travels with its cup
   cs.phase = 'shuffle'; cupNote('Follow it');
   const ms = cupLevel(cs.tier).ms;
@@ -137,7 +96,7 @@ async function cupsRound() {
     const A = S.at[a], B = S.at[b], xa = cupX(a), xb = cupX(b), lift = 0.55 + 0.25 * Math.abs(b - a);
     beep(330 + 40 * (b - a), 0.04);
     if (!await cupAnim(ms, my, k => {
-      const e = cupEase(k), arc = Math.sin(Math.PI * k);
+      const e = ease3D.inOut(k), arc = Math.sin(Math.PI * k);
       A.position.set(xa + (xb - xa) * e, 0.12 * arc, lift * arc);
       B.position.set(xb + (xa - xb) * e, 0.12 * arc, -lift * arc);
       if (A === ballCup || B === ballCup) S.ball.position.set(ballCup.position.x, 0.27, ballCup.position.z);
@@ -149,42 +108,41 @@ async function cupsRound() {
 }
 async function cupsReveal(slot, ok, my) {
   const S = cupScene, cup = S.at[slot], hidden = S.at[cs.answer];
-  const lift = g => cupAnim(320, my, k => { g.position.y = 1.5 * cupBack(k); g.rotation.z = -0.18 * Math.sin(Math.PI * k); });
+  const lift = g => cupAnim(320, my, k => { g.position.y = 1.5 * ease3D.back(k); g.rotation.z = -0.18 * Math.sin(Math.PI * k); });
   if (!await lift(cup)) return;
   if (ok) {
-    const p = S.ball.position.clone().setY(0.6).project(S.camera), box = S.renderer.domElement.getBoundingClientRect();
-    juiceBurst(box.left + (p.x + 1) / 2 * box.width, box.top + (1 - p.y) / 2 * box.height, 14);
+    juiceBurst(...screen3D(S.ball.position.clone().setY(0.6), S.camera), 14);
     await cupAnim(420, my, k => { S.ball.position.y = 0.27 + 1.1 * Math.sin(Math.PI * k); });
   } else {
-    await new Promise(res => setTimeout(res, 200));
+    await wait3D(200);
     await lift(hidden);
   }
 }
 function cupsTap(e) {
   if (!cupScene || cs.phase !== 'pick') return;
-  const S = cupScene, box = S.renderer.domElement.getBoundingClientRect();
-  S.ray.setFromCamera({ x: (e.clientX - box.left) / box.width * 2 - 1, y: -((e.clientY - box.top) / box.height) * 2 + 1 }, S.camera);
-  const hit = S.ray.intersectObjects(S.at, true)[0];
-  if (hit) { e.preventDefault(); cupsPick(S.at.indexOf(hit.object.userData.cup)); }
+  const g = pick3D(e, cupScene.camera, cupScene.at);
+  if (g) { e.preventDefault(); cupsPick(cupScene.at.indexOf(g)); }
 }
 registerGame({
   id: 'cups', name: 'Cup Shuffle', skill: 'Speed', colors: ['#FF8A80', '#B3261E'],
   hint: 'Watch which cup hides the ball, follow it while the cups shuffle, then tap it. 60 seconds.',
   art: '<ellipse cx="60" cy="98" rx="50" ry="10" fill="#fff" fill-opacity=".25"/>' +
-    [[22, 0], [60, -14], [98, 0]].map(([x, dy]) => '<g transform="translate(' + x + ' ' + (dy + 0) + ')"><path d="M-16 92l4-40h24l4 40z" fill="#fff"/><rect x="-14" y="72" width="28" height="6" fill="#B3261E" opacity=".35"/></g>').join('') +
+    [[22, 0], [60, -14], [98, 0]].map(([x, dy]) => '<g transform="translate(' + x + ' ' + dy + ')"><path d="M-16 92l4-40h24l4 40z" fill="#fff"/><rect x="-14" y="72" width="28" height="6" fill="#B3261E" opacity=".35"/></g>').join('') +
     '<circle cx="60" cy="90" r="8" fill="#FFC83D" stroke="#fff" stroke-width="2"/><path d="M30 34q30-22 60 0" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 8"/>',
-  html: '<div class="hunt-wrap cup-wrap" id="cupWrap" data-fx="own"><div class="cup-stage" id="cupStage"></div><p class="cup-note" id="cupNote">Watch the ball</p></div>',
+  html: '<div class="hunt-wrap" id="cupWrap" data-fx="own"><div class="stage3d" id="cupStage"></div><p class="note3d" id="cupNote">Watch the ball</p></div>',
   start(my) {
     cs = makeRound('cups', MAX_LEVEL, 2);
     cs.round = 0; cs.n = 3; cs.phase = 'load';
     show('cups');
     roundHud(cs);
-    cupNote('Loading the table');
-    cupsLoad().then(() => {
-      if (!alive(cs)) return;
-      try { if (!cupScene) cupsBuild(); } catch (err) { cupNote('This phone cannot show 3D games'); return; }
-      cupsSize(); cupsLoop(); cupsRound();
-    }).catch(() => cupNote('Could not load the 3D game'));
+    open3D(cs, 'cupStage', 'cupNote', () => { if (!cupScene) cupsBuild(); }, () => {
+      stage3D('cupStage', cupScene.camera); onTap3D = cupsTap;
+      loop3D(cs, cupScene.scene, cupScene.camera, now => { // a slow, gentle sway so the scene feels alive
+        const t = (now - cupScene.t0) / 1000, d = cupCamDist();
+        cupScene.camera.position.set(Math.sin(t * 0.5) * 0.18, d * 0.66, d); cupScene.camera.lookAt(0, 0.35, 0);
+      });
+      cupsRound();
+    });
     startClock(cs, st => [['Found', st.correct], ['Accuracy', accuracy(st.correct, st.total)], ['Top level', st.top]]);
   },
   key(e) { const n = Number(e.key); if (n >= 1 && n <= cs.n) cupsPick(n - 1); }
