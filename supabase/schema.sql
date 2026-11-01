@@ -43,7 +43,7 @@ create or replace function max_score(p_game text) returns int language sql immut
     when 'colors' then 4000 when 'hunt' then 4000 when 'pattern' then 3000 when 'anagram' then 2500
     when 'target' then 4000 when 'greater' then 4000 when 'defense' then 20000
     when 'pairs' then 4000 when 'newpic' then 4000 when 'recall' then 4000
-    when 'picspell' then 3000
+    when 'fishing' then 15000
     when 'rails' then 4000 when 'arrows' then 4000 when 'seeker' then 4000
     when 'bubbles' then 5000 when 'sort' then 4000 when 'flash' then 4000
     when 'balance' then 3000 when 'matrix' then 3000 when 'path' then 3000

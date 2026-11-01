@@ -19,7 +19,7 @@ A personal brain-training web app in the spirit of apps like Elevate, heading fo
 |---|---|
 | Math | math: Math Sprint · defense: Number Defense · target: Target Total · greater: Greater Than |
 | Memory | memory: Memory Grid · pairs: Picture Pairs 🖼 · newpic: Spot the New 🖼 · recall: Number Recall |
-| Language | words: Word Match · spot: Spot the Error · anagram: Unscramble · picspell: Picture Spell 🖼 |
+| Language | words: Word Match · spot: Spot the Error · anagram: Unscramble · fishing: Word Fishing 🖼 |
 | Focus | colors: Color Clash · rails: Rail Switch · arrows: Arrow Focus · seeker: Shape Seeker |
 | Speed | hunt: Number Hunt · flash: Flash Match 🖼 · bubbles: Bubble Pop · sort: Sort Rush |
 | Logic | pattern: Next in Line · balance: Balance · matrix: Missing Piece · path: Follow the Arrows |

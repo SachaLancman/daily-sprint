@@ -60,9 +60,15 @@
     newpic: { state: () => sn, gen: L => { sn.set = samplePics(2); while (sn.set.length < Math.min(30, L + 2)) newpicAdd(); },
       check: () => new Set(sn.set).size !== sn.set.length || sn.set.some(p => !PICS[p]) ? 'bad picture group' : null,
       solve: () => newpicTap(btnWith('newpicGrid', 'p', sn.fresh)), miss: () => newpicTap(kids('newpicGrid').find(b => b.dataset.p !== sn.fresh)) },
-    picspell: { state: () => ps, gen: L => { ps.tier = L; ps.locked = false; nextSpell(); },
-      check: () => kids('spellOpts').filter(b => b.dataset.o === ps.word).length !== 1 ? 'correct spelling missing or repeated' : null,
-      solve: () => spellChoose(btnWith('spellOpts', 'o', ps.word)), miss: () => spellChoose(kids('spellOpts').find(b => b.dataset.o !== ps.word)) },
+    fishing: { state: () => wf, gen: L => { wf.tier = L; fishSetup(); fishNewWord(); for (let n = 0; n < 4; n++) fishSpawn(); },
+      check: L => { // a real word with one slot per letter, its length fits the level, and its next letter is swimming in the pond
+        const lv = fishLevel(L), n = wf.word.length;
+        if (!/^[A-Z]+$/.test(wf.word) || $('fishSlots').children.length !== n) return 'word or slots wrong: ' + wf.word;
+        if (n < lv.len[0] - 1 || n > lv.len[1]) return 'word length ' + n + ' does not fit level ' + L;
+        return fishSwimming().some(f => f.letter === wf.word[0]) ? null : 'first letter not in the pond';
+      },
+      solve: () => { for (const ch of wf.word) { const f = fishSwimming().find(x => x.letter === ch) || fishSpawn(ch); fishCatch(f); } },
+      miss: () => { const need = wf.word[wf.pos]; fishCatch(fishSwimming().find(f => f.letter !== need) || fishSpawn(need === 'Z' ? 'A' : 'Z')); } },
     rails: { state: () => rs, gen: L => { rs.tier = L; railBuild(); },
       check: () => { // the right number of switches and stations, every switch big enough to tap, and aiming really reaches each station
         const d = rs.depth, b = $('railBoard');

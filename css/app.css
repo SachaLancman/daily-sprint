@@ -244,6 +244,13 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .def-pad{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
 .def-pad .opt{font-size:22px;padding:14px 4px;font-variant-numeric:tabular-nums;min-height:56px}
 
+/* Word Fishing */
+.fish-clue{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.fish-clue .pic{width:56px;flex:none;padding:6px;border-radius:14px}
+.fish-slots{display:flex;gap:4px;flex:1;min-width:0}
+.fish-slot{flex:1;max-width:32px;height:40px;border-radius:8px;background:var(--surface);box-shadow:inset 0 0 0 2px var(--line);display:grid;place-items:center;font:800 20px var(--display);color:var(--ink)}
+.fish-slot.on{background:var(--accent);color:var(--on-accent);box-shadow:none}
+
 /* Rail Switch */
 .rail-board{padding:8px;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none}
 .rail-board svg{display:block;width:100%;height:auto;overflow:visible}
